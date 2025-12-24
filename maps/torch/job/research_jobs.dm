@@ -46,10 +46,10 @@
 	possible_goals = list(/datum/goal/achievement/notslimefodder)
 
 /datum/job/scientist
-	title = "Scientist"
+	title = "Researcher"
 	total_positions = 6
 	spawn_positions = 6
-	supervisors = "the Chief Science Officer"
+	supervisors = "the Chief Medical Officer"
 	economic_power = 10
 	minimum_character_age = list(SPECIES_HUMAN = 25)
 	ideal_character_age = 45
@@ -75,14 +75,11 @@
 
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/research/scientist
 	allowed_branches = list(
-		/datum/mil_branch/civilian,
-		/datum/mil_branch/solgov,
-		/datum/mil_branch/expeditionary_corps
+		/datum/mil_branch/fleet,
 	)
 	allowed_ranks = list(
-		/datum/mil_rank/ec/o1,
-		/datum/mil_rank/civ/contractor = /singleton/hierarchy/outfit/job/torch/passenger/research/scientist,
-		/datum/mil_rank/sol/scientist = /singleton/hierarchy/outfit/job/torch/passenger/research/scientist/solgov
+		/datum/mil_rank/fleet/o1,
+		/datum/mil_rank/fleet/o2,
 	)
 
 	access = list(

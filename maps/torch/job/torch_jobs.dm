@@ -20,20 +20,13 @@
 #undef HUMAN_ONLY_JOBS
 
 	allowed_jobs = list(
-		/datum/job/captain, /datum/job/hop, /datum/job/rd, /datum/job/cmo, /datum/job/chief_engineer, /datum/job/hos,
-		/datum/job/liaison, /datum/job/representative, /datum/job/sea,
-		/datum/job/bridgeofficer, /datum/job/pathfinder, /datum/job/nt_pilot, /datum/job/explorer,
-		/datum/job/senior_engineer, /datum/job/engineer, /datum/job/roboticist, /datum/job/engineer_trainee,
-		/datum/job/officer, /datum/job/warden, /datum/job/detective,
-		/datum/job/senior_doctor, /datum/job/doctor, /datum/job/junior_doctor, /datum/job/chemist, /datum/job/medical_trainee,
+		/datum/job/captain, /datum/job/hop, /datum/job/bridgeofficer, /datum/job/representative, /datum/job/sea,
+		/datum/job/cmo, /datum/job/scientist, /datum/job/senior_doctor, /datum/job/doctor,
 		/datum/job/psychiatrist,
-		/datum/job/qm, /datum/job/cargo_tech, /datum/job/mining,
-		/datum/job/senior_scientist, /datum/job/scientist, /datum/job/scientist_assistant,
-		/datum/job/chief_steward, /datum/job/chef, /datum/job/janitor, /datum/job/crew,
-		/datum/job/cyborg,
-		/datum/job/chaplain,
-		/datum/job/assistant,
-		/datum/job/merchant
+		/datum/job/chief_engineer, /datum/job/senior_engineer, /datum/job/engineer, /datum/job/roboticist, /datum/job/engineer_trainee,
+		/datum/job/hos, /datum/job/officer, /datum/job/warden, /datum/job/detective,
+		/datum/job/qm, /datum/job/cargo_tech,
+		/datum/job/chief_steward, /datum/job/chef, /datum/job/janitor, /datum/job/chaplain, /datum/job/crew
 	)
 
 	access_modify_region = alist(

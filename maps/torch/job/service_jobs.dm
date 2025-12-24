@@ -9,13 +9,11 @@
 	economic_power = 6
 	minimal_player_age = 7
 	supervisors = "the Executive Officer"
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/chief_steward
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/chief_steward/fleet
 	allowed_branches = list(
-		/datum/mil_branch/expeditionary_corps,
 		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/service/chief_steward/fleet
 	)
 	allowed_ranks = list(
-		/datum/mil_rank/ec/e7,
 		/datum/mil_rank/fleet/e7,
 		/datum/mil_rank/fleet/e6
 	)
@@ -51,16 +49,14 @@
 	economic_power = 6
 	minimal_player_age = 0
 	supervisors = "the Executive Officer"
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/chaplain
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/chaplain/fleet
 	allowed_branches = list(
-		/datum/mil_branch/civilian,
-		/datum/mil_branch/expeditionary_corps = /singleton/hierarchy/outfit/job/torch/crew/service/chaplain/ec,
-		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/service/chaplain/fleet)
+		/datum/mil_branch/fleet
+		)
 	allowed_ranks = list(
-		/datum/mil_rank/civ/contractor,
 		/datum/mil_rank/fleet/o1,
 		/datum/mil_rank/fleet/o2,
-		/datum/mil_rank/ec/o1)
+		)
 	min_skill = list( // 1 point
 		SKILL_BUREAUCRACY = SKILL_BASIC, // 1 point
 		SKILL_WEAPONS = SKILL_UNSKILLED // Fleet chaplains may refuse weapon training
@@ -84,16 +80,12 @@
 	alt_titles = list(
 		"Custodian",
 		"Janitor")
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/janitor
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/janitor/fleet
 	allowed_branches = list(
-		/datum/mil_branch/civilian,
-		/datum/mil_branch/expeditionary_corps = /singleton/hierarchy/outfit/job/torch/crew/service/janitor/ec,
-		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/service/janitor/fleet
+		/datum/mil_branch/fleet
 	)
 	allowed_ranks = list(
-		/datum/mil_rank/civ/contractor,
 		/datum/mil_rank/fleet/e2,
-		/datum/mil_rank/ec/e3,
 		/datum/mil_rank/fleet/e3,
 		/datum/mil_rank/fleet/e4
 	)
@@ -109,7 +101,7 @@
 
 
 /datum/job/chef
-	title = "Steward"
+	title = "Mess Technician"
 	department = "Service"
 	department_flag = SRV
 	total_positions = 2
@@ -117,20 +109,15 @@
 	minimum_character_age = list(SPECIES_HUMAN = 20)
 	supervisors = "the Chief Steward"
 	alt_titles = list(
-		"Bartender",
 		"Cook",
-		"Culinary Specialist"
+		"Culinary Specialist",
+		"Steward"
 	)
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/cook
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/cook/fleet
 	allowed_branches = list(
-		/datum/mil_branch/civilian,
-		/datum/mil_branch/expeditionary_corps = /singleton/hierarchy/outfit/job/torch/crew/service/cook/ec,
 		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/service/cook/fleet
 	)
 	allowed_ranks = list(
-		/datum/mil_rank/civ/contractor,
-		/datum/mil_rank/ec/e3,
-		/datum/mil_rank/ec/e5,
 		/datum/mil_rank/fleet/e2,
 		/datum/mil_rank/fleet/e3,
 		/datum/mil_rank/fleet/e4,
@@ -160,13 +147,11 @@
 	supervisors = "the Chief Steward"
 	minimum_character_age = list(SPECIES_HUMAN = 20)
 	ideal_character_age = 20
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/crewman
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/crewman/fleet
 	allowed_branches = list(
-		/datum/mil_branch/expeditionary_corps,
 		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/service/crewman/fleet
 	)
 	allowed_ranks = list(
-		/datum/mil_rank/ec/e3,
 		/datum/mil_rank/fleet/e2,
 		/datum/mil_rank/fleet/e3,
 		/datum/mil_rank/fleet/e4

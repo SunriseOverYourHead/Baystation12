@@ -1,22 +1,23 @@
 /datum/job/qm
-	title = "Deck Chief"
+	title = "Quartermaster"
 	department = "Supply"
 	department_flag = SUP
 	total_positions = 1
 	spawn_positions = 1
 	supervisors = "the Executive Officer"
+	alt_titles = list(
+		"Deck Chief"
+	)
 	economic_power = 5
 	minimal_player_age = 0
 	minimum_character_age = list(SPECIES_HUMAN = 27)
 	ideal_character_age = 35
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/supply/deckofficer
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/supply/deckofficer/fleet
 	allowed_branches = list(
-		/datum/mil_branch/expeditionary_corps,
-		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/supply/deckofficer/fleet
+		/datum/mil_branch/fleet
 	)
 	allowed_ranks = list(
 		/datum/mil_rank/fleet/e6,
-		/datum/mil_rank/ec/e7,
 		/datum/mil_rank/fleet/e7,
 		/datum/mil_rank/fleet/e8
 	)
@@ -44,26 +45,22 @@
 							 /datum/computer_file/program/reports)
 
 /datum/job/cargo_tech
-	title = "Deck Technician"
+	title = "Cargo Technician"
 	department = "Supply"
 	department_flag = SUP
 	total_positions = 3
 	spawn_positions = 3
-	supervisors = "the Deck Chief"
+	supervisors = "the Quartermaster"
 	minimum_character_age = list(SPECIES_HUMAN = 18)
 	ideal_character_age = 24
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/supply/tech
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/supply/tech/fleet
 	allowed_branches = list(
-		/datum/mil_branch/expeditionary_corps,
-		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/supply/tech/fleet,
-		/datum/mil_branch/civilian = /singleton/hierarchy/outfit/job/torch/crew/supply/contractor
+		/datum/mil_branch/fleet
 	)
 	allowed_ranks = list(
 		/datum/mil_rank/fleet/e2,
-		/datum/mil_rank/ec/e3,
 		/datum/mil_rank/fleet/e3,
 		/datum/mil_rank/fleet/e4,
-		/datum/mil_rank/civ/contractor
 	)
 	min_skill = list( // 5 points
 		SKILL_BUREAUCRACY = SKILL_BASIC, // 1 point

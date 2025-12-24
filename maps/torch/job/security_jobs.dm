@@ -7,13 +7,11 @@
 	minimal_player_age = 7
 	ideal_character_age = 35
 	minimum_character_age = list(SPECIES_HUMAN = 27)
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/security/brig_chief
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/security/brig_chief/fleet
 	allowed_branches = list(
-		/datum/mil_branch/expeditionary_corps,
-		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/security/brig_chief/fleet
+		/datum/mil_branch/fleet
 	)
 	allowed_ranks = list(
-		/datum/mil_rank/ec/e7,
 		/datum/mil_rank/fleet/e6,
 		/datum/mil_rank/fleet/e7,
 		/datum/mil_rank/fleet/e8,
@@ -53,21 +51,14 @@
 	alt_titles = list(
 		"Criminal Investigator"
 	)
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/security/forensic_tech
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/security/forensic_tech/fleet
 	allowed_branches = list(
-		/datum/mil_branch/expeditionary_corps,
-		/datum/mil_branch/civilian = /singleton/hierarchy/outfit/job/torch/crew/security/forensic_tech/contractor,
-		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/security/forensic_tech/fleet,
-		/datum/mil_branch/solgov = /singleton/hierarchy/outfit/job/torch/crew/security/forensic_tech/agent
+		/datum/mil_branch/fleet
 	)
 	allowed_ranks = list(
 		/datum/mil_rank/fleet/e3,
-		/datum/mil_rank/ec/e3,
-		/datum/mil_rank/ec/e5,
 		/datum/mil_rank/fleet/e4,
 		/datum/mil_rank/fleet/e5,
-		/datum/mil_rank/civ/contractor,
-		/datum/mil_rank/sol/agent
 	)
 	skill_points = 26
 	min_skill = list( // 11 points
@@ -103,13 +94,11 @@
 	minimum_character_age = list(SPECIES_HUMAN = 18)
 	ideal_character_age = 25
 	alt_titles = list() // This is a hack. Overriding a list var with null does not actually override it due to the particulars of dm list init. Do not "clean up" without testing.
-	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/security/maa
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/security/maa/fleet
 	allowed_branches = list(
-		/datum/mil_branch/expeditionary_corps,
-		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/security/maa/fleet,
+		/datum/mil_branch/fleet,
 	)
 	allowed_ranks = list(
-		/datum/mil_rank/ec/e3,
 		/datum/mil_rank/fleet/e3,
 		/datum/mil_rank/fleet/e4,
 		/datum/mil_rank/fleet/e5
