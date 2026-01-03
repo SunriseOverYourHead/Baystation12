@@ -1,7 +1,7 @@
 /datum/job/pathfinder
 	title = "Pathfinder"
 	department = "Exploration"
-	department_flag = EXP
+	department_flag = INF
 	total_positions = 1
 	spawn_positions = 1
 	supervisors = "the Chief Science Officer"
@@ -43,11 +43,11 @@
 /datum/job/pathfinder/get_description_blurb()
 	return "You are the Pathfinder. Your duty is to organize and lead the expeditions to away sites, carrying out the EC's Primary Mission. You command Explorers. You make sure that expedition has the supplies and personnel it needs. You can pilot Charon if nobody else provides a pilot. Once on the away mission, your duty is to ensure that anything of scientific interest is brought back to the ship and passed to the relevant research lab."
 
-/datum/job/nt_pilot
+/datum/job/nt_pilot2
 	title = "Shuttle Pilot"
 	supervisors = "the Pathfinder"
 	department = "Exploration"
-	department_flag = EXP
+	department_flag = INF
 	total_positions = 1
 	spawn_positions = 1
 	selection_color = "#68099e"
@@ -87,7 +87,7 @@
 /datum/job/explorer
 	title = "Explorer"
 	department = "Exploration"
-	department_flag = EXP
+	department_flag = INF
 	total_positions = 5
 	spawn_positions = 5
 	supervisors = "the Pathfinder"

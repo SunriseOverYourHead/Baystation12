@@ -457,7 +457,7 @@
 
 /singleton/hierarchy/mil_uniform/fleet/exp
 	name = "Fleet exploration"
-	departments = EXP
+	departments = INF
 
 	utility_under = /obj/item/clothing/under/solgov/utility/fleet/exploration
 	utility_extra = list(

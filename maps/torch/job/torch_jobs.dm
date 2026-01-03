@@ -21,12 +21,12 @@
 
 	allowed_jobs = list(
 		/datum/job/captain, /datum/job/hop, /datum/job/bridgeofficer, /datum/job/representative, /datum/job/sea,
-		/datum/job/cmo, /datum/job/scientist, /datum/job/senior_doctor, /datum/job/doctor,
-		/datum/job/psychiatrist,
+		/datum/job/cmo, /datum/job/scientist, /datum/job/senior_doctor, /datum/job/psychiatrist, /datum/job/junior_doctor, /datum/job/doctor,
 		/datum/job/chief_engineer, /datum/job/senior_engineer, /datum/job/engineer, /datum/job/roboticist, /datum/job/engineer_trainee,
 		/datum/job/hos, /datum/job/officer, /datum/job/warden, /datum/job/detective,
 		/datum/job/qm, /datum/job/cargo_tech,
-		/datum/job/chief_steward, /datum/job/chef, /datum/job/janitor, /datum/job/chaplain, /datum/job/crew
+		/datum/job/chief_steward, /datum/job/chef, /datum/job/janitor, /datum/job/chaplain, /datum/job/crew,
+		/datum/job/po, /datum/job/nt_pilot, /datum/job/squadlead, /datum/job/firelead, /datum/job/comtech, /datum/job/rifleman
 	)
 
 	access_modify_region = alist(

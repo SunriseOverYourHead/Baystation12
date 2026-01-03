@@ -191,6 +191,14 @@
 	icon_state = "fleet_sweater_flag"
 	item_state = "fleet_sweater_flag"
 
+/obj/item/clothing/suit/scga/service/marine
+	name = "service jacket, SCGMC"
+	desc = "A rugged green service over-jacket. Part of the solar marine corps service uniform for enlisted."
+
+/obj/item/clothing/suit/scga/service_officer/marine
+	name = "service jacket, SCGMC"
+	desc = "A rugged green service over-jacket. Part of the solar marine corps service uniform for officers."
+
 //Dress - murder me with a gun why are these 3 different types
 
 /obj/item/clothing/suit/storage/solgov/dress
@@ -297,6 +305,15 @@
 	icon_state = "sailordress"
 	item_state = "sailordress"
 
+/obj/item/clothing/suit/dress/solgov/army
+	name = "marine dress jacket"
+	desc = "A tailored black SCG Marine dress jacket with red trim. So sexy it hurts."
+	icon_state = "blackdress"
+
+/obj/item/clothing/suit/dress/solgov/army/command
+	name = "marine officer's dress jacket"
+	desc = "A tailored black SCG Marine dress jacket with gold trim. Smells like ceremony."
+	icon_state = "blackdress_com"
 
 //Misc
 
@@ -307,6 +324,9 @@
 	item_icons = list(slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi')
 	valid_accessory_slots = list(ACCESSORY_SLOT_INSIGNIA,ACCESSORY_SLOT_RANK)
 
+/obj/item/clothing/suit/scga/hooded/wintercoat/marine
+	name = "utility wintercoat, SCGMC"
+	desc = "A comfortable winter-coat in green. Part of the solar marine corps utility uniform."
 
 /obj/item/clothing/suit/storage/hooded/wintercoat/solgov/fleet
 	name = "fleet winter coat"

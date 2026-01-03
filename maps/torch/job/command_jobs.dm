@@ -281,8 +281,55 @@
 							 /datum/computer_file/program/camera_monitor,
 							 /datum/computer_file/program/reports)
 
+/datum/job/po
+	title = "Platoon Officer"
+	supervisors = "the Commanding Officer and the Executive Officer"
+	department = "Infantry"
+	department_flag = INF
+	total_positions = 1
+	spawn_positions = 1
+	selection_color = "#69c931"
+	economic_power = 10
+	minimal_player_age = 14
+	minimum_character_age = list(SPECIES_HUMAN = 25)
+	ideal_character_age = 35
+	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/command/po
+	allowed_branches = list(
+		/datum/mil_branch/marine_corps
+	)
+	allowed_ranks = list(
+		/datum/mil_rank/marine_corps/o2,
+		/datum/mil_rank/marine_corps/o3
+	)
+	skill_points = 34
+	min_skill = list( // 15 points
+		SKILL_BUREAUCRACY = SKILL_TRAINED, // 2 points
+		SKILL_EVA = SKILL_BASIC, // 1 point
+		SKILL_COMBAT = SKILL_BASIC, // 2 points
+		SKILL_WEAPONS = SKILL_TRAINED, // 6 points
+		SKILL_FORENSICS = SKILL_BASIC // 4 points
+	)
+
+	max_skill = list(   SKILL_COMBAT      = SKILL_MAX,
+	                    SKILL_WEAPONS     = SKILL_MAX,
+	                    SKILL_FORENSICS   = SKILL_MAX)
+
+	access = list(
+		access_security, access_brig, access_armory, access_forensics_lockers,
+		access_maint_tunnels, access_external_airlocks, access_emergency_storage,
+		access_teleporter, access_eva, access_bridge, access_heads, access_aquila,
+		access_hos, access_RC_announce, access_keycard_auth, access_sec_doors,
+		access_solgov_crew, access_gun, access_emergency_armory, access_hangar, access_torch_fax,
+		access_radio_comm, access_radio_sec
+	)
+
+	software_on_spawn = list(/datum/computer_file/program/comm,
+							 /datum/computer_file/program/digitalwarrant,
+							 /datum/computer_file/program/camera_monitor,
+							 /datum/computer_file/program/reports)
+
 /datum/job/hos/get_description_blurb()
-	return "You are the Chief of Security. You manage ship security. The Masters at Arms and the Military Police, as well as the Brig Chief and the Forensic Technician. You keep the vessel safe. You handle both internal and external security matters. You are the law. You are subordinate to the CO and the XO. You are expected to know the SCMJ and Sol law and Alert Procedure to a very high degree along with general regulations."
+	return "You are the Platoon Officer. You coordinate and wrangle the Marine Corps platoon staffed aboard the Ship. You pass orders to the Squad Leader, who is your operational right-hand in the field. Delegate to him. Ensure there is no friction between the marine complement and the Navy personnel onboard. Guarantee that the SOP is followed and that the marines maintain a minimum state of combat-readiness at all times. Semper Fi, Platoon Officer."
 
 /datum/job/representative
 	title = "SolGov Representative"

@@ -29,6 +29,11 @@
 	icon_state = "fleetpt"
 	worn_state = "fleetpt"
 
+/obj/item/clothing/under/scga/pt/solgov
+	name = "marine pt uniform"
+	desc = "Does NOT leave much to the imagination."
+	icon_state = "armypt"
+	worn_state = "armypt"
 
 //Utility
 
@@ -192,6 +197,20 @@
 	accessories = list(/obj/item/clothing/accessory/solgov/department/supply/fleet)
 	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
 
+/obj/item/clothing/under/scga/utility/marine
+	name = "utility uniform, SCGMC"
+	desc = "A green, durable utility jumpsuit. Belonging to the SCGMC uniform"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/scga/utility/tan/marine
+	name = "tan utility uniform, SCGMC"
+	desc = "A tan, durable utility jumpsuit. Belonging to the SCGMC uniform"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/scga/utility/urban/marine
+	name = "urban utility uniform, SCGMC"
+	desc = "An urban, durable utility jumpsuit. Belonging to the SCGMC uniform"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
 
 //Service
 
@@ -216,6 +235,27 @@
 	icon_state = "whiteservicefem"
 	worn_state = "whiteservicefem"
 
+/obj/item/clothing/under/scga/service/marine
+	name = "service uniform, SCGMC"
+	desc = "A slimming brown service shirt and green pants. Belonging to the solar marine corps service uniform."
+
+/obj/item/clothing/under/scga/service/skirt/marine
+	name = "service skirt uniform, SCGMC"
+	desc = "A slimming brown service shirt and green skirt. Belonging to the solar marine corps service uniform."
+
+/obj/item/clothing/under/scga/service_command/marine
+	name = "service uniform, SCGMC"
+	desc = "A slimming brown service shirt and green pants with beige streaks, for senior officers. Belonging to the solar marine corps command service uniform."
+
+/obj/item/clothing/under/scga/service_command/skirt/marine
+	name = "service skirt uniform, SCGA"
+	desc = "A slimming brown service shirt and green skirt with beige streaks, for senior officers. Belonging to the solar marine corps command service uniform."
+	icon_state = "under_command_skirt"
+	item_state_slots = list(
+		slot_l_hand_str = "under_command_skirt_held_l",
+		slot_r_hand_str = "under_command_skirt_held_r",
+		slot_w_uniform_str = "under_command_skirt_worn"
+	)
 
 //Dress
 /obj/item/clothing/under/solgov/mildress
@@ -335,6 +375,28 @@
 
 /obj/item/clothing/under/solgov/dress/expeditionary/command/skirt/research
 	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/scga/dress/marine
+	name = "dress uniform, SCGMC"
+	desc = "A classy brown shirt and black dress pants. Part of the solar marine corps dress uniform."
+
+/obj/item/clothing/under/scga/dress/skirt/marine
+	name = "dress skirt uniform, SCGMC"
+	desc = "A classy brown shirt and black dress skirt. Part of the solar marine corps dress uniform."
+
+/obj/item/clothing/under/scga/dress_command/marine
+	name = "dress uniform, SCGMC"
+	desc = "A classy brown shirt and black dress pants with gold streaks, for senior officers. Part of the solar marine corps command dress uniform."
+	icon_state = "under_dress_command"
+	item_state_slots = list(
+		slot_l_hand_str = "under_dress_command_held_l",
+		slot_r_hand_str = "under_dress_command_held_r",
+		slot_w_uniform_str = "under_dress_command_worn"
+	)
+
+/obj/item/clothing/under/scga/dress_command/skirt/marine
+	name = "dress skirt uniform, SCGMC"
+	desc = "A classy brown shirt and black dress skirt with gold streaks, for senior officers. Part of the solar marine corps command dress uniform."
 
 //misc garbage
 /obj/item/clothing/under/rank/internalaffairs/plain/solgov

@@ -8,7 +8,7 @@ var/global/const/MSC = FLAG_07
 var/global/const/SRV = FLAG_08
 var/global/const/SUP = FLAG_09
 var/global/const/SPT = FLAG_10
-var/global/const/EXP = FLAG_11
+var/global/const/INF = FLAG_11
 var/global/const/ROB = FLAG_12
 
 GLOBAL_VAR(antag_code_phrase)

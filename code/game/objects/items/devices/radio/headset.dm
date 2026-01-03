@@ -346,6 +346,55 @@
 	item_state = "syndie_headset"
 	max_keys = 3
 
+/obj/item/device/radio/headset/heads/po/
+	name = "command infantry headset"
+	desc = "A headset with an inbuilt subspace antenna for better reception."
+	icon_state = "exp_headset"
+	item_state = "headset"
+	ks1type = /obj/item/device/encryptionkey/infantry/po
+
+/obj/item/device/radio/headset/heads/po/alt
+	name = "command infantry bowman headset"
+	icon_state = "exp_headset_alt"
+	item_state = "exp_headset_alt"
+
+/obj/item/device/radio/headset/infantry
+	name = "infantry headset"
+	desc = "A headset with an inbuilt subspace antenna for better reception."
+	icon_state = "exp_headset"
+	item_state = "headset"
+	ks1type = /obj/item/device/encryptionkey/infantry
+
+/obj/item/device/radio/headset/infantry/alt
+	name = "infantry bowman headset"
+	icon_state = "exp_headset_alt"
+	item_state = "exp_headset_alt"
+
+/obj/item/device/radio/headset/infantry/comtech/
+	name = "technician infantry headset"
+	desc = "A headset with an inbuilt subspace antenna for better reception."
+	icon_state = "exp_headset"
+	item_state = "headset"
+	ks1type = /obj/item/device/encryptionkey/infantry/comtech
+
+/obj/item/device/radio/headset/infantry/comtech/alt
+	name = "technician infantry bowman headset"
+	icon_state = "exp_headset_alt"
+	item_state = "exp_headset_alt"
+
+
+/obj/item/device/radio/headset/headset_med/infantry
+	name = "corpsman radio headset"
+	desc = "A headset for the trained staff of the medbay."
+	icon_state = "par_headset"
+	item_state = "headset"
+	ks1type = /obj/item/device/encryptionkey/headset_med/corpsman
+
+/obj/item/device/radio/headset/headset_med/infantry/alt
+	name = "corpsman bowman headset"
+	icon_state = "par_headset_alt"
+	item_state = "par_headset_alt"
+
 /obj/item/device/radio/headset/use_tool(obj/item/tool, mob/user, list/click_params)
 	// Encryption Key - Install key
 	if (istype(tool, /obj/item/device/encryptionkey))

@@ -157,6 +157,6 @@ var/global/datum/announcement/minor/minor_announcement = new(new_sound = 'sound/
 		return "Science"
 	if(job.department_flag & SRV)
 		return "Service"
-	if(job.department_flag & EXP)
-		return "Exploration"
+	if(job.department_flag & INF)
+		return "Infantry"
 	return "Common"

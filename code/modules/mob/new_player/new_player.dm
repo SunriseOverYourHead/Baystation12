@@ -362,7 +362,7 @@
 		"Medical" =         list(jobs = list(), dep = MED, color = "#99ffe6"),
 		"Research" =        list(jobs = list(), dep = SCI, color = "#e6b3e6", colBreak = 1),
 		"Supply" =          list(jobs = list(), dep = SUP, color = "#ead4ae"),
-		"Exploration" =     list(jobs = list(), dep = EXP, color = "#ffd699"),
+		"Infantry" =     list(jobs = list(), dep = INF, color = "#69c931"),
 		"ERROR" =           list(jobs = list(), color = "#ffffff", colBreak = 1)
 	)
 	// TORCH JOBS

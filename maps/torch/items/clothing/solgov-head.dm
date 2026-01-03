@@ -54,6 +54,17 @@
 	desc = "A navy blue utility cover bearing the crest of the SCG Fleet."
 	icon_state = "navyutility"
 
+/obj/item/clothing/head/scga/utility/marine
+	name = "utility cover, SCGMC"
+	desc = "A stern, green utility cover. Part of the solar marine corps utility uniform."
+
+/obj/item/clothing/head/scga/utility/tan/marine
+	name = "tan utility cover, SCGMC"
+	desc = "A stern, tan utility cover. Part of the solar marine corps utility uniform."
+
+/obj/item/clothing/head/scga/utility/urban/marine
+	name = "urban utility cover, SCGMC"
+	desc = "A stern, urban utility cover. Part of the solar marine corps utility uniform."
 
 //Service
 
@@ -86,6 +97,25 @@
 	desc = "A peaked grey uniform cap belonging to the SCG Expeditionary Corps. This one is trimmed in gold and blue."
 	icon_state = "ecdresscap_cdr"
 
+/obj/item/clothing/head/scga/service/wheel/marine
+	name = "marine wheel cover"
+	desc = "A green service uniform cover with an SCG Marine Corp crest."
+
+/obj/item/clothing/head/scga/service/wheel_command/marine
+	name = "marine officer's wheel cover"
+	desc = "A green service uniform cover with an SCG Marine Corp crest and gold stripe."
+
+/obj/item/clothing/head/scga/service/garrison/marine
+	name = "marine garrison cap"
+	desc = "A green garrison cap belonging to the SCG Marine Corp."
+
+/obj/item/clothing/head/scga/service/garrison_officer/marine
+	name = "marine officer's garrison cap"
+	desc = "A green garrison cap belonging to the SCG Marine Corp. This one has a gold pin."
+
+/obj/item/clothing/head/scga/dress/garrison/marine
+	name = "campaign cover"
+	desc = "A green campaign cover with an SCG Marine Corp crest. Only found on the heads of Drill Sergeants."
 
 //Dress
 
@@ -113,6 +143,13 @@
 	desc = "A white dress uniform cover. This one has a gold stripe and an SCG Fleet crest."
 	icon_state = "whitepeakcap_com"
 
+/obj/item/clothing/head/scga/dress/garrison/marine
+	name = "marine dress wheel cover"
+	desc = "A white dress uniform cover with an SCG Marine Corp crest."
+
+/obj/item/clothing/head/scga/dress/wheel_command/marine
+	name = "marine officer's dress wheel cover"
+	desc = "A white dress uniform cover with an SCG Marine Corp crest and gold stripe."
 
 //Berets
 
@@ -327,6 +364,14 @@
 	desc = "An SCG Fleet synthfur-lined hat for operating in cold environments."
 	icon_state = "flushankadown"
 	icon_state_up = "flushankaup"
+
+/obj/item/clothing/head/scga/utility/ushanka/marine
+	name = "marine fur hat"
+	desc = "An SCG Marine Corp synthfur-lined hat for operating in cold environments."
+
+/obj/item/clothing/head/scga/utility/ushanka/green/marine
+	name = "green marine fur hat"
+	desc = "An SCG Marine Corp synthfur-lined hat for operating in cold environments."
 
 //helmets and other such trash
 

@@ -298,7 +298,7 @@
 
 /singleton/hierarchy/mil_uniform/ec/exp
 	name = "EC exploration"
-	departments = EXP
+	departments = INF
 
 	utility_extra = list(/obj/item/clothing/head/beret/solgov/expedition/exploration,
 						 /obj/item/clothing/head/ushanka/solgov,

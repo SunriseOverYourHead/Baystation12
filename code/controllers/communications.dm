@@ -127,7 +127,7 @@ var/global/const/MED_FREQ = 1355
 var/global/const/SCI_FREQ = 1351
 var/global/const/SRV_FREQ = 1349
 var/global/const/SUP_FREQ = 1347
-var/global/const/EXP_FREQ = 1361
+var/global/const/INF_FREQ = 1361
 
 // internal department channels
 var/global/const/MED_I_FREQ = 1485
@@ -164,7 +164,7 @@ var/global/list/radiochannels = list(
 	"Mercenary" 	= SYND_FREQ,
 	"Raider"		= RAID_FREQ,
 	"Vox Raider"	= V_RAID_FREQ,
-	"Exploration"	= EXP_FREQ,
+	"Infantry"		= INF_FREQ,
 	"Supply" 		= SUP_FREQ,
 	"Service" 		= SRV_FREQ,
 	"AI Private"	= AI_FREQ,
@@ -177,7 +177,7 @@ var/global/list/radiochannels = list(
 var/global/list/channel_color_presets = list(
 	"Bemoaning Brown" = COMMS_COLOR_SUPPLY,
 	"Bitchin' Blue" = COMMS_COLOR_COMMAND,
-	"Bold Brass" = COMMS_COLOR_EXPLORER,
+	"Bold Lime" = COMMS_COLOR_INFANTRY,
 	"Gastric Green" = COMMS_COLOR_SERVICE,
 	"Global Green" = COMMS_COLOR_COMMON,
 	"Grand Gold" = COMMS_COLOR_COLONY,
@@ -202,7 +202,7 @@ var/global/list/CENT_FREQS = list(ERT_FREQ, DTH_FREQ)
 var/global/list/ANTAG_FREQS = list(SYND_FREQ, RAID_FREQ, V_RAID_FREQ)
 
 //Department channels, arranged lexically
-var/global/list/DEPT_FREQS = list(AI_FREQ, COMM_FREQ, ENG_FREQ, MED_FREQ, SEC_FREQ, SCI_FREQ, SRV_FREQ, SUP_FREQ, EXP_FREQ, ENT_FREQ, MED_I_FREQ, SEC_I_FREQ)
+var/global/list/DEPT_FREQS = list(AI_FREQ, COMM_FREQ, ENG_FREQ, MED_FREQ, SEC_FREQ, SCI_FREQ, SRV_FREQ, SUP_FREQ, INF_FREQ, ENT_FREQ, MED_I_FREQ, SEC_I_FREQ)
 
 #define TRANSMISSION_WIRE	0
 #define TRANSMISSION_RADIO	1
@@ -229,8 +229,8 @@ var/global/list/DEPT_FREQS = list(AI_FREQ, COMM_FREQ, ENG_FREQ, MED_FREQ, SEC_FR
 		return "sciradio"
 	if(frequency == MED_FREQ)
 		return "medradio"
-	if(frequency == EXP_FREQ) // exploration
-		return "EXPradio"
+	if(frequency == INF_FREQ) // infantry
+		return "infradio"
 	if(frequency == SUP_FREQ) // cargo
 		return "supradio"
 	if(frequency == SRV_FREQ) // service

@@ -1,6 +1,6 @@
-/datum/department/exploration
-	name = "Exploration Team"
-	flag = EXP
+/datum/department/infantry
+	name = "Infantry Team"
+	flag = INF
 	goals = list(
 		/datum/goal/department/planet_claim,
 		/datum/goal/department/plant_samples,

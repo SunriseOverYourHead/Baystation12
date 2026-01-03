@@ -218,3 +218,23 @@
 	job_access_type = /datum/job/merchant
 	color = COLOR_OFF_WHITE
 	detail_color = COLOR_BEIGE
+
+//Infantry
+
+/obj/item/card/id/torch/crew/infantry
+	job_access_type = /datum/job/rifleman
+	detail_color = "#429661"
+
+/obj/item/card/id/torch/silver/po
+	job_access_type = /datum/job/po
+	detail_color = "#429661"
+
+/obj/item/card/id/torch/crew/infantry/squadlead
+	job_access_type = /datum/job/squadlead
+	extra_details = list("onegoldstripe")
+
+/obj/item/card/id/torch/crew/infantry/firelead
+	job_access_type = /datum/job/firelead
+
+/obj/item/card/id/torch/crew/infantry/comtech
+	job_access_type = /datum/job/comtech

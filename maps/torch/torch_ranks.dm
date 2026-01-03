@@ -15,7 +15,7 @@
 		/datum/mil_branch/skrell_fleet,
 		/datum/mil_branch/iccgn,
 		/datum/mil_branch/scga,
-		/datum/mil_branch/marines,
+		/datum/mil_branch/marine_corps,
 		/datum/mil_branch/auf
 	)
 
@@ -28,7 +28,7 @@
 		/datum/mil_branch/skrell_fleet,
 		/datum/mil_branch/iccgn,
 		/datum/mil_branch/scga,
-		/datum/mil_branch/marines,
+		/datum/mil_branch/marine_corps,
 		/datum/mil_branch/auf
 	)
 
@@ -205,7 +205,7 @@
 		SKILL_EVA = SKILL_BASIC // 1 point
 	)
 
-/datum/mil_branch/marines
+/datum/mil_branch/marine_corps
 	name = "Marine Corps"
 	name_short = "SCGMC"
 	email_domain = "torch.marine.mil"
@@ -480,133 +480,133 @@
 	name = "Private"
 	name_short = "Pvt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted)
-	sort_order = 1
+	sort_order = 10
 
 /datum/mil_rank/marine_corps/e2
 	name = "Private First Class"
 	name_short = "PFC"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e2)
-	sort_order = 2
+	sort_order = 20
 
 /datum/mil_rank/marine_corps/e3
 	name = "Lance Corporal"
 	name_short = "LCpl"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e3)
-	sort_order = 3
+	sort_order = 30
 
 /datum/mil_rank/marine_corps/e4
 	name = "Corporal"
 	name_short = "Cpl"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e4)
-	sort_order = 4
+	sort_order = 40
 
 /datum/mil_rank/marine_corps/e5
 	name = "Sergeant"
 	name_short = "Sgt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e5)
-	sort_order = 5
+	sort_order = 50
 
 /datum/mil_rank/marine_corps/e6
 	name = "Staff Sergeant"
 	name_short = "SSgt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e6)
-	sort_order = 6
+	sort_order = 60
 
 /datum/mil_rank/marine_corps/e7
 	name = "Gunnery Sergeant"
 	name_short = "GySgt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e7)
-	sort_order = 7
+	sort_order = 70
 
 /datum/mil_rank/marine_corps/e8
 	name = "Master Sergeant"
 	name_short = "MSgt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e8)
-	sort_order = 8
+	sort_order = 80
 
 /datum/mil_rank/marine_corps/e8_alt1
 	name = "First Sergeant"
 	name_short = "1stSg"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e8_alt)
-	sort_order = 8
+	sort_order = 81
 
 /datum/mil_rank/marine_corps/e9
 	name = "Master Gunnery Sergeant"
 	name_short = "MGySgt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e9)
-	sort_order = 9
+	sort_order = 90
 
 /datum/mil_rank/marine_corps/e9_alt1
 	name = "Sergeant Major"
 	name_short = "SgtMaj"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e9_alt)
-	sort_order = 9
+	sort_order = 91
 
 /datum/mil_rank/marine_corps/e9_alt2
 	name = "Sergeant Major of the Marine Corps"
 	name_short = "SMMC"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/enlisted/e9_alt2)
-	sort_order = 9
+	sort_order = 92
 
 /datum/mil_rank/marine_corps/o1
 	name = "Second Lieutenant"
 	name_short = "2ndLt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/officer)
-	sort_order = 116
+	sort_order = 110
 
 /datum/mil_rank/marine_corps/o2
 	name = "First Lieutenant"
 	name_short = "1stLt"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/officer/o2)
-	sort_order = 117
+	sort_order = 120
 
 /datum/mil_rank/marine_corps/o3
 	name = "Captain "
 	name_short = "CPT"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/officer/o3)
-	sort_order = 118
+	sort_order = 130
 
 /datum/mil_rank/marine_corps/o4
 	name = "Major"
 	name_short = "Maj"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/officer/o4)
-	sort_order = 121
+	sort_order = 140
 
 /datum/mil_rank/marine_corps/o5
 	name = "Lieutenant Colonel"
 	name_short = "LtCol"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/officer/o5)
-	sort_order = 122
+	sort_order = 150
 
 /datum/mil_rank/marine_corps/o6
 	name = "Colonel"
 	name_short = "Col"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/officer/o6)
-	sort_order = 123
+	sort_order = 160
 
 /datum/mil_rank/marine_corps/o7
 	name = "Brigadier General"
 	name_short = "BGen"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/flag)
-	sort_order = 124
+	sort_order = 170
 
 /datum/mil_rank/marine_corps/o8
 	name = "Major General"
 	name_short = "MGen"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/flag/o8)
-	sort_order = 125
+	sort_order = 180
 
 /datum/mil_rank/marine_corps/o9
 	name = "Lieutenant General"
 	name_short = "LtGen"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/flag/o9)
-	sort_order = 126
+	sort_order = 190
 
 /datum/mil_rank/marine_corps/o10
 	name = "General"
 	name_short = "Gen"
 	accessory = list(/obj/item/clothing/accessory/solgov/rank/marine_corps/flag/o10)
-	sort_order = 127
+	sort_order = 200
 
 /*
  *  EC

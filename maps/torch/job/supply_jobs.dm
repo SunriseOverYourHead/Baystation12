@@ -1,13 +1,11 @@
 /datum/job/qm
-	title = "Quartermaster"
+	title = "Deck Chief"
 	department = "Supply"
 	department_flag = SUP
 	total_positions = 1
 	spawn_positions = 1
 	supervisors = "the Executive Officer"
-	alt_titles = list(
-		"Deck Chief"
-	)
+	selection_color = "#aa8f38"
 	economic_power = 5
 	minimal_player_age = 0
 	minimum_character_age = list(SPECIES_HUMAN = 27)
@@ -44,6 +42,9 @@
 							 /datum/computer_file/program/deck_management,
 							 /datum/computer_file/program/reports)
 
+/datum/job/qm/get_description_blurb()
+	return "You are the Deck Chief. You manage both the flight deck and the cargo department of the ship. You have positional authority over the dropship pilots."
+
 /datum/job/cargo_tech
 	title = "Cargo Technician"
 	department = "Supply"
@@ -51,6 +52,7 @@
 	total_positions = 3
 	spawn_positions = 3
 	supervisors = "the Quartermaster"
+	selection_color = "#946629"
 	minimum_character_age = list(SPECIES_HUMAN = 18)
 	ideal_character_age = 24
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/supply/tech/fleet

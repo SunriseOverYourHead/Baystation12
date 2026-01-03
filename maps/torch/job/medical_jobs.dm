@@ -44,14 +44,14 @@
 							 /datum/computer_file/program/camera_monitor)
 
 /datum/job/junior_doctor
-	title = "Medical Resident"
+	title = "Nurse"
 	department = "Medical"
 	department_flag = MED
 	minimal_player_age = 2
 	minimum_character_age = list(SPECIES_HUMAN = 24)
 	ideal_character_age = 45
-	total_positions = 1
-	spawn_positions = 1
+	total_positions = 2
+	spawn_positions = 2
 	supervisors = "physicians and the Chief Medical Officer"
 	selection_color = "#013d3b"
 	economic_power = 6
@@ -85,17 +85,14 @@
 							 /datum/computer_file/program/camera_monitor)
 
 /datum/job/doctor
-	title = "Nurse"
-	total_positions = 3
-	spawn_positions = 3
+	title = "Corpsman"
+	total_positions = 6
+	spawn_positions = 6
 	supervisors = "physicians and the Chief Medical Officer"
 	economic_power = 7
 	minimum_character_age = list(SPECIES_HUMAN = 19)
 	ideal_character_age = 40
 	minimal_player_age = 0
-	alt_titles = list(
-		"Paramedic",
-		"Corpsman")
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/medical/doctor/fleet
 	allowed_branches = list(
 		/datum/mil_branch/fleet

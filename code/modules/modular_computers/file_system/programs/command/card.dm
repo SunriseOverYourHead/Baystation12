@@ -53,7 +53,7 @@
 	data["medical_jobs"] = format_jobs(SSjobs.titles_by_department(MED))
 	data["science_jobs"] = format_jobs(SSjobs.titles_by_department(SCI))
 	data["security_jobs"] = format_jobs(SSjobs.titles_by_department(SEC))
-	data["exploration_jobs"] = format_jobs(SSjobs.titles_by_department(EXP))
+	data["infantry_jobs"] = format_jobs(SSjobs.titles_by_department(INF))
 	data["service_jobs"] = format_jobs(SSjobs.titles_by_department(SRV))
 	data["supply_jobs"] = format_jobs(SSjobs.titles_by_department(SUP))
 	data["civilian_jobs"] = format_jobs(SSjobs.titles_by_department(CIV))

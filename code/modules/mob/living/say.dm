@@ -16,7 +16,7 @@ var/global/list/department_radio_keys = list(
 	  ":v" = "Service",		".v" = "Service",
 	  ":p" = "AI Private",	".p" = "AI Private",
 	  ":z" = "Entertainment",".z" = "Entertainment",
-	  ":y" = "Exploration",		".y" = "Exploration",
+	  ":y" = "Infantry",		".y" = "Infantry",
 	  ":f" = "ERT",".f" = "ERT", //ERT
 	  ":j" = "Hailing", ".j" = "Hailing",
 
@@ -36,7 +36,7 @@ var/global/list/department_radio_keys = list(
 	  ":V" = "Service",		".V" = "Service",
 	  ":P" = "AI Private",	".P" = "AI Private",
 	  ":Z" = "Entertainment",".Z" = "Entertainment",
-	  ":Y" = "Exploration",		".Y" = "Exploration",
+	  ":Y" = "Infantry",		".Y" = "Infantry",
 	  ":F" = "ERT", ".F" = "ERT",
 	  ":J" = "Hailing", ".J" = "Hailing",
 
@@ -58,7 +58,7 @@ var/global/list/department_radio_keys = list(
 	  ":м" = "Service",		".м" = "Service",
 	  ":з" = "AI Private",	".з" = "AI Private",
 	  ":я" = "Entertainment",".я" = "Entertainment",
-	  ":н" = "Exploration",		".н" = "Exploration",
+	  ":н" = "Infantry",		".н" = "Infantry",
 	  ":щ" = "ERT",".щ" = "ERT",
 	  ":о" = "Hailing", ".о" = "Hailing",
 
@@ -78,7 +78,7 @@ var/global/list/department_radio_keys = list(
 	  ":М" = "Service",		".М" = "Service",
 	  ":З" = "AI Private",	".З" = "AI Private",
 	  ":Я" = "Entertainment",".Я" = "Entertainment",
-	  ":Н" = "Exploration",		".Н" = "Exploration",
+	  ":Н" = "Infantry",		".Н" = "Infantry",
 	  ":а" = "ERT",".а" = "ERT",
 	  ":О" = "Hailing", ".О" = "Hailing",
 )

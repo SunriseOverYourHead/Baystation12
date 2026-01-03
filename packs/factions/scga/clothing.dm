@@ -44,6 +44,7 @@
 	name = "utility uniform, SCGA"
 	desc = "A green, durable utility jumpsuit. Belonging to the solar army uniform."
 	icon_state = "under_utility"
+	worn_state = "under_utility_worn"
 	item_state_slots = list(
 		slot_l_hand_str = "under_utility_held_l",
 		slot_r_hand_str = "under_utility_held_r",
@@ -77,6 +78,7 @@
 	name = "service uniform, SCGA"
 	desc = "A slimming brown service shirt and green pants. Belonging to the solar army service uniform."
 	icon_state = "under_service"
+	worn_state = "under_service_worn"
 	item_state_slots = list(
 		slot_l_hand_str = "under_service_held_l",
 		slot_r_hand_str = "under_service_held_r",
@@ -99,6 +101,7 @@
 	name = "service uniform, SCGA"
 	desc = "A slimming brown service shirt and green pants with beige streaks, for senior officers. Belonging to the solar army command service uniform."
 	icon_state = "under_command"
+	worn_state = "under_command_worn"
 	item_state_slots = list(
 		slot_l_hand_str = "under_command_held_l",
 		slot_r_hand_str = "under_command_held_r",
@@ -121,6 +124,7 @@
 	name = "dress uniform, SCGA"
 	desc = "A classy brown shirt and black dress pants. Part of the solar army dress uniform."
 	icon_state = "under_dress"
+	worn_state = "under_dress_worn"
 	item_state_slots = list(
 		slot_l_hand_str = "under_dress_held_l",
 		slot_r_hand_str = "under_dress_held_r",
@@ -142,6 +146,7 @@
 	name = "dress uniform, SCGA"
 	desc = "A classy brown shirt and black dress pants with gold streaks, for senior officers. Part of the solar army command dress uniform."
 	icon_state = "under_dress_command"
+	worn_state = "under_dress_command_worn"
 	item_state_slots = list(
 		slot_l_hand_str = "under_dress_command_held_l",
 		slot_r_hand_str = "under_dress_command_held_r",

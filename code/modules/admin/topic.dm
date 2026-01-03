@@ -465,10 +465,10 @@
 				counter = 0
 		jobs += "</tr></table>"
 
-	//Exploration (Pale Purple)
+	// Infantry (Bright Purple)
 		jobs += "<table cellpadding='1' cellspacing='0' width='100%'>"
-		jobs += "<tr bgcolor='b784a7'><th colspan='[length(SSjobs.titles_by_department(EXP))]'><a href='byond://?src=\ref[src];jobban3=explorationdept;jobban4=\ref[M]'>Exploration Positions</a></th></tr><tr align='center'>"
-		for(var/jobPos in SSjobs.titles_by_department(EXP))
+		jobs += "<tr bgcolor='b784a7'><th colspan='[length(SSjobs.titles_by_department(INF))]'><a href='byond://?src=\ref[src];jobban3=infantrydept;jobban4=\ref[M]'>Infantry Positions</a></th></tr><tr align='center'>"
+		for(var/jobPos in SSjobs.titles_by_department(INF))
 			if(!jobPos)	continue
 			var/datum/job/job = SSjobs.get_by_title(jobPos)
 			if(!job) continue
@@ -691,8 +691,8 @@
 					var/datum/job/temp = SSjobs.get_by_title(jobPos)
 					if(!temp) continue
 					job_list += temp.title
-			if("explorationdept")
-				for(var/jobPos in SSjobs.titles_by_department(EXP))
+			if("infantrydept")
+				for(var/jobPos in SSjobs.titles_by_department(INF))
 					if(!jobPos)	continue
 					var/datum/job/temp = SSjobs.get_by_title(jobPos)
 					if(!temp) continue

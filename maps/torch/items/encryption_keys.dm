@@ -74,6 +74,29 @@
 	icon_state = "com_cypherkey"
 	channels = list("Exploration" = 1, "Supply" = 1, "Command" = 1, "Science" = 1, "Hailing" = 1)
 
+/obj/item/device/encryptionkey/infantry
+	name = "infantry encryption key"
+	desc = "An Encryption key."
+	icon_state = "cap_cypherkey"
+	channels = list("Infantry" = 1, "Exploration" = 1)
+
+/obj/item/device/encryptionkey/infantry/po
+	name = "command infantry encryption key"
+	desc = "An Encryption key."
+	icon_state = "cap_cypherkey"
+	channels = list("Infantry" = 1, "Command" = 1)
+
+/obj/item/device/encryptionkey/infantry/comtech
+	name = "technician infantry encryption key"
+	desc = "An Encryption key."
+	icon_state = "cap_cypherkey"
+	channels = list("Infantry" = 1, "Engineering" = 1)
+
+/obj/item/device/encryptionkey/headset_med/corpsman
+	name = "medical corpsman encryption key"
+	icon_state = "med_cypherkey"
+	channels = list("Medical" = 1, "Infantry" = 1)
+
 /obj/item/storage/box/radiokeys
 	name = "box of radio encryption keys"
 	desc = "A box full of assorted encryption keys."

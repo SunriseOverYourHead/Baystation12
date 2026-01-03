@@ -189,7 +189,7 @@ var/global/const/NETWORK_ENGINEERING_OUTPOST = "Engineering Outpost"
 		num2text(SCI_FREQ)   = list(access_radio_sci),
 		num2text(SUP_FREQ)   = list(access_radio_sup),
 		num2text(SRV_FREQ)   = list(access_radio_serv),
-		num2text(EXP_FREQ)   = list(access_radio_exp),
+		num2text(INF_FREQ)   = list(access_radio_exp),
 		num2text(HAIL_FREQ)  = list()
 	)
 
@@ -208,7 +208,7 @@ var/global/const/NETWORK_ENGINEERING_OUTPOST = "Engineering Outpost"
 		num2text(SCI_FREQ)   = list(access_radio_sci),
 		num2text(SUP_FREQ)   = list(access_radio_sup),
 		num2text(SRV_FREQ)   = list(access_radio_serv),
-		num2text(EXP_FREQ)   = list(access_radio_exp),
+		num2text(INF_FREQ)   = list(access_radio_exp),
 		num2text(HAIL_FREQ)  = list(),
 		num2text(SYND_FREQ)  = list()
 	)

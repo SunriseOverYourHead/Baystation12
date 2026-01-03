@@ -9,6 +9,7 @@
 	economic_power = 6
 	minimal_player_age = 7
 	supervisors = "the Executive Officer"
+	selection_color = "#38aa5a"
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/chief_steward/fleet
 	allowed_branches = list(
 		/datum/mil_branch/fleet = /singleton/hierarchy/outfit/job/torch/crew/service/chief_steward/fleet
@@ -49,6 +50,7 @@
 	economic_power = 6
 	minimal_player_age = 0
 	supervisors = "the Executive Officer"
+	selection_color = "#26773e"
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/chaplain/fleet
 	allowed_branches = list(
 		/datum/mil_branch/fleet
@@ -75,6 +77,7 @@
 	total_positions = 2
 	spawn_positions = 2
 	supervisors = "the Chief Steward"
+	selection_color = "#26773e"
 	minimum_character_age = list(SPECIES_HUMAN = 20)
 	ideal_character_age = 20
 	alt_titles = list(
@@ -108,6 +111,7 @@
 	spawn_positions = 2
 	minimum_character_age = list(SPECIES_HUMAN = 20)
 	supervisors = "the Chief Steward"
+	selection_color = "#26773e"
 	alt_titles = list(
 		"Cook",
 		"Culinary Specialist",
@@ -145,6 +149,7 @@
 	total_positions = 5
 	spawn_positions = 5
 	supervisors = "the Chief Steward"
+	selection_color = "#26773e"
 	minimum_character_age = list(SPECIES_HUMAN = 20)
 	ideal_character_age = 20
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/service/crewman/fleet

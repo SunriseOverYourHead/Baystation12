@@ -46,10 +46,10 @@
 	l_ear = /obj/item/device/radio/headset/headset_corpsman
 
 /singleton/hierarchy/outfit/job/torch/crew/medical/doctor/fleet
-	name = OUTFIT_JOB_NAME("Medical Technician - Fleet")
+	name = OUTFIT_JOB_NAME("Corpsman - Fleet")
 	uniform = /obj/item/clothing/under/solgov/utility/fleet/medical
 	shoes = /obj/item/clothing/shoes/dutyboots
-	l_ear = /obj/item/device/radio/headset/headset_corpsman
+	l_ear = /obj/item/device/radio/headset/headset_med/infantry
 
 /singleton/hierarchy/outfit/job/torch/crew/medical/contractor
 	name = OUTFIT_JOB_NAME("Medical Technician - Contractor")
