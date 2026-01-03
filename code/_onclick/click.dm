@@ -557,10 +557,15 @@ GLOBAL_LIST_INIT(click_catchers)
 	return
 
 /obj/item/gun/CanItemAutoclick(object, location, params)
-	return can_autofire
+	if(!can_autofire)
+		return 0
 
-/obj/item/gun/CanItemAutoclick(object, location, params)
-	return can_autofire
+	var/delay = max(burst_delay, fire_delay)
+
+	if(delay <= 0)
+		delay = 0.5
+
+	return delay
 
 /atom/proc/IsAutoclickable()
 	return TRUE

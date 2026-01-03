@@ -315,7 +315,7 @@
 	accuracy_power = 7
 	one_hand_penalty = 8
 	bulk = GUN_BULK_RIFLE
-	burst_delay = 4
+	burst_delay = 1.5
 	wielded_item_state = "z8carbine-wielded"
 	mag_insert_sound = 'sound/weapons/guns/interaction/batrifle_magin.ogg'
 	mag_remove_sound = 'sound/weapons/guns/interaction/batrifle_magout.ogg'
@@ -325,21 +325,31 @@
 			"mode_name" = "semi auto",
 			"burst" = 1,
 			"fire_delay" = null,
-			"move_delay" = null,
+			"move_delay" = 0.5,
 			"use_launcher" = null,
-			"one_hand_penalty" = 8,
+			"one_hand_penalty" = 6,
 			"burst_accuracy" = null,
 			"dispersion" = null
 		),
 		list(
 			"mode_name" = "3-round bursts",
 			"burst" = 3,
-			"fire_delay" = null,
-			"move_delay" = 6,
+			"fire_delay" = 0.1,
+			"move_delay" = 0.5,
 			"use_launcher" = null,
-			"one_hand_penalty" = 9,
-			"burst_accuracy" = list(0, -1, -1),
-			"dispersion" = list(0.0, 0.6, 1.0)
+			"one_hand_penalty" = 7,
+			"burst_accuracy" = list(0),
+			"dispersion" = list(0.0)
+		),
+		list(
+			"mode_name" = "full auto",
+			"can_autofire" = 1,
+			"burst" = 1,
+			"fire_delay" = 0.3,
+			"move_delay" = 0.5,
+			"one_hand_penalty" = 12,
+			"burst_accuracy" = list(0),
+			"dispersion" = list(0)
 		),
 		list(
 			"mode_name" = "fire grenades",
@@ -417,30 +427,41 @@
 	icon = 'icons/obj/guns/bullpup_rifle_light.dmi'
 	item_state = "z9carbine"
 	magazine_type = /obj/item/ammo_magazine/mil_rifle/light
+	burst_delay = 1
 	one_hand_penalty = 6 //Slightly lighter than the Z8. Still don't try it.
 	bulk = GUN_BULK_LIGHT_RIFLE
 	has_launcher = FALSE
 	wielded_item_state = "z9carbine-wielded"
-	firemodes = list( //Two round bursts. More accurate than the Z8 due to less maximum dispersion. More delay between shots, however, so slower.
+	firemodes = list(
 		list(
 			"mode_name" = "semi auto",
 			"burst" = 1,
 			"fire_delay" = null,
-			"move_delay" = null,
+			"move_delay" = 0.5,
 			"use_launcher" = null,
 			"one_hand_penalty" = 6,
 			"burst_accuracy" = null,
 			"dispersion" = null
 		),
 		list(
-			"mode_name" = "2-round bursts",
-			"burst" = 2,
-			"fire_delay" = null,
-			"move_delay" = 6,
+			"mode_name" = "3-round bursts",
+			"burst" = 3,
+			"fire_delay" = 0.1,
+			"move_delay" = 0.5,
 			"use_launcher" = null,
 			"one_hand_penalty" = 7,
-			"burst_accuracy" = list(0, -1),
-			"dispersion" = list(0.0, 0.6)
+			"burst_accuracy" = list(0),
+			"dispersion" = list(0.0)
+		),
+		list(
+			"mode_name" = "full auto",
+			"can_autofire" = 1,
+			"burst" = 1,
+			"fire_delay" = 0.3,
+			"move_delay" = 0.5,
+			"one_hand_penalty" = 12,
+			"burst_accuracy" = list(0),
+			"dispersion" = list(0)
 		)
 	)
 

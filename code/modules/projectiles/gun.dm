@@ -264,21 +264,25 @@
 			handle_click_safety(user)
 			return
 
-	if(world.time < next_fire_time)
+	var/effective_delay = max(burst_delay, fire_delay)
+	if(effective_delay > 0.1 && world.time < next_fire_time)
 		if (world.time % 3) //to prevent spam
 			to_chat(user, SPAN_WARNING("[src] is not ready to fire again!"))
 		return
 
 	last_safety_check = world.time
-	var/shoot_time = (burst - 1)* burst_delay
-	user.setClickCooldown(shoot_time) //no clicking on things while shooting
-	user.SetMoveCooldown(shoot_time) //no moving while shooting either
+	var/shoot_time = (burst - 1) * burst_delay
+
+	if(effective_delay > 0.1)
+		user.setClickCooldown(shoot_time)
+		user.SetMoveCooldown(shoot_time)
+
 	next_fire_time = world.time + shoot_time
 
 	var/held_twohanded = (user.can_wield_item(src) && src.is_held_twohanded(user))
 
 	//actually attempt to shoot
-	var/turf/targloc = get_turf(target) //cache this in case target gets deleted during shooting, e.g. if it was a securitron that got destroyed.
+	var/turf/targloc = get_turf(target)
 	for(var/i in 1 to burst)
 		var/obj/projectile = consume_next_projectile(user)
 		if(!projectile)
@@ -302,10 +306,16 @@
 			pointblank = 0
 
 	//update timing
-	var/delay = max(burst_delay+1, fire_delay)
-	user.setClickCooldown(min(delay, DEFAULT_QUICK_COOLDOWN))
+	var/delay = max(burst_delay, fire_delay)
+
+	if(delay <= 0.1)
+		user.setClickCooldown(0)
+		next_fire_time = world.time  // Allow immediate re-fire
+	else
+		user.setClickCooldown(min(delay, DEFAULT_QUICK_COOLDOWN))
+		next_fire_time = world.time + delay
+
 	user.SetMoveCooldown(move_delay)
-	next_fire_time = world.time + delay
 
 //obtains the next projectile to fire
 /obj/item/gun/proc/consume_next_projectile()
@@ -363,6 +373,9 @@
 						to_chat(user, SPAN_WARNING("You have trouble keeping \the [src] on target with just one hand."))
 					if(8 to INFINITY)
 						to_chat(user, SPAN_WARNING("You struggle to keep \the [src] on target with just one hand!"))
+				if(screen_shake)
+					spawn()
+						shake_camera(user, screen_shake+1, screen_shake)
 			else if(!user.can_wield_item(src))
 				switch(one_hand_penalty)
 					if(4 to 6)
@@ -372,10 +385,9 @@
 						to_chat(user, SPAN_WARNING("You have trouble holding \the [src] steady."))
 					if(8 to INFINITY)
 						to_chat(user, SPAN_WARNING("You struggle to hold \the [src] steady!"))
-
-		if(screen_shake)
-			spawn()
-				shake_camera(user, screen_shake+1, screen_shake)
+				if(screen_shake)
+					spawn()
+						shake_camera(user, screen_shake+1, screen_shake)
 
 	if(combustion)
 		var/turf/curloc = get_turf(src)
@@ -556,7 +568,7 @@
 		if (i < burst)
 			sleep(burst_delay)
 
-	var/delay = max(burst_delay+1, fire_delay)
+	var/delay = max(burst_delay, fire_delay)
 	M.setClickCooldown(min(delay, DEFAULT_QUICK_COOLDOWN))
 	next_fire_time = world.time + delay
 	if (brain.damage > brain.max_damage)
@@ -584,14 +596,11 @@
 		accuracy = scoped_accuracy
 		if(user.skill_check(SKILL_WEAPONS, SKILL_MASTER))
 			accuracy += 2
-		if(screen_shake)
-			screen_shake = round(screen_shake*zoom_amount+1) //screen shake is worse when looking through a scope
 
 //make sure accuracy and screen_shake are reset regardless of how the item is unzoomed.
 /obj/item/gun/unzoom()
 	..()
 	accuracy = initial(accuracy)
-	screen_shake = initial(screen_shake)
 
 /obj/item/gun/examine(mob/user)
 	. = ..()
