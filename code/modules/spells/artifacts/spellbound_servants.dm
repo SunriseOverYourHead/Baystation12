@@ -116,7 +116,7 @@
 			if(A)
 				A.armor_values = list(
 					melee = ARMOR_MELEE_VERY_HIGH,
-					bullet = ARMOR_BALLISTIC_PISTOL,
+					bullet = ARMOR_BALLISTIC_IIIA,
 					laser = ARMOR_LASER_SMALL,
 					energy = ARMOR_ENERGY_SMALL
 					) //More armor
@@ -124,7 +124,7 @@
 			if(A)
 				A.armor_values = list(
 					melee = ARMOR_MELEE_RESISTANT,
-					bullet = ARMOR_BALLISTIC_MINOR,
+					bullet = ARMOR_BALLISTIC_I,
 					laser = ARMOR_LASER_MINOR,
 					energy = ARMOR_ENERGY_MINOR
 					)

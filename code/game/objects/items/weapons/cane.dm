@@ -146,7 +146,7 @@
 	handle_casings = CYCLE_CASINGS
 	max_shells = 1
 	ammo_type = /obj/item/ammo_casing/shotgun/pellet
-	caliber = CALIBER_SHOTGUN
+	caliber = PROJECTILE_SHOTGUN
 	one_hand_penalty = 5
 	accuracy = -3
 

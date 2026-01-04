@@ -152,7 +152,7 @@ The megabot
 	special_attack_cooldown = 3 MINUTES
 	natural_armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL
+		bullet = ARMOR_BALLISTIC_IIIA
 		)
 	can_escape = TRUE
 	armor_type = /datum/extension/armor/toggle

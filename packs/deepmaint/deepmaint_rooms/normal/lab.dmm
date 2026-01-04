@@ -363,7 +363,7 @@
 /area/map_template/deepmaint)
 "Eq" = (
 /obj/decal/cleanable/blood/drip,
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /turf/simulated/floor/tiled,
 /area/map_template/deepmaint)
 "EA" = (

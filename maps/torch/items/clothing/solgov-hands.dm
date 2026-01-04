@@ -69,7 +69,7 @@
 	force = 5
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_MINOR,
 		energy = ARMOR_ENERGY_SMALL,
 		bomb = ARMOR_BOMB_MINOR,

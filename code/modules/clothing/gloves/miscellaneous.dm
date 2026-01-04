@@ -67,7 +67,7 @@
 	force = 5
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_II,
 		laser = ARMOR_LASER_HANDGUNS,
 		energy = ARMOR_ENERGY_SMALL,
 		bomb = ARMOR_BOMB_RESISTANT,
@@ -83,7 +83,7 @@
 	force = 5
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_II,
 		laser = ARMOR_LASER_HANDGUNS,
 		energy = ARMOR_ENERGY_SMALL,
 		bomb = ARMOR_BOMB_RESISTANT,
@@ -131,7 +131,7 @@
 	item_state = "wgloves"
 	armor = list(
 		melee = ARMOR_MELEE_MINOR,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_MINOR
 		)
 
@@ -148,7 +148,7 @@
 	permeability_coefficient = 0.05
 	armor = list(
 		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_MINOR
 		)
 
@@ -163,7 +163,7 @@
 	permeability_coefficient = 0.03
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_SMALL,
 		energy = ARMOR_ENERGY_SMALL,
 		bomb = ARMOR_BOMB_PADDED

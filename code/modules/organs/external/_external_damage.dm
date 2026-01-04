@@ -129,6 +129,9 @@
 	if(!LAZYLEN(internal_organs))
 		return FALSE
 
+	if(damage_flags & DAMAGE_FLAG_EXTERNAL)
+		return FALSE
+
 	var/laser = (damage_flags & DAMAGE_FLAG_LASER)
 
 	var/damage_amt = brute

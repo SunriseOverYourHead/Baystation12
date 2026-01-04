@@ -591,7 +591,7 @@
 	dir = 8
 	},
 /obj/decal/cleanable/dirt,
-/obj/item/ammo_casing/pistol/magnum,
+/obj/item/ammo_casing/pistol/huge,
 /turf/simulated/floor/tiled/dark,
 /area/outpost/abandoned)
 "cg" = (
@@ -599,7 +599,7 @@
 	dir = 5
 	},
 /obj/decal/cleanable/dirt,
-/obj/item/ammo_casing/pistol/magnum,
+/obj/item/ammo_casing/pistol/huge,
 /turf/simulated/floor/tiled/dark,
 /area/outpost/abandoned)
 "ch" = (
@@ -2413,7 +2413,7 @@
 	dir = 9
 	},
 /obj/decal/cleanable/dirt,
-/obj/item/ammo_casing/pistol/magnum,
+/obj/item/ammo_casing/pistol/huge,
 /turf/simulated/floor/tiled/dark,
 /area/outpost/abandoned)
 "rb" = (
@@ -2424,7 +2424,7 @@
 /obj/decal/cleanable/dirt,
 /obj/decal/cleanable/dirt,
 /obj/decal/cleanable/dirt,
-/obj/item/ammo_casing/pistol/magnum,
+/obj/item/ammo_casing/pistol/huge,
 /turf/simulated/floor/tiled/dark,
 /area/outpost/abandoned)
 "sb" = (

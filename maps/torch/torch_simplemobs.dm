@@ -36,7 +36,7 @@
 	response_harm = "hits"
 	natural_armor = list(
 		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_SMALL
 		)
 	speed = 8
@@ -142,7 +142,7 @@
 	ranged = TRUE
 	natural_armor = list(
 		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_RESISTANT,
+		bullet = ARMOR_BALLISTIC_III,
 		laser = ARMOR_LASER_HANDGUNS
 		)
 	speed = 4

@@ -221,12 +221,12 @@
 
 /obj/item/storage/box/ammo/sniperammo
 	name = "box of sniper shells"
-	startswith = list(/obj/item/ammo_casing/shell = 7)
+	startswith = list(/obj/item/ammo_casing/rifle/full/huge = 7)
 
 
 /obj/item/storage/box/ammo/sniperammo/apds
 	name = "box of sniper APDS shells"
-	startswith = list(/obj/item/ammo_casing/shell/apds = 3)
+	startswith = list(/obj/item/ammo_casing/rifle/full/huge = 3)
 
 
 /obj/item/storage/box/ammo/pistol

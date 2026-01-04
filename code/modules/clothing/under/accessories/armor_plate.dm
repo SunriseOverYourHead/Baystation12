@@ -1,12 +1,12 @@
 /obj/item/clothing/accessory/armor_plate
-	name = "light armor plate"
-	desc = "A basic armor plate made of steel-reinforced synthetic fibers. Attaches to a plate carrier."
+	name = "IIIA+ armor plate"
+	desc = "A basic, level IIIA+ armor plate made of steel-reinforced synthetic fibers. Attaches to a plate carrier."
 	icon = 'icons/obj/clothing/obj_suit_modular_armor.dmi'
 	icon_state = "armor_light"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
 	armor = list(
 		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_SMALL,
+		bullet = ARMOR_BALLISTIC_IIIAP,
 		laser = ARMOR_LASER_MINOR,
 		energy = ARMOR_ENERGY_MINOR,
 		bomb = ARMOR_BOMB_MINOR
@@ -16,12 +16,12 @@
 
 
 /obj/item/clothing/accessory/armor_plate/medium
-	name = "medium armor plate"
-	desc = "A plasteel-reinforced synthetic armor plate, providing good protection. Attaches to a plate carrier."
+	name = "III armor plate"
+	desc = "A level III armor plate, providing good protection. Attaches to a plate carrier."
 	icon_state = "armor_medium"
 	armor = list(
 		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_III,
 		laser = ARMOR_LASER_SMALL,
 		energy = ARMOR_ENERGY_SMALL,
 		bomb = ARMOR_BOMB_PADDED
@@ -29,31 +29,30 @@
 
 
 /obj/item/clothing/accessory/armor_plate/tactical
-	name = "tactical armor plate"
-	desc = "A heavier armor plate with additional ablative coating. Attaches to a plate carrier."
+	name = "III+ armor plate"
+	desc = "A III+ armor plate with additional material. Attaches to a plate carrier."
 	icon_state = "armor_tactical"
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_RESISTANT,
+		bullet = ARMOR_BALLISTIC_IIIP,
 		laser = ARMOR_LASER_MAJOR,
 		energy = ARMOR_ENERGY_RESISTANT,
 		bomb = ARMOR_BOMB_PADDED
 	)
-	slowdown = 0.5
 
 
 /obj/item/clothing/accessory/armor_plate/merc
-	name = "heavy armor plate"
-	desc = "A ceramics-reinforced synthetic armor plate, providing state of of the art protection. Attaches to a plate carrier."
+	name = "IV armor plate"
+	desc = "A level IV ceramics-reinforced synthetic armor plate, providing state of of the art protection. Attaches to a plate carrier."
 	icon_state = "armor_merc"
 	armor = list(
 		melee = ARMOR_MELEE_MAJOR,
-		bullet = ARMOR_BALLISTIC_RIFLE,
+		bullet = ARMOR_BALLISTIC_IV,
 		laser = ARMOR_LASER_MAJOR,
 		energy = ARMOR_ENERGY_RESISTANT,
 		bomb = ARMOR_BOMB_PADDED
 	)
-	slowdown = 0.5
+	slowdown = 0.1
 
 
 /obj/item/clothing/accessory/armor_plate/sneaky
@@ -74,7 +73,7 @@
 	desc = "An armor vest made of layered smart polymers. Can attach to your slacks and office shirt."
 	armor = list(
 		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_IIIAP,
 		laser = ARMOR_LASER_SMALL,
 		energy = ARMOR_ENERGY_SMALL,
 		bomb = ARMOR_BOMB_PADDED

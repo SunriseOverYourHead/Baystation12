@@ -21,7 +21,7 @@
 		/obj/item/ammo_casing/shotgun/beanbag ,
 		/obj/item/ammo_casing/shotgun/stunshell,
 		/obj/item/ammo_casing/shotgun/flash,
-		/obj/item/ammo_casing/rifle/military,
+		/obj/item/ammo_casing/rifle/intermediate/small,
 		/obj/item/ammo_casing/rifle
 		)
 
@@ -32,11 +32,11 @@
 	var/obj/item/ammo_casing/ammo = pick(ammo_types)
 	caliber = initial(ammo.caliber)
 	desc += " Uses [caliber] rounds."
-	if(caliber == CALIBER_SHOTGUN)
+	if(caliber == PROJECTILE_SHOTGUN)
 		fire_sound = 'sound/weapons/gunshot/shotgun.ogg'
-	if(caliber == CALIBER_PISTOL)
+	if(caliber == PROJECTILE_PISTOL)
 		fire_sound = 'sound/weapons/gunshot/gunshot_pistol.ogg'
-	if(caliber == CALIBER_RIFLE || caliber == CALIBER_RIFLE_MILITARY)
+	if(caliber == PROJECTILE_RIFLE_INTERMEDIATE_SMALL || caliber == PROJECTILE_RIFLE_INTERMEDIATE_BIG)
 		fire_sound = 'sound/weapons/gunshot/gunshot3.ogg'
 	. = ..()
 

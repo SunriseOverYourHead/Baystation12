@@ -15,7 +15,7 @@
 	desc = "A needle thin dart formed of bone."
 	icon_state = "ling_dart"
 	icon = 'icons/obj/projectiles.dmi'
-	caliber = CALIBER_DART
+	caliber = PROJECTILE_DART
 	projectile_type = /obj/item/projectile/bullet/chemdart/changeling
 	leaves_residue = FALSE
 /obj/item/projectile/bullet/chemdart/changeling

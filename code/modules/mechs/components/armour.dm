@@ -6,7 +6,7 @@
 	desc = "A pair of flexible armor plates, used to protect the internals of exosuits and its pilot."
 	armor = list(
 		melee = ARMOR_MELEE_MAJOR,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_IIIA,
 		laser = ARMOR_LASER_HANDGUNS,
 		energy = ARMOR_ENERGY_MINOR,
 		bomb = ARMOR_BOMB_PADDED,
@@ -22,7 +22,7 @@
 	icon_state_broken = "armor_r_broken"
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_IIIA,
 		laser = ARMOR_LASER_HANDGUNS,
 		energy = ARMOR_ENERGY_MINOR,
 		bomb = ARMOR_BOMB_PADDED,
@@ -38,7 +38,7 @@
 	icon_state_broken = "armor_e_broken"
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT ,
-		bullet = ARMOR_BALLISTIC_SMALL,
+		bullet = ARMOR_BALLISTIC_II,
 		laser = ARMOR_LASER_SMALL,
 		energy = ARMOR_ENERGY_SHIELDED,
 		bomb = ARMOR_BOMB_MINOR,
@@ -54,7 +54,7 @@
 	icon_state_broken = "armor_c_broken"
 	armor = list(
 		melee = ARMOR_MELEE_MAJOR,
-		bullet = ARMOR_BALLISTIC_RESISTANT,
+		bullet = ARMOR_BALLISTIC_IIIP,
 		laser = ARMOR_LASER_HANDGUNS,
 		energy = ARMOR_ENERGY_MINOR,
 		bomb = ARMOR_BOMB_RESISTANT,

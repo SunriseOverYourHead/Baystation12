@@ -4,12 +4,12 @@
 	icon = 'icons/obj/guns/revolvers.dmi'
 	icon_state = "revolver"
 	item_state = "revolver"
-	caliber = CALIBER_PISTOL_MAGNUM
+	caliber = PROJECTILE_PISTOL_HUGE
 	origin_tech = list(TECH_COMBAT = 2, TECH_MATERIAL = 2)
 	handle_casings = CYCLE_CASINGS
 	max_shells = 6
 	fire_delay = 12 //Revolvers are naturally slower-firing
-	ammo_type = /obj/item/ammo_casing/pistol/magnum
+	ammo_type = /obj/item/ammo_casing/pistol/huge
 	mag_insert_sound = 'sound/weapons/guns/interaction/rev_magin.ogg'
 	mag_remove_sound = 'sound/weapons/guns/interaction/rev_magout.ogg'
 	fire_sound = 'sound/weapons/gunshot/gunshot_strong.ogg'
@@ -51,7 +51,7 @@
 	name = "revolver"
 	icon_state = "medium"
 	safety_icon = "medium_safety"
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	ammo_type = /obj/item/ammo_casing/pistol
 	fire_sound = 'sound/weapons/gunshot/gunshot_pistol.ogg'
 	desc = "The Lumoco Arms' Solid is a rugged revolver for people who don't keep their guns well-maintained."
@@ -64,8 +64,8 @@
 	desc = "The al-Maliki & Mosley Partner is a concealed-carry revolver made for people who do not trust automatic pistols any more than the people they're dealing with."
 	icon_state = "holdout"
 	item_state = "pistol"
-	caliber = CALIBER_PISTOL_SMALL
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	caliber = PROJECTILE_PISTOL_SMALL
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	fire_sound = 'sound/weapons/gunshot/gunshot_pistol.ogg'
 	w_class = ITEM_SIZE_SMALL
 	accuracy = 1
@@ -78,7 +78,7 @@
 	desc = "Looks almost like the real thing! Ages 8 and up."
 	icon_state = "revolver-toy"
 	fire_sound = 'sound/weapons/gunshot/gunshot.ogg'
-	caliber = CALIBER_CAPS
+	caliber = PROJECTILE_CAPS
 	origin_tech = list(TECH_COMBAT = 1, TECH_MATERIAL = 1)
 	ammo_type = /obj/item/ammo_casing/cap
 	var/snipped = FALSE

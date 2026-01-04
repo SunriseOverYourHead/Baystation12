@@ -8,12 +8,12 @@
 	force = 10
 	slot_flags = SLOT_BACK
 	origin_tech = list(TECH_COMBAT = 8, TECH_MATERIAL = 2, TECH_ESOTERIC = 8)
-	caliber = CALIBER_ANTIMATERIAL
+	caliber = PROJECTILE_RIFLE_FULL_HUGE
 	screen_shake = 2 //extra kickback
 	handle_casings = HOLD_CASINGS
 	load_method = SINGLE_CASING
 	max_shells = 1
-	ammo_type = /obj/item/ammo_casing/shell
+	ammo_type = /obj/item/ammo_casing/rifle/full/huge
 	one_hand_penalty = 6
 	accuracy = -2
 	bulk = 8
@@ -106,7 +106,7 @@
 	item_state = "boltaction"
 	w_class = ITEM_SIZE_LARGE
 	origin_tech = list(TECH_COMBAT = 2)
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_SMALL
 	ammo_type = /obj/item/ammo_casing/rifle
 	load_method = SINGLE_CASING|SPEEDLOADER
 	max_shells = 5
@@ -127,7 +127,7 @@
 	origin_tech = list(TECH_COMBAT = 6, TECH_MATERIAL = 4, TECH_ESOTERIC = 5)
 	w_class = ITEM_SIZE_HUGE
 	force = 10
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_SMALL
 	slot_flags = SLOT_BACK
 	load_method = MAGAZINE
 	magazine_type = /obj/item/ammo_magazine/rifle
@@ -159,7 +159,7 @@
 	origin_tech = list(TECH_COMBAT = 2)
 	w_class = ITEM_SIZE_HUGE
 	force = 10
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_SMALL
 	slot_flags = SLOT_BACK
 	load_method = MAGAZINE
 	magazine_type = /obj/item/ammo_magazine/iclipr
@@ -194,8 +194,8 @@
 	force = 10
 	origin_tech = list(TECH_COMBAT = 2)
 	slot_flags = SLOT_BACK
-	caliber = CALIBER_PISTOL_MAGNUM
-	ammo_type = /obj/item/ammo_casing/pistol/magnum
+	caliber = PROJECTILE_PISTOL_HUGE
+	ammo_type = /obj/item/ammo_casing/pistol/huge
 	load_method = SINGLE_CASING|SPEEDLOADER
 	fire_delay = 2
 	one_hand_penalty = 8

@@ -21,7 +21,7 @@
 	w_class = ITEM_SIZE_HUGE
 	force = 5
 	obj_flags =  OBJ_FLAG_CONDUCTIBLE
-	caliber = CALIBER_SHOTGUN
+	caliber = PROJECTILE_SHOTGUN
 	load_method = SINGLE_CASING
 	ammo_type = /obj/item/ammo_casing/shotgun/pellet
 	handle_casings = EJECT_CASINGS

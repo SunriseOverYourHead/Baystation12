@@ -85,6 +85,8 @@
 #define DAMAGE_FLAG_DISPERSED               FLAG_08
 /// Toxin damage that should be mitigated by biological (i.e. sterile) armor
 #define DAMAGE_FLAG_BIO                     FLAG_09
+/// This is for damage that should never be applied to internal organs.
+#define DAMAGE_FLAG_EXTERNAL                FLAG_10
 
 
 /// Health Status flags for `/atom/var/health_status`.

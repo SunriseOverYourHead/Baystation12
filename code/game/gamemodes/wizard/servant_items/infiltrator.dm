@@ -4,7 +4,7 @@
 	icon_state = "infhat"
 	armor = list(
 		melee = ARMOR_MELEE_MINOR,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_MINOR,
 		energy = ARMOR_ENERGY_MINOR
 		)
@@ -15,7 +15,7 @@
 	icon_state = "infsuit"
 	armor = list(
 		melee = ARMOR_MELEE_MINOR,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_IIIA,
 		laser = ARMOR_LASER_MINOR,
 		energy = ARMOR_ENERGY_MINOR
 		)

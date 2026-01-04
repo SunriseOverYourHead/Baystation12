@@ -2,7 +2,7 @@
 	name = "speed loader"
 	desc = "A speed loader for revolvers."
 	icon_state = "spdloader"
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	ammo_type = /obj/item/ammo_casing/pistol
 	matter = list(MATERIAL_STEEL = 1260)
 	max_ammo = 6
@@ -14,8 +14,8 @@
 
 /obj/item/ammo_magazine/speedloader/magnum
 	icon_state = "spdloader_magnum"
-	caliber = CALIBER_PISTOL_MAGNUM
-	ammo_type = /obj/item/ammo_casing/pistol/magnum
+	caliber = PROJECTILE_PISTOL_HUGE
+	ammo_type = /obj/item/ammo_casing/pistol/huge
 	matter = list(MATERIAL_STEEL = 1440)
 	max_ammo = 6
 	multiple_sprites = 1
@@ -23,8 +23,8 @@
 /obj/item/ammo_magazine/speedloader/small
 	name = "speed loader"
 	icon_state = "spdloader_small"
-	caliber = CALIBER_PISTOL_SMALL
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	caliber = PROJECTILE_PISTOL_SMALL
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	matter = list(MATERIAL_STEEL = 1060)
 	max_ammo = 6
 	multiple_sprites = 1
@@ -33,8 +33,8 @@
 	name = "magnum pistol stripper clip"
 	desc = "A stripper clip for pistol magnum caliber weapons."
 	icon_state = "pclip"
-	caliber = CALIBER_PISTOL_MAGNUM
-	ammo_type = /obj/item/ammo_casing/pistol/magnum
+	caliber = PROJECTILE_PISTOL_HUGE
+	ammo_type = /obj/item/ammo_casing/pistol/huge
 	matter = list(MATERIAL_STEEL = 1300)
 	max_ammo = 5
 	multiple_sprites = 1
@@ -43,8 +43,8 @@
 	name = "holdout pistol stripper clip"
 	desc = "A stripper clip for pistol holdout caliber weapons."
 	icon_state = "hpclip"
-	caliber = CALIBER_PISTOL_SMALL
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	caliber = PROJECTILE_PISTOL_SMALL
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	matter = list(MATERIAL_STEEL = 1800)
 	max_ammo = 10
 	multiple_sprites = TRUE
@@ -53,7 +53,7 @@
 	name = "rifle stripper clip"
 	desc = "A stripper clip for rifle caliber weapons."
 	icon_state = "clip"
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_SMALL
 	ammo_type = /obj/item/ammo_casing/rifle
 	matter = list(MATERIAL_STEEL = 1800)
 	max_ammo = 5
@@ -63,7 +63,7 @@
 	name = "shotgun slug holder"
 	desc = "A convenient pouch that holds 12 gauge shells."
 	icon_state = "shotholder"
-	caliber = CALIBER_SHOTGUN
+	caliber = PROJECTILE_SHOTGUN
 	ammo_type = /obj/item/ammo_casing/shotgun
 	matter = list(MATERIAL_STEEL = 1440)
 	max_ammo = 4
@@ -127,7 +127,7 @@
 	mag_type = MAGAZINE
 	ammo_type = /obj/item/ammo_casing/pistol
 	matter = list(MATERIAL_STEEL = 1200)
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	max_ammo = 16
 	multiple_sprites = 1
 
@@ -138,9 +138,9 @@
 	name = "top mounted magazine"
 	icon_state = "smg_top"
 	mag_type = MAGAZINE
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	matter = list(MATERIAL_STEEL = 1200)
-	caliber = CALIBER_PISTOL_SMALL
+	caliber = PROJECTILE_PISTOL_SMALL
 	max_ammo = 20
 	multiple_sprites = 1
 
@@ -149,18 +149,18 @@
 
 /obj/item/ammo_magazine/smg_top/rubber
 	labels = list("rubber")
-	ammo_type = /obj/item/ammo_casing/pistol/small/rubber
+	ammo_type = /obj/item/ammo_casing/pistol/tiny/rubber
 
 /obj/item/ammo_magazine/smg_top/practice
 	labels = list("practice")
-	ammo_type = /obj/item/ammo_casing/pistol/small/practice
+	ammo_type = /obj/item/ammo_casing/pistol/tiny/practice
 
 /obj/item/ammo_magazine/smg
 	name = "box magazine"
 	icon_state = "smg"
 	origin_tech = list(TECH_COMBAT = 2)
 	mag_type = MAGAZINE
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	matter = list(MATERIAL_STEEL = 1500)
 	ammo_type = /obj/item/ammo_casing/pistol
 	max_ammo = 20
@@ -174,7 +174,7 @@
 	icon_state = "pistol_mag"
 	origin_tech = list(TECH_COMBAT = 2)
 	mag_type = MAGAZINE
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	matter = list(MATERIAL_STEEL = 750)
 	ammo_type = /obj/item/ammo_casing/pistol
 	max_ammo = 8
@@ -211,8 +211,8 @@
 /obj/item/ammo_magazine/pistol/small
 	icon_state = "holdout"
 	matter = list(MATERIAL_STEEL = 480)
-	caliber = CALIBER_PISTOL_SMALL
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	caliber = PROJECTILE_PISTOL_SMALL
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	max_ammo = 8
 
 /obj/item/ammo_magazine/pistol/small/empty
@@ -223,9 +223,9 @@
 	icon_state = "magnum"
 	origin_tech = list(TECH_COMBAT = 2)
 	mag_type = MAGAZINE
-	caliber = CALIBER_PISTOL_MAGNUM
+	caliber = PROJECTILE_PISTOL_HUGE
 	matter = list(MATERIAL_STEEL = 1680)
-	ammo_type = /obj/item/ammo_casing/pistol/magnum
+	ammo_type = /obj/item/ammo_casing/pistol/huge
 	max_ammo = 7
 	multiple_sprites = 1
 
@@ -237,15 +237,15 @@
 	icon_state = "smallpistol"
 	origin_tech = list(TECH_COMBAT = 2)
 	matter = list(MATERIAL_STEEL = 1800)
-	caliber = CALIBER_PISTOL_SMALL
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	caliber = PROJECTILE_PISTOL_SMALL
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	max_ammo = 30
 
 /obj/item/ammo_magazine/box/pistol
 	name = "ammunition box"
 	icon_state = "smallpistol"
 	origin_tech = list(TECH_COMBAT = 2)
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	matter = list(MATERIAL_STEEL = 2250)
 	ammo_type = /obj/item/ammo_casing/pistol
 	max_ammo = 30
@@ -255,31 +255,31 @@
 
 /obj/item/ammo_magazine/pistol/throwback
 	name = "pistol magazine"
-	caliber = CALIBER_PISTOL_ANTIQUE
-	ammo_type = /obj/item/ammo_casing/pistol/throwback
+	caliber = PROJECTILE_PISTOL_ANTIQUE
+	ammo_type = /obj/item/ammo_casing/pistol/antique
 
 /obj/item/ammo_magazine/box/emp/pistol
 	name = "ammunition box"
 	desc = "A box containing loose rounds of standard EMP ammo."
 	labels = list("haywire")
 	ammo_type = /obj/item/ammo_casing/pistol/emp
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	max_ammo = 15
 
 /obj/item/ammo_magazine/box/emp/smallpistol
 	name = "ammunition box"
 	desc = "A box containing loose rounds of small EMP ammo."
 	labels = list("haywire")
-	ammo_type = /obj/item/ammo_casing/pistol/small/emp
-	caliber = CALIBER_PISTOL_SMALL
+	ammo_type = /obj/item/ammo_casing/pistol/tiny/emp
+	caliber = PROJECTILE_PISTOL_SMALL
 	max_ammo = 8
 
 /obj/item/ammo_magazine/proto_smg
 	name = "submachine gun magazine"
-	icon_state = CALIBER_PISTOL_FLECHETTE
+	icon_state = PROJECTILE_PISTOL_FLECHETTE
 	origin_tech = list(TECH_COMBAT = 4)
 	mag_type = MAGAZINE
-	caliber = CALIBER_PISTOL_FLECHETTE
+	caliber = PROJECTILE_PISTOL_FLECHETTE
 	matter = list(MATERIAL_STEEL = 2000)
 	ammo_type = /obj/item/ammo_casing/flechette
 	max_ammo = 40
@@ -289,7 +289,7 @@
 	name = "microrocket magazine"
 	icon_state = "gyrojet"
 	mag_type = MAGAZINE
-	caliber = CALIBER_GYROJET
+	caliber = PROJECTILE_GYROJET
 	ammo_type = /obj/item/ammo_casing/gyrojet
 	multiple_sprites = 1
 	max_ammo = 4
@@ -302,9 +302,9 @@
 	icon_state = "machinegun"
 	origin_tech = list(TECH_COMBAT = 2)
 	mag_type = MAGAZINE
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_ANTIQUE_BIG
 	matter = list(MATERIAL_STEEL = 4500)
-	ammo_type = /obj/item/ammo_casing/rifle
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/big/antique
 	max_ammo = 50
 	multiple_sprites = 1
 
@@ -315,9 +315,9 @@
 	name = "assault rifle magazine"
 	icon_state = "assault_rifle"
 	mag_type = MAGAZINE
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_ANTIQUE_BIG
 	matter = list(MATERIAL_STEEL = 1800)
-	ammo_type = /obj/item/ammo_casing/rifle
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/big/antique
 	max_ammo = 20
 	multiple_sprites = 1
 
@@ -326,9 +326,9 @@
 	icon_state = "bullpup"
 	origin_tech = list(TECH_COMBAT = 2)
 	mag_type = MAGAZINE
-	caliber = CALIBER_RIFLE_MILITARY
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE
 	matter = list(MATERIAL_STEEL = 1800)
-	ammo_type = /obj/item/ammo_casing/rifle/military
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate
 	max_ammo = 18
 	multiple_sprites = 1
 
@@ -340,12 +340,12 @@
 
 /obj/item/ammo_magazine/mil_rifle/heavy/practice
 	labels = list("heavy, practice")
-	ammo_type = /obj/item/ammo_casing/rifle/military/practice
+	ammo_type = /obj/item/ammo_casing/rifle/practice/intermediate
 
 /obj/item/ammo_magazine/mil_rifle/light
 	icon_state = "bullpup_light"
 	labels = list("light")
-	ammo_type = /obj/item/ammo_casing/rifle/military/light
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/small
 	max_ammo = 14
 
 /obj/item/ammo_magazine/mil_rifle/light/empty
@@ -353,13 +353,13 @@
 
 /obj/item/ammo_magazine/mil_rifle/light/practice
 	labels = list("light, practice")
-	ammo_type = /obj/item/ammo_casing/rifle/military/practice
+	ammo_type = /obj/item/ammo_casing/rifle/practice/intermediate
 
 /obj/item/ammo_magazine/caps
 	name = "speed loader"
 	desc = "A cheap plastic speed loader for some kind of revolver."
 	icon_state = "T38"
-	caliber = CALIBER_CAPS
+	caliber = PROJECTILE_CAPS
 	ammo_type = /obj/item/ammo_casing/cap
 	matter = list(MATERIAL_STEEL = 600)
 	max_ammo = 7
@@ -369,7 +369,7 @@
 	name = "en-bloc clip"
 	desc = "An en-bloc clip for the garand rifle."
 	icon_state = "iclipr"
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_SMALL
 	mag_type = MAGAZINE
 	ammo_type = /obj/item/ammo_casing/rifle
 	matter = list(MATERIAL_STEEL = 1500)
@@ -381,9 +381,9 @@
 	icon_state = "minigun"
 	origin_tech = list(TECH_COMBAT = 4)
 	mag_type = MAGAZINE
-	caliber = CALIBER_PISTOL_SMALL
+	caliber = PROJECTILE_PISTOL_SMALL
 	matter = list(MATERIAL_STEEL = 10000)
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	max_ammo = 200
 	multiple_sprites = TRUE
 
@@ -394,7 +394,7 @@
 	name = "shotgun magazine"
 	desc = "A magazine for semi-automatic shotguns."
 	icon_state = "drum"
-	caliber = CALIBER_SHOTGUN
+	caliber = PROJECTILE_SHOTGUN
 	mag_type = MAGAZINE
 	ammo_type = /obj/item/ammo_casing/shotgun
 	matter = list(MATERIAL_STEEL = 2400)

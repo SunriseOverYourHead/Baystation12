@@ -122,33 +122,99 @@
 				if(Bump(M, TRUE)) //Bump will make sure we don't hit a mob multiple times
 					return
 
-/* short-casing projectiles, like the kind used in pistols or SMGs */
+// PISTOL and SMG calibers
 
-/obj/item/projectile/bullet/pistol
-	damage = 45
-	distance_falloff = 3
 
-/obj/item/projectile/bullet/pistol/holdout
-	damage = 40
-	penetration_modifier = 1.2
+// .45
+/obj/item/projectile/bullet/pistol/antique
+	energy = 7
+	penetration_modifier = 0.6
+	distance_falloff = 5
+
+// .32
+/obj/item/projectile/bullet/pistol/tiny
+	damage = 70 // Even a small caliber kills you very, very easily unprotected.
+	energy = 2
+	armor_penetration = 2
+	penetration_modifier = 0.3
+	agony = 10
+	distance_falloff = 5
+
+/obj/item/projectile/bullet/pistol/rubber/tiny
+	damage = 10
+	energy = 1
+	agony = 20
+
+// .380
+/obj/item/projectile/bullet/pistol/small
+	damage = 80
+	energy = 4
+	armor_penetration = 4
+	penetration_modifier = 0.4
+	agony = 15
 	distance_falloff = 4
 
-/obj/item/projectile/bullet/pistol/strong
-	damage = 50
-	penetration_modifier = 0.8
-	distance_falloff = 2.5
-	armor_penetration = 15
+// 9x19mm
+/obj/item/projectile/bullet/pistol
+	damage = 80
+	energy = 10
+	armor_penetration = 10
+	penetration_modifier = 0.5 // Bullets without a lot of power that often don't go very deep.
+	agony = 20
+	distance_falloff = 3
 
 /obj/item/projectile/bullet/pistol/rubber //"rubber" bullets
 	name = "rubber bullet"
 	damage_flags = 0
+	armor_penetration = 0
 	damage = 15
-	agony = 15
+	energy = 4
+	agony = 40
 	embed = FALSE
 
-/obj/item/projectile/bullet/pistol/rubber/holdout
-	agony = 10
-	damage = 10
+/obj/item/projectile/bullet/pistol/practice
+	damage = 5
+	energy = 0
+	armor_penetration = 0
+	penetration_modifier = 0.1
+	agony = 5
+
+
+// 10mm
+/obj/item/projectile/bullet/pistol/big
+	damage = 85
+	energy = 15
+	armor_penetration = 20
+	penetration_modifier = 0.6
+	agony = 25
+	distance_falloff = 3
+
+// .44
+/obj/item/projectile/bullet/pistol/huge
+	damage = 85
+	energy = 25
+	armor_penetration = 35
+	penetration_modifier = 0.7
+	distance_falloff = 2
+	agony = 30
+
+// .50
+/obj/item/projectile/bullet/pistol/massive
+	damage = 90
+	energy = 30
+	armor_penetration = 40
+	penetration_modifier = 0.8
+	distance_falloff = 1
+	agony = 35
+
+// 20mm
+/obj/item/projectile/bullet/pistol/cannon
+	damage = 110
+	energy = 60
+	armor_penetration = 47
+	penetration_modifier = 1
+	distance_falloff = 3
+	agony = 80
 
 //4mm. Tiny, very low damage, does not embed, but has very high penetration. Only to be used for the experimental SMG.
 /obj/item/projectile/bullet/flechette
@@ -158,71 +224,222 @@
 	embed = FALSE
 	distance_falloff = 2
 
-/* shotgun projectiles */
+// SHOTGUNS
 
+// Not nearly as much AP as rifles, but tons of damage and energy.
 /obj/item/projectile/bullet/shotgun
 	name = "slug"
-	damage = 65
-	armor_penetration = 10
+	damage = 90
+	energy = 55
+	armor_penetration = 40
+	penetration_modifier = 1
+	distance_falloff = 1
+	agony = 30
 
 /obj/item/projectile/bullet/shotgun/beanbag		//because beanbags are not bullets
 	name = "beanbag"
 	damage = 20
+	energy = 5
 	damage_flags = 0
-	agony = 30
+	agony = 70
 	embed = FALSE
-	armor_penetration = 0
+	armor_penetration = 10
 	distance_falloff = 3
 
-//Should do about 180 damage at 1 tile distance (adjacent), and 120 damage at 3 tiles distance.
 //Overall less damage than slugs in exchange for more damage at very close range and more embedding
 /obj/item/projectile/bullet/pellet/shotgun
 	name = "shrapnel"
 	icon_state = "pellet"
-	damage = 30
+	damage = 60
+	energy = 5
 	pellets = 6
 	range_step = 1
 	spread_step = 50
+	agony = 5
+	armor_penetration = 10
+	penetration_modifier = 0.5
 
+// Ineffective against hard armor
 /obj/item/projectile/bullet/pellet/shotgun/flechette
 	name = "flechette"
 	icon_state = "flechette"
-	damage = 30
-	armor_penetration = 25
+	damage = 50
+	energy = 8
+	armor_penetration = 40
 	pellets = 3
 	range_step = 3
 	base_spread = 99
 	spread_step = 2
-	penetration_modifier = 0.5
+	agony = 10
+	penetration_modifier = 0.3
 	hitchance_mod = 5
 
-/* "Rifle" rounds */
-
+// Base rifle round.
 /obj/item/projectile/bullet/rifle
-	damage = 45
-	armor_penetration = 25
+	damage = 80
+	energy = 35
+	armor_penetration = 46
 	penetrating = 1
 	distance_falloff = 1
+	agony = 10
+	penetration_modifier = 0.2
 
-/obj/item/projectile/bullet/rifle/military
-	damage = 40
-	armor_penetration = 35
-
-/obj/item/projectile/bullet/rifle/shell
-	fire_sound = 'sound/weapons/gunshot/sniper.ogg'
-	damage = 80
-	stun = 3
-	weaken = 3
-	penetrating = 3
-	armor_penetration = 70
-	penetration_modifier = 1.2
-	distance_falloff = 0.5
-
-/obj/item/projectile/bullet/rifle/shell/apds
+// Intermediate RIFLE rounds
+//.223 Remington
+/obj/item/projectile/bullet/rifle/intermediate/small/antique
 	damage = 70
+	energy = 25
+	distance_falloff = 1
+
+// 6.02x41mm, ICCG service
+/obj/item/projectile/bullet/rifle/intermediate/small
+	damage = 75
+	energy = 40
+	distance_falloff = 0.2
+
+// 6.5x39mm	Grendel, SCG service
+/obj/item/projectile/bullet/rifle/intermediate
+	damage = 80
+	energy = 35
+	armor_penetration = 46
+	distance_falloff = 0.4
+
+// 8.6x43mm Blackout, SCG Special
+/obj/item/projectile/bullet/rifle/intermediate/big
+	damage = 85
+	energy = 45
+	agony = 20
+	armor_penetration = 48
+	penetration_modifier = 0.5
+
+// 7.62x39mm
+/obj/item/projectile/bullet/rifle/intermediate/big/antique
+	damage = 70
+	energy = 30
+	agony = 15
+	armor_penetration = 45
+
+// 9x39mm, ICCG Special
+/obj/item/projectile/bullet/rifle/intermediate/massive
+	damage = 70
+	energy = 50
+	agony = 30
+	armor_penetration = 48
+	distance_falloff = 2
+	penetration_modifier = 0.7
+
+// 11.6x57mm. SOL Exotic
+/obj/item/projectile/bullet/rifle/intermediate/huge
+	damage = 110
+	energy = 50
+	agony = 35
+	armor_penetration = 47
+	distance_falloff = 2
+	penetration_modifier = 1
+
+
+// Full Length RIFLE rounds
+
+// 5.56x56mm
+/obj/item/projectile/bullet/rifle/full/small/antique
+	damage = 90
+	energy = 45
+	agony = 20
+	armor_penetration = 60
+	distance_falloff = 0.3
+
+// 7.62x51mm
+/obj/item/projectile/bullet/rifle/full/big/antique
+	damage = 90
+	energy = 45
+	agony = 20
+	armor_penetration = 60
+	distance_falloff = 0.3
+
+// 12.7x99mm
+/obj/item/projectile/bullet/rifle/full/huge/antique
+	damage = 120
+	energy = 70
+	agony = 35
+	armor_penetration = 85
+	distance_falloff = 0.3
+
+// 6.5x59mm Sol Service
+/obj/item/projectile/bullet/rifle/full/small
+	damage = 85
+	energy = 40
+	agony = 20
+	armor_penetration = 60
+	penetration_modifier = 0.2
+	distance_falloff = 0.1
+
+// 8.6x66mm ICCG Service
+/obj/item/projectile/bullet/rifle/full
+	damage = 90
+	energy = 45
+	agony = 20
+	armor_penetration = 60
+	penetration_modifier = 0.3
+	distance_falloff = 01
+
+// 10.5x99mm ICCG Special
+/obj/item/projectile/bullet/rifle/full/big
+	damage = 120
+	energy = 70
+	agony = 40
 	penetrating = 5
-	armor_penetration = 80
-	penetration_modifier = 1.5
+	armor_penetration = 87
+	penetration_modifier = 0.9
+	distance_falloff = 0
+
+// 11.6x101mm SOL Special
+/obj/item/projectile/bullet/rifle/full/huge
+	damage = 125
+	energy = 75
+	agony = 45
+	penetrating = 5
+	armor_penetration = 88
+	penetration_modifier = 1
+	distance_falloff = 0
+
+// Autocannon
+
+/obj/item/projectile/bullet/autocannon
+	damage = 180
+	energy = 120
+	agony = 80
+	armor_penetration = 110
+	penetration_modifier = 2
+	distance_falloff = 0
+
+// Rockets
+
+// 88mm
+/obj/item/projectile/bullet/rocket
+	damage = 300
+	energy = 200
+	agony = 100
+	armor_penetration = 150
+	penetration_modifier = 2
+	distance_falloff = 0
+	var/explosion_radius = 3
+	var/explosion_max_power = EX_ACT_LIGHT
+
+// 66mm
+/obj/item/projectile/bullet/rocket/light
+	damage = 250
+	energy = 180
+	agony = 90
+	armor_penetration = 130
+	explosion_radius = 2
+	explosion_max_power = EX_ACT_LIGHT
+
+
+/obj/item/projectile/bullet/rocket/on_hit(atom/target, blocked = 0)
+	if(isturf(target))
+		explosion(target, explosion_radius, explosion_max_power)
+	..()
+
 
 /* Miscellaneous */
 /obj/item/projectile/bullet/gyro
@@ -240,11 +457,6 @@
 	invisibility = INVISIBILITY_ABSTRACT
 	damage = 1
 	embed = FALSE
-
-/* Practice */
-
-/obj/item/projectile/bullet/pistol/practice
-	damage = 5
 
 /obj/item/projectile/bullet/rifle/practice
 	damage = 5

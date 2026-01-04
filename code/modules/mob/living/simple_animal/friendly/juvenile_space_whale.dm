@@ -29,7 +29,7 @@
 	response_harm = "strikes"
 
 	natural_armor = list(melee = ARMOR_MELEE_SMALL,
-						bullet = ARMOR_BALLISTIC_MINOR)
+						bullet = ARMOR_BALLISTIC_I)
 
 	var/mob/living/simple_animal/hostile/retaliate/space_whale/parent
 

@@ -32,7 +32,7 @@
 	response_harm = "strikes"
 
 	natural_armor = list(melee = ARMOR_MELEE_RESISTANT,
-						bullet = ARMOR_BALLISTIC_SMALL)
+						bullet = ARMOR_BALLISTIC_I)
 
 	var/chosen_color
 	var/species_colors = list(COLOR_COMMAND_BLUE, COLOR_PURPLE, COLOR_DARK_BLUE_GRAY, COLOR_PALE_PINK)

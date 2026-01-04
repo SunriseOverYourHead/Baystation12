@@ -4812,7 +4812,7 @@
 /turf/simulated/floor/tiled,
 /area/casino/casino_mainfloor)
 "pb" = (
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /turf/simulated/floor/tiled,
 /area/casino/casino_bridge)
 "pc" = (
@@ -5020,7 +5020,7 @@
 /area/casino/casino_cutter)
 "yb" = (
 /obj/decal/cleanable/blood/splatter,
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /turf/simulated/floor/tiled,
 /area/casino/casino_security)
 "yc" = (
@@ -5067,8 +5067,8 @@
 /area/casino/casino_cutter)
 "Ab" = (
 /obj/item/gun/projectile/pistol/sec/MK,
-/obj/item/ammo_casing/pistol/magnum/used,
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /turf/simulated/floor/tiled,
 /area/casino/casino_security)
 "Ac" = (
@@ -5093,7 +5093,7 @@
 /area/casino/casino_cutter)
 "Bb" = (
 /obj/item/material/shard,
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /turf/simulated/floor/tiled,
 /area/casino/casino_security)
 "Bc" = (
@@ -5160,9 +5160,9 @@
 	d2 = 8;
 	icon_state = "4-8"
 	},
-/obj/item/ammo_casing/pistol/magnum/used,
-/obj/item/ammo_casing/pistol/magnum/used,
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
+/obj/item/ammo_casing/pistol/huge/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /obj/machinery/atmospherics/pipe/simple/hidden/supply{
 	dir = 10
 	},
@@ -5188,7 +5188,7 @@
 	d2 = 8;
 	icon_state = "4-8"
 	},
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers{
 	dir = 10
 	},
@@ -5215,7 +5215,7 @@
 /turf/simulated/floor/tiled/steel_grid,
 /area/casino/casino_cutter)
 "Gb" = (
-/obj/item/ammo_casing/pistol/magnum/used,
+/obj/item/ammo_casing/pistol/huge/used,
 /obj/machinery/atmospherics/unary/vent_pump/on{
 	dir = 1;
 	level = 2

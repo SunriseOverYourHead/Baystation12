@@ -39,7 +39,7 @@
 	health = 150
 	natural_armor = list(
 				melee	= ARMOR_MELEE_RESISTANT,
-				bullet	= ARMOR_BALLISTIC_PISTOL,
+				bullet	= ARMOR_BALLISTIC_IIIA,
 				laser	= ARMOR_LASER_HANDGUNS,
 				energy	= ARMOR_ENERGY_SMALL,
 				bomb	= ARMOR_BOMB_PADDED,
@@ -65,7 +65,7 @@
 	name = "bulletproof hivebot"
 	desc = "A robot specialized in ballistic defense."
 	natural_armor = list(
-				bullet	= ARMOR_BALLISTIC_RESISTANT,
+				bullet	= ARMOR_BALLISTIC_III,
 				bio		= ARMOR_BIO_SHIELDED,
 				rad		= ARMOR_RAD_SHIELDED
 				)

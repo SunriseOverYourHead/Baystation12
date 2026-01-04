@@ -57,7 +57,7 @@
 	allowed = list(/obj/item/gun, /obj/item/tank)
 	armor = list(
 		melee = ARMOR_MELEE_VERY_HIGH,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_IIIA,
 		laser = ARMOR_LASER_MINOR,
 		bomb = ARMOR_BOMB_PADDED) //Higher melee armor versus lower everything else.
 	icon = 'icons/obj/clothing/species/vox/obj_suit_vox.dmi'

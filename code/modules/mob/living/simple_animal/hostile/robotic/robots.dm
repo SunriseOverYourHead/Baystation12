@@ -20,7 +20,7 @@
 
 	natural_armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_IIIA,
 		laser = ARMOR_LASER_HANDGUNS,
 		energy = ARMOR_ENERGY_MINOR,
 		bomb = ARMOR_BOMB_PADDED,
@@ -87,8 +87,8 @@
 
 /mob/living/simple_animal/hostile/hivebot/ranged_damage/fleet_robot/ballistic
 	desc = "A relatively recent model of a 'tracker' security subaltern, armed with a sub-machine gun."
-	projectiletype = /obj/item/projectile/bullet/pistol/holdout
-	casingtype = /obj/item/ammo_casing/pistol/small
+	projectiletype = /obj/item/projectile/bullet/pistol/tiny
+	casingtype = /obj/item/ammo_casing/pistol/tiny
 	projectilesound = 'sound/weapons/gunshot/gunshot_smg.ogg'
 	base_attack_cooldown = 0.5 SECONDS
 	projectile_dispersion = 2
@@ -166,7 +166,7 @@
 
 	natural_armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL,
+		bullet = ARMOR_BALLISTIC_IIIA,
 		laser = ARMOR_LASER_HANDGUNS,
 		energy = ARMOR_ENERGY_MINOR,
 		bomb = ARMOR_BOMB_PADDED,

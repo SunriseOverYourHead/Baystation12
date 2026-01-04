@@ -14,7 +14,7 @@
 	armor_type = /datum/extension/armor
 	natural_armor = list(
 		"melee" = ARMOR_MELEE_RESISTANT,
-		"bullet" = ARMOR_BALLISTIC_RESISTANT,
+		"bullet" = ARMOR_BALLISTIC_III,
 		"laser" = ARMOR_LASER_MAJOR,
 		"energy" = ARMOR_ENERGY_RESISTANT,
 		"bomb" = ARMOR_BOMB_RESISTANT,

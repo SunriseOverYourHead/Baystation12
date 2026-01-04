@@ -37,7 +37,8 @@
 		list(8, 0.7)
 	)
 
-	var/damage = 10
+	var/damage = 10 // Damage if bullet penetrates
+	var/energy = 2 // Blunt damage dealt if bullet gets blocked.
 	/// String (One of `DAMAGE_*`).
 	var/damage_type = DAMAGE_BRUTE
 	var/nodamage = FALSE //Determines if the projectile will skip any damage inflictions
@@ -62,6 +63,7 @@
 	var/hitscan = FALSE		// whether the projectile should be hitscan
 	var/step_delay = 0.3	// the delay between iterations if not a hitscan projectile
 
+	var/stopped_by_armor = FALSE
 	// effect types to be used
 	var/muzzle_type
 	var/tracer_type
@@ -519,6 +521,10 @@
 	return output ? hit_thing : null //Send it back to the gun!
 
 /obj/item/projectile/after_wounding(obj/item/organ/external/organ, datum/wound/wound)
+
+	if(stopped_by_armor)
+		return
+
 	//Check if we even broke skin in first place
 	if (!wound || !(wound.damage_type == INJURY_TYPE_CUT || wound.damage_type == INJURY_TYPE_PIERCE))
 		return
@@ -534,7 +540,6 @@
 			organ.embed(shrapnel)
 	else if(prob(2 * damage_prob))
 		organ.sever_artery()
-
 	organ.owner.projectile_hit_bloody(src, wound.damage*5, null, organ)
 
 /obj/item/projectile/proc/get_shrapnel()

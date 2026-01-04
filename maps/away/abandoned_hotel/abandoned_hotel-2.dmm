@@ -1638,7 +1638,7 @@
 /obj/floor_decal/spline/fancy/black{
 	dir = 4
 	},
-/obj/item/ammo_casing/pistol/small,
+/obj/item/ammo_casing/pistol/tiny,
 /turf/simulated/floor/wood/walnut,
 /area/abandoned_hotel/rooms)
 "sN" = (
@@ -2835,7 +2835,7 @@
 /turf/simulated/floor/plating,
 /area/abandoned_hotel/atmos)
 "Pw" = (
-/obj/item/ammo_casing/pistol/small,
+/obj/item/ammo_casing/pistol/tiny,
 /turf/simulated/floor/wood/walnut,
 /area/abandoned_hotel/rooms)
 "PH" = (

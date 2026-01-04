@@ -27,11 +27,11 @@
 /turf/simulated/floor,
 /area/smugglers/base)
 "aj" = (
-/obj/item/ammo_casing/pistol/magnum{
+/obj/item/ammo_casing/pistol/huge{
 	pixel_x = 5;
 	pixel_y = 5
 	},
-/obj/item/ammo_casing/pistol/magnum,
+/obj/item/ammo_casing/pistol/huge,
 /obj/item/shovel{
 	pixel_x = 10;
 	pixel_y = -5

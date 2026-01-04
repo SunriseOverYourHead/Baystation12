@@ -113,7 +113,7 @@
 	)
 	armor = list(
 		melee = ARMOR_MELEE_KNIVES,
-		bullet = ARMOR_BALLISTIC_SMALL,
+		bullet = ARMOR_BALLISTIC_II,
 		laser = ARMOR_LASER_SMALL,
 		energy = ARMOR_ENERGY_MINOR
 		)
@@ -146,7 +146,7 @@
 	)
 	armor = list(
 		melee = ARMOR_MELEE_SMALL,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_MINOR,
 		energy = ARMOR_ENERGY_MINOR
 		)

@@ -73,7 +73,7 @@
 	pull_mask = TRUE
 	armor = list(
 		melee = ARMOR_MELEE_SMALL,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_MINOR,
 		bio = ARMOR_BIO_RESISTANT
 		)
@@ -112,7 +112,7 @@
 	body_parts_covered = FACE|EYES
 	armor = list(
 		melee = ARMOR_MELEE_SMALL,
-		bullet = ARMOR_BALLISTIC_MINOR,
+		bullet = ARMOR_BALLISTIC_I,
 		laser = ARMOR_LASER_MINOR,
 		bio = ARMOR_BIO_STRONG
 		)
@@ -125,7 +125,7 @@
 	siemens_coefficient = 0.7
 	armor = list(
 		melee = ARMOR_MELEE_SMALL,
-		bullet = ARMOR_BALLISTIC_SMALL,
+		bullet = ARMOR_BALLISTIC_II,
 		laser = ARMOR_LASER_MINOR,
 		bio = ARMOR_BIO_STRONG
 		)

@@ -7,7 +7,7 @@
 	w_class = ITEM_SIZE_NORMAL
 	bulk = -1
 	load_method = MAGAZINE
-	caliber = CALIBER_PISTOL_FLECHETTE
+	caliber = PROJECTILE_PISTOL_FLECHETTE
 	origin_tech = list(TECH_COMBAT = 6, TECH_MATERIAL = 3)
 	slot_flags = SLOT_BELT
 	ammo_type = /obj/item/ammo_casing/flechette
@@ -57,7 +57,7 @@
 	icon_state = "mpistolen"
 	safety_icon = "safety"
 	item_state = "mpistolen"
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	origin_tech = list(TECH_COMBAT = 5, TECH_MATERIAL = 2, TECH_ESOTERIC = 3)
 	ammo_type = /obj/item/ammo_casing/pistol
 	magazine_type = /obj/item/ammo_magazine/machine_pistol
@@ -118,7 +118,8 @@
 	safety_icon = "safety"
 	w_class = ITEM_SIZE_LARGE
 	force = 10
-	caliber = CALIBER_PISTOL
+	ammo_type = /obj/item/ammo_casing/pistol
+	caliber = PROJECTILE_PISTOL
 	origin_tech = list(TECH_COMBAT = 5, TECH_MATERIAL = 2, TECH_ESOTERIC = 8)
 	slot_flags = SLOT_BELT|SLOT_BACK
 	magazine_type = /obj/item/ammo_magazine/smg
@@ -176,10 +177,11 @@
 	item_state = null
 	w_class = ITEM_SIZE_HUGE
 	force = 10
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_ANTIQUE_BIG
 	origin_tech = list(TECH_COMBAT = 6, TECH_MATERIAL = 1, TECH_ESOTERIC = 5)
 	slot_flags = SLOT_BACK
 	load_method = MAGAZINE
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/big/antique
 	magazine_type = /obj/item/ammo_magazine/rifle
 	one_hand_penalty = 8
 	allowed_magazines = /obj/item/ammo_magazine/rifle
@@ -239,10 +241,10 @@
 	item_state = "wt550"
 	safety_icon = "safety"
 	w_class = ITEM_SIZE_NORMAL
-	caliber = CALIBER_PISTOL_SMALL
+	caliber = PROJECTILE_PISTOL_SMALL
 	origin_tech = list(TECH_COMBAT = 5, TECH_MATERIAL = 2)
 	slot_flags = SLOT_BELT
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	load_method = MAGAZINE
 	magazine_type = /obj/item/ammo_magazine/smg_top
 	allowed_magazines = /obj/item/ammo_magazine/smg_top
@@ -303,10 +305,11 @@
 	item_state = "z8carbine"
 	w_class = ITEM_SIZE_HUGE
 	force = 10
-	caliber = CALIBER_RIFLE_MILITARY
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE
 	origin_tech = list(TECH_COMBAT = 8, TECH_MATERIAL = 3)
 	slot_flags = SLOT_BACK
 	load_method = MAGAZINE
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate
 	magazine_type = /obj/item/ammo_magazine/mil_rifle/heavy
 	allowed_magazines = /obj/item/ammo_magazine/mil_rifle //Interchangable but poor performance
 	auto_eject = 1
@@ -477,10 +480,10 @@
 	force = 10
 	slot_flags = 0
 	max_shells = 50
-	caliber = CALIBER_RIFLE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_ANTIQUE_BIG
 	origin_tech = list(TECH_COMBAT = 6, TECH_MATERIAL = 1, TECH_ESOTERIC = 2)
 	slot_flags = 0 //need sprites for SLOT_BACK
-	ammo_type = /obj/item/ammo_casing/rifle
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/big/antique
 	load_method = MAGAZINE
 	magazine_type = /obj/item/ammo_magazine/box/machinegun
 	allowed_magazines = list(/obj/item/ammo_magazine/box/machinegun, /obj/item/ammo_magazine/rifle)
@@ -596,10 +599,11 @@
 	item_state = null
 	w_class = ITEM_SIZE_HUGE
 	force = 12
-	caliber = CALIBER_RIFLE_MILITARY
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_SMALL
 	origin_tech = list(TECH_COMBAT = 4, TECH_MATERIAL = 1, TECH_ESOTERIC = 5)
 	slot_flags = SLOT_BACK
 	load_method = MAGAZINE
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/small
 	magazine_type = /obj/item/ammo_magazine/mil_rifle/heavy
 	allowed_magazines = /obj/item/ammo_magazine/mil_rifle
 	one_hand_penalty = 10
@@ -650,10 +654,11 @@
 	item_state = "l6closedmag" /// Onmob is WIP sprite
 	w_class = ITEM_SIZE_HUGE
 	force = 15
-	caliber = CALIBER_PISTOL_SMALL
+	caliber = PROJECTILE_PISTOL_SMALL
 	origin_tech = list(TECH_COMBAT = 8, TECH_MATERIAL = 4, TECH_ESOTERIC = 8)
 	slot_flags = 0
 	load_method = MAGAZINE
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 	magazine_type = /obj/item/ammo_magazine/box/minigun
 	allowed_magazines = /obj/item/ammo_magazine/box/minigun
 	accuracy = 1

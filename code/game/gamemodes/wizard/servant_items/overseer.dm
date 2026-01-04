@@ -3,7 +3,7 @@
 	desc = "Darker than dark. What... what is this <i>made</i> of?"
 	armor = list(
 		melee = ARMOR_MELEE_SHIELDED,
-		bullet = ARMOR_BALLISTIC_HEAVY,
+		bullet = ARMOR_BALLISTIC_IVP,
 		laser = ARMOR_LASER_HEAVY,
 		energy = ARMOR_ENERGY_SHIELDED,
 		bomb = ARMOR_BOMB_SHIELDED
@@ -20,7 +20,7 @@
 	icon_state = "overseercloak"
 	armor = list(
 		melee = ARMOR_MELEE_SHIELDED,
-		bullet = ARMOR_BALLISTIC_HEAVY,
+		bullet = ARMOR_BALLISTIC_IVP,
 		laser = ARMOR_LASER_HEAVY,
 		energy = ARMOR_ENERGY_SHIELDED,
 		bomb = ARMOR_BOMB_SHIELDED

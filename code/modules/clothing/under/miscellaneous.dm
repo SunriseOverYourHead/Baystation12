@@ -126,7 +126,7 @@
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS|HANDS
 	armor = list(
 		melee = ARMOR_MELEE_SHIELDED,
-		bullet = ARMOR_BALLISTIC_HEAVY,
+		bullet = ARMOR_BALLISTIC_V,
 		laser = ARMOR_LASER_HEAVY,
 		energy = ARMOR_ENERGY_SHIELDED,
 		bomb = ARMOR_BOMB_SHIELDED,

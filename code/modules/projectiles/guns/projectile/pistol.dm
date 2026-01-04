@@ -1,7 +1,7 @@
 
 /obj/item/gun/projectile/pistol
 	load_method = MAGAZINE
-	caliber = CALIBER_PISTOL
+	caliber = PROJECTILE_PISTOL
 	magazine_type = /obj/item/ammo_magazine/pistol
 	allowed_magazines = /obj/item/ammo_magazine/pistol
 	fire_sound = 'sound/weapons/gunshot/gunshot_pistol.ogg'
@@ -49,7 +49,7 @@
 	item_state = "magnum"
 	safety_icon = "safety"
 	force = 9
-	caliber = CALIBER_PISTOL_MAGNUM
+	caliber = PROJECTILE_PISTOL_HUGE
 	fire_delay = 12
 	screen_shake = 2
 	magazine_type = /obj/item/ammo_magazine/magnum
@@ -71,7 +71,7 @@
 	accuracy_power = 5
 	one_hand_penalty = 2
 	fire_delay = 7
-	caliber = CALIBER_PISTOL_ANTIQUE
+	caliber = PROJECTILE_PISTOL_ANTIQUE
 	origin_tech = list(TECH_COMBAT = 2, TECH_MATERIAL = 2)
 	var/base_icon = "pistol1"
 
@@ -93,7 +93,7 @@
 	icon = 'icons/obj/guns/gyropistol.dmi'
 	icon_state = "gyropistol"
 	max_shells = 8
-	caliber = CALIBER_GYROJET
+	caliber = PROJECTILE_GYROJET
 	origin_tech = list(TECH_COMBAT = 3)
 	magazine_type = /obj/item/ammo_magazine/gyrojet
 	allowed_magazines = /obj/item/ammo_magazine/gyrojet
@@ -119,7 +119,7 @@
 	icon_state = "pistol"
 	item_state = "pistol"
 	w_class = ITEM_SIZE_SMALL
-	caliber = CALIBER_PISTOL_SMALL
+	caliber = PROJECTILE_PISTOL_SMALL
 	fire_delay = 4
 	origin_tech = list(TECH_COMBAT = 2, TECH_MATERIAL = 2, TECH_ESOTERIC = 2)
 	magazine_type = /obj/item/ammo_magazine/pistol/small
@@ -140,7 +140,7 @@
 	icon = 'icons/obj/guns/holdout_pistol.dmi'
 	icon_state = "silencer"
 	w_class = ITEM_SIZE_SMALL
-	var/caliber = CALIBER_PISTOL_SMALL
+	var/caliber = PROJECTILE_PISTOL_SMALL
 	var/silenced_sound = 'sound/weapons/gunshot/gunshot_suppressed.ogg'
 
 /obj/item/gun/projectile/pistol/broomstick
@@ -151,7 +151,7 @@
 	accuracy_power = 6
 	one_hand_penalty = 3
 	fire_delay = 5
-	caliber = CALIBER_PISTOL_SMALL
+	caliber = PROJECTILE_PISTOL_SMALL
 	origin_tech = list(
 						TECH_COMBAT = 2,
 						TECH_MATERIAL = 2

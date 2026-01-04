@@ -62,7 +62,7 @@
 	siemens_coefficient = 0.6
 	armor = list(
 		melee = ARMOR_MELEE_SMALL,
-		bullet = ARMOR_BALLISTIC_SMALL,
+		bullet = ARMOR_BALLISTIC_IIA,
 		bomb = ARMOR_BOMB_MINOR
 	)
 	action_button_name = "Toggle Attachments"

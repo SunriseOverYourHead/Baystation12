@@ -174,7 +174,7 @@
 	pixel_x = rand(-10, 10)
 	pixel_y = rand(-10, 10)
 
-/obj/item/ammo_casing/pistol/magnum/used/Initialize()
+/obj/item/ammo_casing/pistol/huge/used/Initialize()
 	. = ..()
 	expend()
 	pixel_x = rand(-10, 10)

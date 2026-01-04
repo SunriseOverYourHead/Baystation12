@@ -12,7 +12,7 @@
 	slot_flags = SLOT_BELT | SLOT_HOLSTER
 	matter = list(MATERIAL_STEEL = 1500, MATERIAL_PLASTIC = 2000)
 
-	caliber = CALIBER_SHOTGUN
+	caliber = PROJECTILE_SHOTGUN
 	handle_casings = CYCLE_CASINGS
 	load_method = SINGLE_CASING|SPEEDLOADER
 	max_shells = 1

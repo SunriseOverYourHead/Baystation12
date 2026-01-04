@@ -16,16 +16,16 @@
 
 // Small Pistol
 /obj/item/ammobox/pistol/small
-	ammo_type = /obj/item/ammo_casing/pistol/small
+	ammo_type = /obj/item/ammo_casing/pistol/tiny
 
 /obj/item/ammobox/pistol/small_practice
-	ammo_type = /obj/item/ammo_casing/pistol/small/practice
+	ammo_type = /obj/item/ammo_casing/pistol/tiny/practice
 
 /obj/item/ammobox/pistol/small_rubber
-	ammo_type = /obj/item/ammo_casing/pistol/small/rubber
+	ammo_type = /obj/item/ammo_casing/pistol/tiny/rubber
 
 /obj/item/ammobox/pistol/small_emp
-	ammo_type = /obj/item/ammo_casing/pistol/small/emp
+	ammo_type = /obj/item/ammo_casing/pistol/tiny/emp
 
 
 // Rifle
@@ -39,14 +39,14 @@
 
 // Military Rifle
 /obj/item/ammobox/rifle/military
-	ammo_type = /obj/item/ammo_casing/rifle/military
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate
 	ammo_count = 100
 
 /obj/item/ammobox/rifle/military/light
-	ammo_type = /obj/item/ammo_casing/rifle/military/light
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate
 
 /obj/item/ammobox/rifle/military/practice
-	ammo_type = /obj/item/ammo_casing/rifle/military/practice
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/practice
 
 
 // Shotgun
@@ -81,14 +81,14 @@
 
 // Misc
 /obj/item/ammobox/antimaterial
-	ammo_type = /obj/item/ammo_casing/shell
+	ammo_type = /obj/item/ammo_casing/rifle/full/huge
 	ammo_count = 25
 
 /obj/item/ammobox/antimaterial/apds
-	ammo_type = /obj/item/ammo_casing/shell/apds
+	ammo_type = /obj/item/ammo_casing/rifle/full/huge
 
 /obj/item/ammobox/antique
-	ammo_type = /obj/item/ammo_casing/pistol/throwback
+	ammo_type = /obj/item/ammo_casing/pistol/antique
 	ammo_count = 100
 
 /obj/item/ammobox/cap
@@ -104,7 +104,7 @@
 	ammo_count = 16
 
 /obj/item/ammobox/magnum
-	ammo_type = /obj/item/ammo_casing/pistol/magnum
+	ammo_type = /obj/item/ammo_casing/pistol/huge
 	ammo_count = 50
 
 /obj/item/ammobox/rocket

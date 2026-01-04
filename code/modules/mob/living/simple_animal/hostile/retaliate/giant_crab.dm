@@ -24,7 +24,7 @@
 	harm_intent_damage = 1
 	natural_armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
-		bullet = ARMOR_BALLISTIC_PISTOL
+		bullet = ARMOR_BALLISTIC_IIIA
 		)
 	special_attack_min_range = 0
 	special_attack_max_range = 1

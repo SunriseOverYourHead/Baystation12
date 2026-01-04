@@ -4,6 +4,7 @@
 	var/list/armor_values
 	var/full_block_message = "Your armor absorbs the blow!"
 	var/partial_block_message = "Your armor softens the blow!"
+	var/pen_message = "Your armor is penetrated!"
 
 	// Armor 'works' for damages in range from 0 to [armor_range_mult * armor].
 	// The lower the damage, the harder it gets blocked, tapering to 0 mitigation at [armor_range_mult * armor]
@@ -26,10 +27,8 @@
 /datum/extension/armor/proc/apply_damage_modifications(damage, damage_type, damage_flags, mob/living/victim, armor_pen, silent = FALSE)
 	if(damage <= 0)
 		return args.Copy()
-
 	var/blocked = get_blocked(damage_type, damage_flags, armor_pen, damage)
 	on_blocking(damage, damage_type, damage_flags, armor_pen, blocked)
-
 	// Blocking values that mean the damage was under armor, so all dangerous flags are removed (edge/sharp)
 	var/armor_border_blocking = 1 - (under_armor_mult * 1/armor_range_mult)
 	if(blocked >= armor_border_blocking)
@@ -40,7 +39,6 @@
 		damage = max(0, damage - 100 * blocked)
 		silent = TRUE
 	damage *= 1 - blocked
-
 	if(!silent)
 		if(blocked > 0.7)
 			to_chat(victim, SPAN_NOTICE(full_block_message))
@@ -51,17 +49,20 @@
 /datum/extension/armor/proc/on_blocking(damage, damage_type, damage_flags, armor_pen, blocked)
 
 // A simpler proc used as a helper for above but can also be used externally. Does not modify state.
-/datum/extension/armor/proc/get_blocked(damage_type, damage_flags, armor_pen = 0, damage = 5)
+/datum/extension/armor/proc/get_blocked(damage_type, damage_flags, armor_pen = 0, damage = 5, energy = 0)
 	var/key = get_armor_key(damage_type, damage_flags)
 	if(!key)
 		return 0
-
-	var/armor = max(0, get_value(key) - armor_pen)
-	if(!armor)
-		return 0
-	var/efficiency = min(damage / (armor_range_mult * armor), 1)
-	var/coef = damage <= armor ? under_armor_mult : over_armor_mult
-	return max(1 - coef * efficiency, 0)
+	var/armor = get_value(key)
+	// Projectile penetrates armor
+	if(armor_pen >= armor)
+		return 0  // No blocking, full damage
+	// Projectile stopped by armor - calculate blunt trauma
+	var/armor_excess = armor - armor_pen
+	var/energy_multiplier = 1 / (2 ** (armor_excess / 10))
+	var/blunt_damage = energy * energy_multiplier
+	// Return blocking ratio based on blunt vs penetrating damage
+	return 1 - (blunt_damage / damage)
 
 /datum/extension/armor/proc/get_value(key)
 	if(isnull(armor_values[key]))

@@ -32,15 +32,60 @@
 		visible_message(SPAN_WARNING("[src] triggers their deadman's switch"))
 		signaler.signal()
 
-	//Armor
+	//Get total armor value using existing system
+	var/list/armors = get_armors_by_zone(def_zone, P.damage_type, P.damage_flags())
+	var/total_armor = 0
+	var/key = get_armor_key(P.damage_type, P.damage_flags())
+	if(key)
+		for(var/armor in armors)
+			var/datum/extension/armor/armor_datum = armor
+			total_armor = max(total_armor, armor_datum.armor_values[key])
+
 	var/damage = P.damage
 	var/flags = P.damage_flags()
 	var/damaged
+	var/blocked_ratio = 0
+
 	if(!P.nodamage)
-		damaged = apply_damage(damage, P.damage_type, def_zone, flags, P, P.armor_penetration)
-		bullet_impact_visuals(P, def_zone, damaged)
-	if(damaged || P.nodamage) // Run the block computation if we did damage or if we only use armor for effects (nodamage)
-		. = get_blocked_ratio(def_zone, P.damage_type, flags, P.armor_penetration, P.damage)
+		// Check if projectile penetrates armor
+		if(P.armor_penetration >= total_armor)
+			// Full penetration - use normal damage system with armor modifications
+			P.stopped_by_armor = FALSE
+			damaged = apply_damage(damage, P.damage_type, def_zone, flags, P, P.armor_penetration)
+			bullet_impact_visuals(P, def_zone, damaged)
+			blocked_ratio = get_blocked_ratio(def_zone, P.damage_type, flags, P.armor_penetration, P.damage, P.energy)
+
+		else
+			// Stopped by armor - apply blunt trauma from energy directly
+			P.stopped_by_armor = TRUE
+			var/armor_excess = total_armor - P.armor_penetration
+			var/energy_mult = 1 / (2 ** (armor_excess / 10))
+			var/blunt_damage = P.energy * energy_mult
+
+			// Apply blunt damage ONLY to external organ, don't propagate internally
+			if(ishuman(src))
+				var/mob/living/carbon/human/H = src
+				var/obj/item/organ/external/affecting = H.get_organ(def_zone)
+				if(affecting)
+					// Apply damage directly to external organ only
+					var/blunt_flags = (flags & ~(DAMAGE_FLAG_SHARP | DAMAGE_FLAG_EDGE)) | DAMAGE_FLAG_EXTERNAL
+					affecting.take_external_damage(blunt_damage, 0, blunt_flags, "blunt force")
+					damaged = blunt_damage
+			else
+				// Fallback for non-humans
+				damaged = apply_damage(blunt_damage, P.damage_type, def_zone, flags & ~(DAMAGE_FLAG_SHARP | DAMAGE_FLAG_EDGE), P, 0)
+
+			bullet_impact_visuals(P, def_zone, damaged)
+
+			// Calculate blocking for status effects only
+			blocked_ratio = 1 - (blunt_damage / max(damage, 1))
+
+			// Prevent embedding when stopped by armor
+			P.embed = FALSE
+
+	if(damaged || P.nodamage)
+		. = blocked_ratio
+
 	P.on_hit(src, ., def_zone)
 
 	if(ai_holder && P.firer)

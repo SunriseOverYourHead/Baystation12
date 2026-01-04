@@ -6,13 +6,13 @@
 /obj/item/projectile/bullet/nullglass/disrupts_psionics()
 	return src
 
-/obj/item/ammo_casing/pistol/magnum/nullglass
+/obj/item/ammo_casing/pistol/huge/nullglass
 	desc = "A revolver bullet casing with a nullglass coating."
 	label = "nullglass"
 	projectile_type = /obj/item/projectile/bullet/nullglass
 
-/obj/item/ammo_casing/pistol/magnum/nullglass/disrupts_psionics()
+/obj/item/ammo_casing/pistol/huge/nullglass/disrupts_psionics()
 	return src
 
 /obj/item/ammo_magazine/speedloader/magnum/nullglass
-	ammo_type = /obj/item/ammo_casing/pistol/magnum/nullglass
+	ammo_type = /obj/item/ammo_casing/pistol/huge/nullglass
