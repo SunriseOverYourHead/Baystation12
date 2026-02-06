@@ -18431,16 +18431,16 @@
 /obj/floor_decal/industrial/outline/grey,
 /obj/item/storage/box/ammo/light_bullpup,
 /obj/item/storage/box/ammo/light_bullpup,
-/obj/item/gun/projectile/automatic/bullpup_rifle/light{
+/obj/item/gun/projectile/automatic/z8/z9{
 	starts_loaded = 0
 	},
-/obj/item/gun/projectile/automatic/bullpup_rifle/light{
+/obj/item/gun/projectile/automatic/z8/z9{
 	starts_loaded = 0
 	},
-/obj/item/gun/projectile/automatic/bullpup_rifle/light{
+/obj/item/gun/projectile/automatic/z8/z9{
 	starts_loaded = 0
 	},
-/obj/item/gun/projectile/automatic/bullpup_rifle/light{
+/obj/item/gun/projectile/automatic/z8/z9{
 	starts_loaded = 0
 	},
 /turf/simulated/floor/tiled/techfloor/grid,

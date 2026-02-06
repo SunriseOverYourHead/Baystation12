@@ -17,8 +17,8 @@
 	/obj/item/gun/energy/xray/pistol,
 	/obj/item/gun/energy/toxgun,
 	/obj/item/gun/energy/incendiary_laser,
-	/obj/item/gun/projectile/pistol/bobcat,
-	/obj/item/gun/projectile/pistol/optimus,
+	/obj/item/gun/projectile/pistol/p87,
+	/obj/item/gun/projectile/pistol/p225,
 	/obj/item/gun/projectile/pistol/m22f,
 	/obj/item/gun/projectile/pistol/m19
 )

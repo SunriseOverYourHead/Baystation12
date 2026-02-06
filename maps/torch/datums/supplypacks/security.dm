@@ -89,7 +89,7 @@
 
 /singleton/hierarchy/supply_pack/security/bullpup
 	name = "Weapons - Heavy ballistic rifles"
-	contains = list(/obj/item/gun/projectile/automatic/bullpup_rifle = 2)
+	contains = list(/obj/item/gun/projectile/automatic/z8 = 2)
 	cost = 100 //A little more expensive than the 5mmR variant. Hits harder!
 	containertype = /obj/structure/closet/crate/secure/weapon
 	containername = "bullpup heavy automatic rifle crate"
@@ -98,7 +98,7 @@
 
 /singleton/hierarchy/supply_pack/security/light_bullpup
 	name = "Weapons - Light ballistic rifles"
-	contains = list(/obj/item/gun/projectile/automatic/bullpup_rifle/light = 2)
+	contains = list(/obj/item/gun/projectile/automatic/z8/z9 = 2)
 	cost = 80
 	containertype = /obj/structure/closet/crate/secure/weapon
 	containername = "bullpup light automatic rifle crate"

@@ -1,8 +1,8 @@
 /datum/trader/ship/gunshop
 	possible_trading_items = list(
 		/obj/item/gun/projectile/pistol/holdout = TRADER_ALL,
-		/obj/item/gun/projectile/pistol/bobcat = TRADER_ALL,
-		/obj/item/gun/projectile/pistol/optimus = TRADER_ALL,
+		/obj/item/gun/projectile/pistol/p87 = TRADER_ALL,
+		/obj/item/gun/projectile/pistol/p225 = TRADER_ALL,
 		/obj/item/gun/projectile/pistol/m22f = TRADER_ALL,
 		/obj/item/gun/projectile/pistol/m19 = TRADER_ALL,
 		/obj/item/gun/projectile/pistol/magnum_pistol = TRADER_ALL,

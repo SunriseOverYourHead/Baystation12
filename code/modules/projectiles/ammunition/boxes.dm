@@ -345,8 +345,11 @@
 /obj/item/ammo_magazine/mil_rifle/light
 	icon_state = "bullpup_light"
 	labels = list("light")
-	ammo_type = /obj/item/ammo_casing/rifle/intermediate/small
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate
 	max_ammo = 14
+
+/obj/item/ammo_magazine/mil_rifle/light/bottomless
+	max_ammo = 14000
 
 /obj/item/ammo_magazine/mil_rifle/light/empty
 	initial_ammo = 0

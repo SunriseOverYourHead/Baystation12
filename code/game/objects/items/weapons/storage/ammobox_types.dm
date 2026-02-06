@@ -46,7 +46,7 @@
 	ammo_type = /obj/item/ammo_casing/rifle/intermediate
 
 /obj/item/ammobox/rifle/military/practice
-	ammo_type = /obj/item/ammo_casing/rifle/intermediate/practice
+	ammo_type = /obj/item/ammo_casing/rifle/practice
 
 
 // Shotgun
