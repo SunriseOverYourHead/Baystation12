@@ -48,6 +48,11 @@
 // Fictional. Blocks AP variants of 10.5x99mm, 12.7x99mm and 11.6x101mm. Should degrade with repeated impacts.
 #define  ARMOR_BALLISTIC_V 100
 
+// Named aliases used by alien tech definitions
+#define  ARMOR_BALLISTIC_PISTOL     ARMOR_BALLISTIC_IIIAP
+#define  ARMOR_BALLISTIC_RESISTANT  ARMOR_BALLISTIC_III
+#define  ARMOR_BALLISTIC_RIFLE      ARMOR_BALLISTIC_IV
+
 // Pending a rework. Two types of laser armor should exist: Ablative and Capacitive.
 // Capacitive heats and cooks you on multiple hits, but doesn't degrade.
 // Ablative slowly degrades as the surface material ablates.

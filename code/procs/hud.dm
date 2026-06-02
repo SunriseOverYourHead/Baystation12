@@ -70,7 +70,8 @@ the HUD updates properly! */
 		return 0
 	if(!M.client)
 		return 0
-	if(M.stat != CONSCIOUS)
+	// Ghosts are always DEAD but should still be able to use HUDs
+	if(M.stat != CONSCIOUS && !isghost(M))
 		return 0
 	return 1
 

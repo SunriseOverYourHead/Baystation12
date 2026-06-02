@@ -11,7 +11,6 @@
 	var/shuttle_tag
 	var/hacked = 0   // Has been emagged, no access restrictions.
 
-	var/ui_template = "shuttle_control_console.tmpl"
 
 
 /obj/machinery/computer/shuttle_control/Initialize(mapload)
@@ -123,23 +122,48 @@
 			shuttle.set_docking_codes(uppertext(newcode))
 		return TOPIC_REFRESH
 
-/obj/machinery/computer/shuttle_control/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/machinery/computer/shuttle_control/ui_interact(mob/user, datum/tgui/ui)
 	var/datum/shuttle/autodock/shuttle = SSshuttle.shuttles[shuttle_tag]
 	if (!istype(shuttle))
-		to_chat(user,SPAN_WARNING("Unable to establish link with the shuttle."))
+		to_chat(user, SPAN_WARNING("Unable to establish link with the shuttle."))
 		return
+	ui = tgui_interact(user, src, "ShuttleControl", "[shuttle_tag] Shuttle Control", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
+/obj/machinery/computer/shuttle_control/ui_data(mob/user)
+	var/datum/shuttle/autodock/shuttle = SSshuttle.shuttles[shuttle_tag]
+	if (!istype(shuttle))
+		return list()
 	var/list/data = get_ui_data(shuttle)
+	data["shuttle_tag"] = shuttle_tag
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, ui_template, "[shuttle_tag] Shuttle Control", 470, 450)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/computer/shuttle_control/OnTopic(user, href_list)
-	return handle_topic_href(SSshuttle.shuttles[shuttle_tag], href_list, user)
+/obj/machinery/computer/shuttle_control/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	var/mob/user = ui.user
+	var/datum/shuttle/autodock/shuttle = SSshuttle.shuttles[shuttle_tag]
+	if(!istype(shuttle))
+		return
+	switch(action)
+		if("move")
+			if(can_move(shuttle, user))
+				shuttle.launch(src)
+			. = TRUE
+		if("force")
+			if(can_move(shuttle, user))
+				shuttle.force_launch(src)
+			. = TRUE
+		if("cancel")
+			shuttle.cancel_launch(src)
+			. = TRUE
+		if("set_codes")
+			var/newcode = input(user, "Input new docking codes", "Docking codes", shuttle.docking_codes) as text|null
+			if(newcode && CanInteract(user, GLOB.default_state))
+				shuttle.set_docking_codes(uppertext(newcode))
+			. = TRUE
 
 /obj/machinery/computer/shuttle_control/emag_act(remaining_charges, mob/user)
 	if (!hacked)

@@ -23,43 +23,54 @@
 	bodyscans += list(scan.Copy())
 	updateUsrDialog()
 
-/obj/machinery/body_scan_display/OnTopic(mob/user as mob, href_list)
-	if(href_list["view"])
-		var/selection = text2num(href_list["view"])
-		if(is_valid_index(selection, bodyscans))
-			selected = selection
-			return TOPIC_REFRESH
-		return TOPIC_HANDLED
-	if(href_list["delete"])
-		var/selection = text2num(href_list["delete"])
-		if(!is_valid_index(selection, bodyscans))
-			return TOPIC_HANDLED
-		if(selected == selection)
-			selected = 0
-		else if(selected > selection)
-			selected--
-		bodyscans -= list(bodyscans[selection])
-		return TOPIC_REFRESH
-
 /obj/machinery/body_scan_display/interface_interact(user)
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/body_scan_display/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open=1)
-	var/list/data = list()
-	data["scans"] = bodyscans
-	data["selected"] = selected
+/obj/machinery/body_scan_display/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "BodyScannerDisplay", "Body Scan Display Console", ui)
 
+/obj/machinery/body_scan_display/ui_state(mob/user)
+	return GLOB.tgui_default_state
+
+/obj/machinery/body_scan_display/ui_data(mob/user)
+	var/list/data = list()
+	var/list/scan_list = list()
+	for(var/list/scan in bodyscans)
+		scan_list += list(list(
+			"name" = scan["name"] || "Unknown",
+			"time" = scan["time"] || ""
+		))
+	data["scans"] = scan_list
+	data["selected"] = selected
 	if(selected > 0)
 		data["scan_header"] = display_medical_data_header(bodyscans[selected], user.get_skill_value(SKILL_MEDICAL))
 		data["scan_health"] = display_medical_data_health(bodyscans[selected], user.get_skill_value(SKILL_MEDICAL))
 		data["scan_body"] = display_medical_data_body(bodyscans[selected], user.get_skill_value(SKILL_MEDICAL))
 	else
-		data["scan_header"] = "&nbsp;"
-		data["scan_health"] = "&nbsp;"
-		data["scan_body"] = "&nbsp;"
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "body_scan_display.tmpl", "Body Scan Display Console", 600, 800)
-		ui.set_initial_data(data)
-		ui.open()
+		data["scan_header"] = ""
+		data["scan_health"] = ""
+		data["scan_body"] = ""
+	return data
+
+/obj/machinery/body_scan_display/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("view")
+			var/selection = text2num(params["view"])
+			if(is_valid_index(selection, bodyscans))
+				selected = selection
+				return TRUE
+		if("delete")
+			var/selection = text2num(params["delete"])
+			if(!is_valid_index(selection, bodyscans))
+				return FALSE
+			if(selected == selection)
+				selected = 0
+			else if(selected > selection)
+				selected--
+			bodyscans -= list(bodyscans[selection])
+			return TRUE
+	return FALSE

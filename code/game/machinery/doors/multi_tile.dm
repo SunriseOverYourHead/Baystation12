@@ -150,6 +150,10 @@
 	door_color = COLOR_WHITE
 	stripe_color = COLOR_VIOLET
 
+/obj/machinery/door/airlock/multi_tile/infantry
+	door_color = COLOR_PALE_GREEN_GRAY
+	stripe_color = COLOR_NT_RED
+
 /obj/machinery/door/airlock/multi_tile/sol
 	door_color = COLOR_BLUE_GRAY
 
@@ -205,6 +209,10 @@
 /obj/machinery/door/airlock/multi_tile/glass/science
 	door_color = COLOR_WHITE
 	stripe_color = COLOR_VIOLET
+
+/obj/machinery/door/airlock/multi_tile/glass/infantry
+	door_color = COLOR_PALE_GREEN_GRAY
+	stripe_color = COLOR_NT_RED
 
 /obj/machinery/door/airlock/multi_tile/glass/sol
 	door_color = COLOR_BLUE_GRAY

@@ -485,6 +485,7 @@
 			return
 
 		SSnano.close_uis(H)
+		SStgui.force_close_all_windows(H)
 		H.client.cache.Cut()
 		var/datum/asset/assets = get_asset_datum(/datum/asset/nanoui)
 		assets.send(H)

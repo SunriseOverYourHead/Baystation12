@@ -149,106 +149,92 @@
 /obj/machinery/computer/ship/disperser/proc/get_charge()
 	return locate(/obj/structure/ship_munition/disperser_charge) in get_turf(back)
 
-/obj/machinery/computer/ship/disperser/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = TRUE)
+/obj/machinery/computer/ship/disperser/ui_interact(mob/user, datum/tgui/ui)
 	if(!linked)
 		display_reconnect_dialog(user, "disperser synchronization")
 		return
+	ui = tgui_interact(user, src, "DisperserConsole", "[linked.name] Obstruction Field Disperser Control", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	var/data = list()
-
-	if (!link_parts())
+/obj/machinery/computer/ship/disperser/ui_data(mob/user)
+	var/list/data = list()
+	if(!link_parts())
 		data["faillink"] = TRUE
-	else
-		data["calibration"] = calibration
-		data["overmapdir"] = overmapdir
-		data["t_x"] = tx
-		data["t_y"] = ty
-		data["t_z"] = tz
-		data["coordinates"] = tx || ty || tz
-		data["cal_accuracy"] = cal_accuracy()
-		data["strength"] = strength
-		data["range"] = range
-		data["next_shot"] = round(get_next_shot_seconds())
-		data["nopower"] = !data["faillink"] && (!front.powered() || !middle.powered() || !back.powered())
-		data["skill"] = user.get_skill_value(core_skill) > skill_offset
+		return data
+	data["faillink"] = FALSE
+	data["calibration"] = calibration
+	data["cal_count"] = cal_count
+	data["overmapdir"] = overmapdir
+	data["t_x"] = tx
+	data["t_y"] = ty
+	data["t_z"] = tz
+	data["coordinates"] = tx || ty || tz
+	data["cal_accuracy"] = cal_accuracy()
+	data["strength"] = strength
+	data["range"] = range
+	data["next_shot"] = round(get_next_shot_seconds())
+	data["nopower"] = !front.powered() || !middle.powered() || !back.powered()
+	data["skill"] = user.get_skill_value(core_skill) > skill_offset
 
-		var/charge = SPAN_BOLD("UNKNOWN ERROR")
-		switch(get_charge_type())
-			if(OVERMAP_WEAKNESS_NONE)
-				charge = "[SPAN_BOLD("ERROR")]: No valid charge detected."
-			else
-				var/obj/structure/ship_munition/disperser_charge/B = get_charge()
-				charge = B.chargedesc
-		data["chargeload"] = charge
+	var/chargeload = "UNKNOWN ERROR"
+	switch(get_charge_type())
+		if(OVERMAP_WEAKNESS_NONE)
+			chargeload = "ERROR: No valid charge detected."
+		else
+			var/obj/structure/ship_munition/disperser_charge/charge_obj = get_charge()
+			chargeload = charge_obj.chargedesc
+	data["chargeload"] = chargeload
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "disperser.tmpl", "[linked.name] obstruction field disperser control", 400, 550)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/computer/ship/disperser/OnTopic(mob/user, list/href_list, state)
+/obj/machinery/computer/ship/disperser/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
-
 	if(!linked)
-		return TOPIC_HANDLED
+		return
 
-	if (href_list["choose"])
-		overmapdir = sanitize_integer(text2num(href_list["choose"]), 0, 10, 0)
-		reset_calibration()
-
-	if (href_list["setx"])
-		var/newx = input("Input new target x coordinate", "Coordinate input", tx) as num|null
-		if(!CanInteract(user,state))
-			return
-		if (newx)
-			tx = clamp(newx, 1, world.maxx - TRANSITIONEDGE)
-
-	if (href_list["sety"])
-		var/newy = input("Input new target y coordinate", "Coordinate input", ty) as num|null
-		if(!CanInteract(user,state))
-			return
-		if (newy)
-			ty = clamp(newy, 1, world.maxy - TRANSITIONEDGE)
-
-	if (href_list["setz"])
-		var/newz = input("Input new target z coordinate", "Coordinate input", tz) as num|null
-		if(!CanInteract(user,state))
-			return
-		if (newz)
-			tz = clamp(newz, 1, world.maxz)
-
-	if (href_list["reset"])
-		tx = 0
-		ty = 0
-		tz = 0
-
-	if(href_list["calibration"])
-		var/input = input("0-9", "disperser calibration", 0) as num|null
-		if(!isnull(input))
-			var/calnum = sanitize_integer(text2num(href_list["calibration"]), 0, cal_count - 1)
-			calibration[calnum + 1] = sanitize_integer(input, 0, 9, 0)
-
-	if(href_list["skill_calibration"])
-		for(var/i = 1 to clamp(user.get_skill_value(core_skill) - skill_offset, 1, cal_count))
-			calibration[i] = calexpected[i]
-
-	if(href_list["strength"])
-		var/input = input("1-5", "disperser strength", 1) as num|null
-		if(input && CanInteract(user, state))
-			strength = sanitize_integer(input, 1, 5, 1)
+	switch(action)
+		if("choose")
+			overmapdir = sanitize_integer(text2num(params["dir"]), 0, 10, 0)
+			reset_calibration()
+			. = TRUE
+		if("setx")
+			var/newx = text2num(params["value"])
+			if(newx)
+				tx = clamp(newx, 1, world.maxx - TRANSITIONEDGE)
+			. = TRUE
+		if("sety")
+			var/newy = text2num(params["value"])
+			if(newy)
+				ty = clamp(newy, 1, world.maxy - TRANSITIONEDGE)
+			. = TRUE
+		if("setz")
+			var/newz = text2num(params["value"])
+			if(newz)
+				tz = clamp(newz, 1, world.maxz)
+			. = TRUE
+		if("reset")
+			tx = 0
+			ty = 0
+			tz = 0
+			. = TRUE
+		if("set_calibration")
+			var/calnum = sanitize_integer(text2num(params["index"]), 0, cal_count - 1)
+			calibration[calnum + 1] = sanitize_integer(text2num(params["value"]), 0, 9, 0)
+			. = TRUE
+		if("skill_calibration")
+			for(var/i = 1 to clamp(usr.get_skill_value(core_skill) - skill_offset, 1, cal_count))
+				calibration[i] = calexpected[i]
+			. = TRUE
+		if("set_strength")
+			strength = sanitize_integer(text2num(params["value"]), 1, 5, 1)
 			middle.idle_power_usage = strength * range * 100
-
-	if(href_list["range"])
-		var/input = input("1-5", "disperser radius", 1) as num|null
-		if(input && CanInteract(user, state))
-			range = sanitize_integer(input, 1, 5, 1)
+			. = TRUE
+		if("set_range")
+			range = sanitize_integer(text2num(params["value"]), 1, 5, 1)
 			middle.idle_power_usage = strength * range * 100
-
-	if(href_list["fire"])
-		fire(user)
-
-	return TOPIC_REFRESH
+			. = TRUE
+		if("fire")
+			fire(usr)
+			. = TRUE

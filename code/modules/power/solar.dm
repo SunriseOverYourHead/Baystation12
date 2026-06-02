@@ -88,6 +88,17 @@ var/global/solar_gen_rate = 1500
 		src.set_dir(angle2dir(adir))
 	return
 
+// WET principle. surely this won't generate tech debt.
+/obj/machinery/power/solar/improved/on_update_icon()
+	..()
+	ClearOverlays()
+	if(MACHINE_IS_BROKEN(src))
+		AddOverlays(image('icons/obj/machines/power/solar_panels.dmi', icon_state = "solar_paneladv-b", layer = ABOVE_HUMAN_LAYER))
+	else
+		AddOverlays(image('icons/obj/machines/power/solar_panels.dmi', icon_state = "solar_paneladv", layer = ABOVE_HUMAN_LAYER))
+		src.set_dir(angle2dir(adir))
+	return
+
 //calculates the fraction of the sunlight that the panel receives
 /obj/machinery/power/solar/proc/update_solar_exposure()
 	if(obscured)

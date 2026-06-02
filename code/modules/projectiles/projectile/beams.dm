@@ -386,6 +386,22 @@
 	armor_penetration = 20
 	penetration_modifier = 0.3
 
+/obj/item/projectile/beam/particleadv
+	name = "overcharged particle lance"
+	icon_state = "particle"
+	damage = 55
+	armor_penetration = 75
+	muzzle_type = /obj/projectile/laser_particle/muzzle
+	tracer_type = /obj/projectile/laser_particle/tracer
+	impact_type = /obj/projectile/laser_particle/impact
+	penetration_modifier = 0.7
+
+/obj/item/projectile/beam/particleadv/small
+	name = "overcharged particle beam"
+	damage = 35
+	armor_penetration = 40
+	penetration_modifier = 0.5
+
 /obj/item/projectile/beam/darkmatter
 	name = "dark matter bolt"
 	icon_state = "darkb"

@@ -394,6 +394,37 @@ var/global/const/access_medical_records = "ACCESS_MEDICAL_RECORDS"
 	desc = "Medical Records"
 	region = ACCESS_REGION_MEDBAY
 
+var/global/const/access_rifleman = "ACCESS_RIFLEMAN" //71
+/datum/access/rifleman
+	id = access_rifleman
+	desc = "Rifleman"
+	region = ACCESS_REGION_INFANTRY
+
+var/global/const/access_ftlead = "ACCESS_FTLEAD" //72
+/datum/access/ftlead
+	id = access_ftlead
+	desc = "Fire Team Leader"
+	region = ACCESS_REGION_INFANTRY
+
+var/global/const/access_squadlead = "ACCESS_SQUADLEAD" //73
+/datum/access/squadlead
+	id = access_squadlead
+	desc = "Squad Leader"
+	region = ACCESS_REGION_INFANTRY
+
+var/global/const/access_comtech = "ACCESS_COMTECH"
+/datum/access/access_comtech
+	id = access_comtech
+	desc = "Combat Technician"
+	region = ACCESS_REGION_INFANTRY
+
+var/global/const/access_platoon = "ACCESS_PLATOON"
+/datum/access/access_platoon
+	id = access_platoon
+	desc = "Platoon Officer"
+	region = ACCESS_REGION_COMMAND
+
+
 /******************
 * Central Command *
 ******************/
@@ -491,6 +522,19 @@ var/global/const/access_merchant = "ACCESS_MERCHANT" //301
 /datum/access/merchant
 	id = access_merchant
 	desc = "Merchant"
+	access_type = ACCESS_TYPE_NONE
+
+// Ascent access.
+var/global/const/access_ascent = "ACCESS_ASCENT"
+/datum/access/ascent
+	id = access_ascent
+	desc = "Ascent Materiel"
+	access_type = ACCESS_TYPE_NONE
+
+var/global/const/access_ascentpar = "ACCESS_ASCENTPAR"
+/datum/access/ascentpar
+	id = access_ascentpar
+	desc = "Ascent Par"
 	access_type = ACCESS_TYPE_NONE
 
 var/global/const/access_skrellscoutship = "ACCESS_SKRELLSCOUT"

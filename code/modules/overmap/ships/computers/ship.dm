@@ -30,18 +30,16 @@ somewhere on that shuttle. Subtypes of these can be then used to perform ship ov
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/computer/ship/OnTopic(mob/user, list/href_list)
-	if(..())
-		return TOPIC_HANDLED
+/obj/machinery/computer/ship/Topic(href, href_list, hsrc)
 	if(href_list["sync"])
-		if (sync_linked() && reconnect_popup)
+		if(sync_linked() && reconnect_popup)
 			reconnect_popup.close()
-		return TOPIC_REFRESH
+		return
 	if(href_list["close"])
-		unlook(user)
-		user.unset_machine()
-		return TOPIC_HANDLED
-	return TOPIC_NOACTION
+		unlook(usr)
+		return
+	return ..()
+
 
 // Management of mob view displacement. look to shift view to the ship on the overmap; unlook to shift back.
 
@@ -49,6 +47,7 @@ somewhere on that shuttle. Subtypes of these can be then used to perform ship ov
 	unlook(M)
 
 /obj/machinery/computer/ship/proc/look(mob/user)
+	user.set_machine(src) // keeps handle_vision() on the check_eye() path so it doesn't reset our overmap view
 	if(linked)
 		user.reset_view(linked)
 	if(user.client)
@@ -65,6 +64,7 @@ somewhere on that shuttle. Subtypes of these can be then used to perform ship ov
 
 /obj/machinery/computer/ship/proc/unlook(mob/user)
 	user.reset_view(null, FALSE)
+	user.unset_machine()
 	if(user.client)
 		user.client.view = world.view
 	if(linked)

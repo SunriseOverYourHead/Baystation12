@@ -24,6 +24,8 @@ var/global/list/image/ghost_sightless_images = list() //this is a list of images
 	var/has_enabled_antagHUD = 0
 	var/medHUD = 0
 	var/antagHUD = 0
+	var/secHUD = 0
+	var/hud_loop_active = FALSE
 	var/admin_ghosted = 0
 	var/anonsay = 0
 	var/ghostvision = 1 //is the ghost able to see things humans can't?
@@ -105,36 +107,100 @@ Transfer_mind is there to check if mob is being deleted/not going to have a body
 Works together with spawning an observer, noted above.
 */
 
-/mob/observer/ghost/Life()
-	..()
-	if(!loc) return
-	if(!client) return 0
+/mob/observer/ghost/handle_hud_glasses()
+	if(client)
+		var/list/to_remove = list()
+		for(var/image/hud_overlay/hud in client.images)
+			to_remove += hud
+		client.images -= to_remove
+	GLOB.med_hud_users -= src
+	GLOB.sec_hud_users -= src
+	GLOB.jani_hud_users -= src
+
+/mob/observer/ghost/proc/ghost_hud_image(image/orig, atom/mob_loc)
+	if(!orig)
+		return null
+	var/image/hud_overlay/I = new(orig.icon, mob_loc, orig.icon_state)
+	I.plane = OBSERVER_PLANE
+	return I
+
+// Starts the HUD refresh loop if it isn't already running.
+// Called whenever any HUD is enabled.
+/mob/observer/ghost/proc/ensure_hud_loop()
+	if(hud_loop_active)
+		return
+	hud_loop_active = TRUE
+	ghost_hud_refresh()
+
+// Clears stale HUD images, re-applies active HUDs, then schedules itself
+// to run again in 2 seconds. Exits when all HUDs are off or client is gone.
+// Uses spawn() so SSmobs population checks cannot block it.
+/mob/observer/ghost/proc/ghost_hud_refresh()
+	if(!client || QDELETED(src))
+		hud_loop_active = FALSE
+		return
 
 	handle_hud_glasses()
 
+	if(!medHUD && !secHUD && !antagHUD)
+		hud_loop_active = FALSE
+		return
+
 	if(antagHUD)
 		var/list/target_list = list()
-		for(var/mob/living/target in oview(src, 14))
-			if(target.mind && target.mind.special_role)
-				target_list += target
+		var/turf/GT = get_turf(src)
+		if(GT)
+			for(var/mob/living/target in SSmobs.mob_list)
+				if(target.z != GT.z || get_dist(target, GT) > 14)
+					continue
+				if(target.mind && target.mind.special_role)
+					target_list += target
 		if(length(target_list))
 			assess_targets(target_list, src)
 	if(medHUD)
 		process_medHUD(src)
+	if(secHUD)
+		process_secHUD(src)
 
+	spawn(20)
+		ghost_hud_refresh()
 
 /mob/observer/ghost/proc/process_medHUD(mob/M)
 	var/client/C = M.client
-	for(var/mob/living/carbon/human/patient in oview(M, 14))
-		C.images += patient.hud_list[HEALTH_HUD]
-		C.images += patient.hud_list[STATUS_HUD_OOC]
+	if(!C)
+		return
+	var/turf/T = get_turf(M)
+	if(!T)
+		return
+	for(var/mob/living/carbon/human/patient in GLOB.human_mobs)
+		if(patient.z != T.z || get_dist(patient, T) > 14)
+			continue
+		var/image/HI = ghost_hud_image(patient.hud_list[HEALTH_HUD], patient)
+		var/image/SI = ghost_hud_image(patient.hud_list[STATUS_HUD_OOC], patient)
+		if(HI) C.images += HI
+		if(SI) C.images += SI
+
+/mob/observer/ghost/proc/process_secHUD(mob/M)
+	var/client/C = M.client
+	if(!C)
+		return
+	var/turf/T = get_turf(M)
+	if(!T)
+		return
+	for(var/mob/living/carbon/human/perp in GLOB.human_mobs)
+		if(perp.z != T.z || get_dist(perp, T) > 14)
+			continue
+		var/image/II = ghost_hud_image(perp.hud_list[ID_HUD], perp)
+		if(II) C.images += II
 
 /mob/observer/ghost/proc/assess_targets(list/target_list, mob/observer/ghost/U)
 	var/client/C = U.client
 	for(var/mob/living/carbon/human/target in target_list)
-		C.images += target.hud_list[SPECIALROLE_HUD]
+		var/image/RI = ghost_hud_image(target.hud_list[SPECIALROLE_HUD], target)
+		if(RI) C.images += RI
 	for(var/mob/living/silicon/target in target_list)
-		C.images += target.hud_list[SPECIALROLE_HUD]
+		var/image/RI = ghost_hud_image(target.hud_list[SPECIALROLE_HUD], target)
+		if(RI) C.images += RI
 	return 1
 
 /mob/proc/ghostize(can_reenter_corpse = CORPSE_CAN_REENTER)
@@ -239,6 +305,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	else
 		medHUD = 1
 		to_chat(src, SPAN_NOTICE("Medical HUD Enabled"))
+		ensure_hud_loop()
 
 /mob/observer/ghost/verb/toggle_antagHUD()
 	set category = "Ghost"
@@ -266,6 +333,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	else
 		M.antagHUD = 1
 		to_chat(src, SPAN_NOTICE("AntagHUD Enabled"))
+		ensure_hud_loop()
 
 /mob/observer/ghost/verb/dead_tele(A in area_repository.get_areas_by_z_level())
 	set category = "Ghost"

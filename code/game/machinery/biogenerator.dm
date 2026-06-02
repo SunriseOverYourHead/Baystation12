@@ -133,31 +133,26 @@
 	update_icon()
 	return TRUE
 
-/**
- *  Display the NanoUI window for the vending machine.
- *
- *  See NanoUI documentation for details.
- */
-/obj/machinery/biogenerator/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	user.set_machine(src)
+/obj/machinery/biogenerator/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "BiogeneratorBay", "Biogenerator", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/machinery/biogenerator/ui_data(mob/user)
 	var/list/data = list()
 	data["state"] = state
-	var/name
-	var/cost
-	var/type_name
-	var/path
-	if (state == BG_READY)
+	if(state == BG_READY)
 		data["points"] = points
 		var/list/listed_types = list()
-		for(var/c_type =1 to length(products))
-			type_name = products[c_type]
+		for(var/c_type = 1 to length(products))
+			var/type_name = products[c_type]
 			var/list/current_content = products[type_name]
 			var/list/listed_products = list()
-			for(var/c_product =1 to length(current_content))
-				path = current_content[c_product]
+			for(var/c_product = 1 to length(current_content))
+				var/path = current_content[c_product]
 				var/atom/A = path
-				name = initial(A.name)
-				cost = current_content[path]
+				var/name = initial(A.name)
+				var/cost = current_content[path]
 				listed_products.Add(list(list(
 					"product_index" = c_product,
 					"name" = name,
@@ -166,36 +161,42 @@
 				"type_name" = type_name,
 				"products" = listed_products)))
 		data["types"] = listed_types
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "biogenerator.tmpl", "Biogenerator", 440, 600)
-		ui.set_initial_data(data)
-		ui.open()
+	return data
 
-/obj/machinery/biogenerator/OnTopic(user, href_list)
-	switch (href_list["action"])
+/obj/machinery/biogenerator/ui_state(mob/user)
+	return GLOB.default_state
+
+/obj/machinery/biogenerator/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
 		if("activate")
 			activate()
+			return TRUE
 		if("detach")
 			if(beaker)
 				beaker.dropInto(src.loc)
 				beaker = null
-				state = BG_NO_BEAKER
+				src.state = BG_NO_BEAKER
 				update_icon()
+			return TRUE
 		if("create")
-			if (state == BG_PROCESSING)
-				return TOPIC_REFRESH
-			var/type = href_list["type"]
-			var/product_index = text2num(href_list["product_index"])
-			if (isnull(products[type]))
-				return TOPIC_REFRESH
+			if(src.state == BG_PROCESSING)
+				return TRUE
+			var/type = params["type"]
+			var/product_index = text2num(params["product_index"])
+			if(isnull(products[type]))
+				return TRUE
 			var/list/sub_products = products[type]
-			if (product_index < 1 || product_index > length(sub_products))
-				return TOPIC_REFRESH
+			if(product_index < 1 || product_index > length(sub_products))
+				return TRUE
 			create_product(type, sub_products[product_index])
+			return TRUE
 		if("return")
-			state = BG_READY
-	return TOPIC_REFRESH
+			src.state = BG_READY
+			return TRUE
+	return FALSE
 
 /obj/machinery/biogenerator/interface_interact(mob/user)
 	ui_interact(user)
@@ -217,7 +218,7 @@
 		qdel(I)
 	if(S)
 		state = BG_PROCESSING
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		update_icon()
 		playsound(src.loc, 'sound/machines/blender.ogg', 50, 1)
 		use_power_oneoff(S * 30)
@@ -233,7 +234,7 @@
 	var/cost = products[type][path]
 	cost = round(cost/build_eff)
 	points -= cost
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
 	update_icon()
 	sleep(30)
 	var/atom/movable/result = new path

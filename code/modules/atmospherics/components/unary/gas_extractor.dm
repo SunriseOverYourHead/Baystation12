@@ -58,61 +58,57 @@
 			else
 				add_underlay(T,, dir)
 
-/obj/machinery/atmospherics/unary/gas_extractor/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/machinery/atmospherics/unary/gas_extractor/ui_interact(mob/user, datum/tgui/ui)
 	if(inoperable())
 		return
+	ui = tgui_interact(user, src, "GasExtractor", name, ui)
 
-	var/data = list()
-
-	data = list(
+/obj/machinery/atmospherics/unary/gas_extractor/ui_data(mob/user)
+	return list(
 		"on" = use_power,
 		"id" = id,
-		"target_pressure" = round(target_pressure*100),
+		"target_pressure" = round(target_pressure * 100),
 		"pressure_check" = external_mode,
 		"frequency" = frequency,
-		"last_flow_rate" = round(last_flow_rate*10),
+		"last_flow_rate" = round(last_flow_rate * 10),
 	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "gas_extractor.tmpl", name, 480, 240)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/atmospherics/unary/gas_extractor/Topic(href,href_list)
-	if((. = ..())) return
-
-	if(href_list["power"])
-		update_use_power(!use_power)
-		. = 1
-
-	if(href_list["settag"])
-		var/t = sanitizeSafe(input(usr, "Enter the ID tag for [src.name]", src.name, id), MAX_NAME_LEN)
-		id = t
-		. = 1
-
-	if(href_list["toggle_mode"])
-		external_mode = !external_mode
-		update_use_power(POWER_USE_OFF)  // Stop when switching modes without new pressure data
-		. = 1
-
-	if(href_list["setfreq"])
-		var/freq = input(usr, "Enter the Frequency for [src.name]. Decimal will automatically be inserted", src.name, frequency) as num|null
-		set_frequency(freq)
-		. = 1
-
-	switch(href_list["setpressure"])
-		if ("max")
-			target_pressure = MAX_PUMP_PRESSURE
-			. = 1
-		if ("set")
-			var/new_pressure = input(usr,"Enter new pressure (0-[MAX_PUMP_PRESSURE]kPa)","Pressure control",src.target_pressure) as num
-			src.target_pressure = clamp(new_pressure, 0, MAX_PUMP_PRESSURE)
-			. = 1
-
+/obj/machinery/atmospherics/unary/gas_extractor/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
 	if(.)
-		src.update_icon()
+		return
+	switch(action)
+		if("power")
+			update_use_power(!use_power)
+			update_icon()
+			return TRUE
+		if("settag")
+			var/t = sanitizeSafe(input(usr, "Enter the ID tag for [src.name]", src.name, id), MAX_NAME_LEN)
+			id = t
+			return TRUE
+		if("toggle_mode")
+			external_mode = !external_mode
+			update_use_power(POWER_USE_OFF)
+			return TRUE
+		if("setfreq")
+			var/freq = input(usr, "Enter the Frequency for [src.name]. Decimal will automatically be inserted", src.name, frequency) as num|null
+			set_frequency(freq)
+			return TRUE
+		if("setpressure")
+			switch(params["value"])
+				if("max")
+					target_pressure = MAX_PUMP_PRESSURE
+					update_icon()
+					return TRUE
+				if("set")
+					var/new_pressure = input(usr, "Enter new pressure (0-[MAX_PUMP_PRESSURE]kPa)", "Pressure control", src.target_pressure) as num
+					src.target_pressure = clamp(new_pressure, 0, MAX_PUMP_PRESSURE)
+					update_icon()
+					return TRUE
+	return FALSE
+
+/obj/machinery/atmospherics/unary/gas_extractor/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 /obj/machinery/atmospherics/unary/gas_extractor/interface_interact(mob/user)
 	ui_interact(user)

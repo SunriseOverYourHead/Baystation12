@@ -321,45 +321,61 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/power/port_gen/pacman/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/machinery/power/port_gen/pacman/ui_interact(mob/user, datum/tgui/ui)
 	if(IsBroken())
 		return
+	ui = tgui_interact(user, src, "Pacman", src.name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	var/data = list()
-	data["active"] = active
-	if(istype(user, /mob/living/silicon/ai))
-		data["is_ai"] = 1
-	else if(istype(user, /mob/living/silicon/robot) && !Adjacent(user))
-		data["is_ai"] = 1
-	else
-		data["is_ai"] = 0
-	data["output_set"] = power_output
-	data["output_max"] = max_power_output
-	data["output_safe"] = max_safe_output
-	data["output_watts"] = power_output * power_gen
-	data["temperature_current"] = src.operating_temperature
-	data["temperature_max"] = src.max_temperature
-	if(overheating)
-		data["temperature_overheat"] = ((overheating / max_overheat) * 100)		// Overheat percentage. Generator explodes at 100%
-	else
-		data["temperature_overheat"] = 0
-	// 1 sheet = 1000cm3?
-	data["fuel_stored"] = round((sheets * 1000) + (sheet_left * 1000))
-	data["fuel_capacity"] = round(max_sheets * 1000, 0.1)
-	data["fuel_usage"] = active ? round((power_output / time_per_sheet) * 1000) : 0
-	data["fuel_type"] = sheet_name
-	data["uses_coolant"] = !!reagents
-	data["coolant_stored"] = reagents?.total_volume
-	data["coolant_capacity"] = reagents?.maximum_volume
+/obj/machinery/power/port_gen/pacman/ui_data(mob/user)
+	return list(
+		"active" = active,
+		"is_ai" = (istype(user, /mob/living/silicon/ai) || (istype(user, /mob/living/silicon/robot) && !Adjacent(user))),
+		"output_set" = power_output,
+		"output_max" = max_power_output,
+		"output_safe" = max_safe_output,
+		"output_watts" = power_output * power_gen,
+		"temperature_current" = operating_temperature,
+		"temperature_max" = max_temperature,
+		"temperature_overheat" = overheating ? ((overheating / max_overheat) * 100) : 0,
+		"fuel_stored" = round((sheets * 1000) + (sheet_left * 1000)),
+		"fuel_capacity" = round(max_sheets * 1000, 0.1),
+		"fuel_usage" = active ? round((power_output / time_per_sheet) * 1000) : 0,
+		"fuel_type" = sheet_name,
+		"uses_coolant" = !!reagents,
+		"coolant_stored" = reagents?.total_volume,
+		"coolant_capacity" = reagents?.maximum_volume,
+	)
 
-
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "pacman.tmpl", src.name, 500, 560)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/power/port_gen/pacman/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	src.add_fingerprint(usr)
+	switch(action)
+		if("enable")
+			if(!active && HasFuel() && !IsBroken())
+				active = 1
+				update_icon()
+			. = TRUE
+		if("disable")
+			if(active)
+				active = 0
+				update_icon()
+			. = TRUE
+		if("eject")
+			if(!active)
+				DropFuel()
+			. = TRUE
+		if("lower_power")
+			if(power_output > 1)
+				power_output--
+			. = TRUE
+		if("higher_power")
+			if(power_output < max_power_output || (emagged && power_output < round(max_power_output*2.5)))
+				power_output++
+			. = TRUE
 
 
 /*
@@ -389,30 +405,6 @@
 	show_browser(user, "[dat]", "window=port_gen")
 	onclose(user, "port_gen")
 */
-
-/obj/machinery/power/port_gen/pacman/Topic(href, href_list)
-	if(..())
-		return
-
-	src.add_fingerprint(usr)
-	if(href_list["action"])
-		if(href_list["action"] == "enable")
-			if(!active && HasFuel() && !IsBroken())
-				active = 1
-				update_icon()
-		if(href_list["action"] == "disable")
-			if (active)
-				active = 0
-				update_icon()
-		if(href_list["action"] == "eject")
-			if(!active)
-				DropFuel()
-		if(href_list["action"] == "lower_power")
-			if (power_output > 1)
-				power_output--
-		if (href_list["action"] == "higher_power")
-			if (power_output < max_power_output || (emagged && power_output < round(max_power_output*2.5)))
-				power_output++
 
 /obj/machinery/power/port_gen/pacman/super
 	name = "\improper S.U.P.E.R.P.A.C.M.A.N.-type Portable Generator"

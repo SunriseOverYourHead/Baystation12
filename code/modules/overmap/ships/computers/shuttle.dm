@@ -1,7 +1,6 @@
 //Shuttle controller computer for shuttles going between sectors
 /obj/machinery/computer/shuttle_control/explore
 	name = "general shuttle control console"
-	ui_template = "shuttle_control_console_exploration.tmpl"
 	base_type = /obj/machinery/computer/shuttle_control/explore
 	machine_name = "long range shuttle console"
 	machine_desc = "Used to control spacecraft that are designed to move between local sectors in open space."
@@ -55,3 +54,24 @@
 		if(CanInteract(usr, GLOB.default_state) && (D in possible_d))
 			shuttle.set_destination(possible_d[D])
 		return TOPIC_REFRESH
+
+/obj/machinery/computer/shuttle_control/explore/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	var/mob/user = ui.user
+	var/datum/shuttle/autodock/overmap/shuttle = SSshuttle.shuttles[shuttle_tag]
+	if(istype(shuttle))
+		shuttle.operator_skill = user.get_skill_value(SKILL_PILOT)
+	. = ..()
+	if(.)
+		return
+	if(!istype(shuttle))
+		return
+	if(action == "pick")
+		var/list/possible_d = shuttle.get_possible_destinations()
+		if(length(possible_d))
+			var/D = input(user, "Choose shuttle destination", "Shuttle Destination") as null|anything in possible_d
+			possible_d = shuttle.get_possible_destinations()
+			if(D && CanInteract(user, GLOB.default_state) && (D in possible_d))
+				shuttle.set_destination(possible_d[D])
+		else
+			to_chat(user, SPAN_WARNING("No valid landing sites in range."))
+		. = TRUE

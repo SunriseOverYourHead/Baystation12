@@ -44,7 +44,7 @@ var/global/bomb_set
 		playsound(loc, 'sound/items/timer.ogg',50)
 		if(world.time > timeleft)
 			addtimer(new Callback(src, PROC_REF(explode)), 0)
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 
 /obj/machinery/nuclearbomb/use_tool(obj/item/O, mob/living/user, list/click_params)
 	if(isScrewdriver(O))
@@ -184,40 +184,116 @@ var/global/bomb_set
 		ui_interact(user)
 		return TRUE
 
-/obj/machinery/nuclearbomb/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
-	data["evacuate"] = evacuate
-	data["hacking"] = 0
-	data["auth"] = is_auth(user)
-	data["is_regular_nuke"] = !istype(src, /obj/machinery/nuclearbomb/station)
-	if(is_auth(user))
+/obj/machinery/nuclearbomb/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "NuclearBomb", "Nuke Control Panel", ui)
+	ui.set_autoupdate(TRUE)
+
+/obj/machinery/nuclearbomb/ui_data(mob/user)
+	var/auth = is_auth(user)
+	var/authstatus
+	if(auth)
 		if(yes_code)
-			data["authstatus"] = timing ? "Functional/Set" : "Functional"
+			authstatus = timing ? "Functional/Set" : "Functional"
 		else
-			data["authstatus"] = "Auth. S2"
+			authstatus = "Auth. S2"
 	else
 		if(timing)
-			data["authstatus"] = "Set"
+			authstatus = "Set"
 		else
-			data["authstatus"] = "Auth. S1"
-	data["safe"] = safety ? "Safe" : "Engaged"
-	data["time"] = timing ? round((timeleft - world.time)/10, 1) : round(timeleft/10, 1)
-	data["timer"] = timing
-	data["safety"] = safety
-	data["anchored"] = anchored
-	data["yescode"] = yes_code
-	data["message"] = "AUTH"
-	if(is_auth(user))
-		data["message"] = code
-		if(yes_code)
-			data["message"] = "*****"
+			authstatus = "Auth. S1"
+	// Build the two status display lines
+	var/status1 = "[authstatus] | [safety ? "Safe" : "Engaged"]"
+	var/status2 = timing ? "[round((timeleft - world.time)/10, 1)]s" : "[round(timeleft/10, 1)]s"
+	return list(
+		"disk_present" = !isnull(auth_disk()),
+		"status1" = status1,
+		"status2" = status2,
+		"anchored" = anchored,
+	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "nuclear_bomb.tmpl", "Nuke Control Panel", 300, 510)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/nuclearbomb/proc/auth_disk()
+	return auth
+
+/obj/machinery/nuclearbomb/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("keypad")
+			if(!is_auth(usr))
+				return FALSE
+			var/digit = params["digit"]
+			if(digit == "C") // reset
+				yes_code = 0
+				code = null
+			else if(digit == "E") // enter
+				if(code == r_code)
+					yes_code = 1
+					code = null
+					log_and_message_admins("has armed \the [src]")
+				else
+					code = "ERROR"
+			else
+				if(isnull(text2num_or_default(digit)))
+					log_and_message_admins("tried to exploit a nuclear bomb by entering non-numerical codes")
+				else
+					code += digit
+					if(length(code) > 5)
+						code = "ERROR"
+			return TRUE
+		if("eject_disk")
+			if(auth)
+				auth.forceMove(loc)
+				yes_code = 0
+				auth = null
+			else
+				var/obj/item/I = usr.get_active_hand()
+				if(istype(I, /obj/item/disk/nuclear))
+					if(!usr.unEquip(I, src))
+						return FALSE
+					auth = I
+			return TRUE
+		if("arm")
+			if(!is_auth(usr) || !yes_code)
+				return FALSE
+			if(timing)
+				to_chat(usr, SPAN_WARNING("Cannot alter the timing during countdown."))
+				return FALSE
+			if(wires.IsIndexCut(NUCLEARBOMB_WIRE_TIMING))
+				to_chat(usr, SPAN_WARNING("Nothing happens, something might be wrong with the wiring."))
+				return FALSE
+			if(!anchored)
+				to_chat(usr, SPAN_WARNING("\The [src] needs to be anchored."))
+				return FALSE
+			if(safety)
+				to_chat(usr, SPAN_WARNING("The safety is still on."))
+				return FALSE
+			if(!timing && !safety)
+				start_bomb()
+			else
+				secure_device()
+			return TRUE
+		if("anchor")
+			if(!is_auth(usr) || !yes_code)
+				return FALSE
+			if(removal_stage == 5)
+				anchored = FALSE
+				visible_message(SPAN_WARNING("\The [src] makes a highly unpleasant crunching noise. It looks like the anchoring bolts have been cut."))
+				return TRUE
+			if(!isinspace())
+				anchored = !anchored
+				if(anchored)
+					visible_message(SPAN_WARNING("With a steely snap, bolts slide out of \the [src] and anchor it to the flooring."))
+				else
+					secure_device()
+					visible_message(SPAN_WARNING("The anchoring bolts slide back into the depths of \the [src]."))
+			else
+				to_chat(usr, SPAN_WARNING("There is nothing to anchor to!"))
+			return TRUE
+	return FALSE
+
+/obj/machinery/nuclearbomb/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 /obj/machinery/nuclearbomb/verb/toggle_deployable()
 	set category = "Object"
@@ -242,96 +318,6 @@ var/global/bomb_set
 		return 1
 	return 0
 
-/obj/machinery/nuclearbomb/Topic(href, href_list)
-	if(..())
-		return 1
-
-	if(href_list["auth"])
-		if(auth)
-			auth.forceMove(loc)
-			yes_code = 0
-			auth = null
-		else
-			var/obj/item/I = usr.get_active_hand()
-			if(istype(I, /obj/item/disk/nuclear))
-				if(!usr.unEquip(I, src))
-					return 1
-				auth = I
-	if(is_auth(usr))
-		if(href_list["type"])
-			if(href_list["type"] == "E")
-				if(code == r_code)
-					yes_code = 1
-					code = null
-					log_and_message_admins("has armed \the [src]")
-				else
-					code = "ERROR"
-			else
-				if(href_list["type"] == "R")
-					yes_code = 0
-					code = null
-				else
-					lastentered = "[href_list["type"]]"
-					if(isnull(text2num_or_default(lastentered)))
-						log_and_message_admins("tried to exploit a nuclear bomb by entering non-numerical codes")
-					else
-						code += lastentered
-						if(length(code) > 5)
-							code = "ERROR"
-		if(yes_code)
-			if(href_list["time"])
-				if(timing)
-					to_chat(usr, SPAN_WARNING("Cannot alter the timing during countdown."))
-					return
-
-				var/time = text2num(href_list["time"]) SECONDS
-				timeleft += time
-				timeleft = clamp(timeleft, minTime, maxTime)
-			if(href_list["timer"])
-				if(timing == -1)
-					return 1
-				if(!anchored)
-					to_chat(usr, SPAN_WARNING("\The [src] needs to be anchored."))
-					return 1
-				if(safety)
-					to_chat(usr, SPAN_WARNING("The safety is still on."))
-					return 1
-				if(wires.IsIndexCut(NUCLEARBOMB_WIRE_TIMING))
-					to_chat(usr, SPAN_WARNING("Nothing happens, something might be wrong with the wiring."))
-					return 1
-				if(!timing && !safety)
-					start_bomb()
-				else
-					secure_device()
-			if(href_list["safety"])
-				if (wires.IsIndexCut(NUCLEARBOMB_WIRE_SAFETY))
-					to_chat(usr, SPAN_WARNING("Nothing happens, something might be wrong with the wiring."))
-					return 1
-				safety = !safety
-				if(safety)
-					secure_device()
-				update_icon()
-			if(href_list["evacuate"])
-				if(timing)
-					to_chat(usr, SPAN_WARNING("Cannot alter evacuation during countdown."))
-					return
-				evacuate = !evacuate
-			if(href_list["anchor"])
-				if(removal_stage == 5)
-					anchored = FALSE
-					visible_message(SPAN_WARNING("\The [src] makes a highly unpleasant crunching noise. It looks like the anchoring bolts have been cut."))
-					return 1
-
-				if(!isinspace())
-					anchored = !anchored
-					if(anchored)
-						visible_message(SPAN_WARNING("With a steely snap, bolts slide out of \the [src] and anchor it to the flooring."))
-					else
-						secure_device()
-						visible_message(SPAN_WARNING("The anchoring bolts slide back into the depths of \the [src]."))
-				else
-					to_chat(usr, SPAN_WARNING("There is nothing to anchor to!"))
-	return 1
 
 /obj/machinery/nuclearbomb/proc/start_bomb()
 	timeleft += world.time

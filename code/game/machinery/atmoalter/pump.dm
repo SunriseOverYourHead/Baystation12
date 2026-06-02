@@ -110,47 +110,53 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/portable_atmospherics/powered/pump/ui_interact(mob/user, ui_key = "rcon", datum/nanoui/ui=null, force_open=1)
-	var/list/data = list()
+/obj/machinery/portable_atmospherics/powered/pump/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "PortablePump", "Portable Pump", ui)
+
+/obj/machinery/portable_atmospherics/powered/pump/ui_data(mob/user)
 	var/obj/item/cell/cell = get_cell()
-	data["portConnected"] = connected_port ? 1 : 0
-	data["tankPressure"] = round(air_contents.return_pressure() > 0 ? air_contents.return_pressure() : 0)
-	data["targetpressure"] = round(target_pressure)
-	data["pump_dir"] = direction_out
-	data["minpressure"] = round(pressuremin)
-	data["maxpressure"] = round(pressuremax)
-	data["powerDraw"] = round(last_power_draw)
-	data["cellCharge"] = cell ? cell.charge : 0
-	data["cellMaxCharge"] = cell ? cell.maxcharge : 1
-	data["on"] = (use_power == POWER_USE_ACTIVE) ? 1 : 0
-
-	data["hasHoldingTank"] = holding ? 1 : 0
-	if (holding)
+	var/list/data = list(
+		"portConnected"  = connected_port ? 1 : 0,
+		"tankPressure"   = round(air_contents.return_pressure() > 0 ? air_contents.return_pressure() : 0),
+		"targetpressure" = round(target_pressure),
+		"pump_dir"       = direction_out,
+		"minpressure"    = round(pressuremin),
+		"maxpressure"    = round(pressuremax),
+		"powerDraw"      = round(last_power_draw),
+		"cellCharge"     = cell ? cell.charge : 0,
+		"cellMaxCharge"  = cell ? cell.maxcharge : 1,
+		"on"             = (use_power == POWER_USE_ACTIVE) ? 1 : 0,
+		"hasHoldingTank" = holding ? 1 : 0,
+	)
+	if(holding)
 		data["holdingTank"] = list("name" = holding.name, "tankPressure" = round(holding.air_contents.return_pressure() > 0 ? holding.air_contents.return_pressure() : 0))
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "portpump.tmpl", "Portable Pump", 480, 410, state = GLOB.physical_state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/portable_atmospherics/powered/pump/OnTopic(user, href_list)
-	if(href_list["power"])
-		update_use_power(use_power == POWER_USE_ACTIVE ? POWER_USE_IDLE : POWER_USE_ACTIVE)
-		. = TOPIC_REFRESH
-	if(href_list["direction"])
-		direction_out = !direction_out
-		. = TOPIC_REFRESH
-	if (href_list["remove_tank"])
-		if(holding)
-			holding.dropInto(loc)
-			holding = null
-		. = TOPIC_REFRESH
-	if (href_list["pressure_adj"])
-		var/diff = text2num(href_list["pressure_adj"])
-		target_pressure = min(10*ONE_ATMOSPHERE, max(0, target_pressure+diff))
-		. = TOPIC_REFRESH
-
+/obj/machinery/portable_atmospherics/powered/pump/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
 	if(.)
-		update_icon()
+		return
+	switch(action)
+		if("toggle_power")
+			update_use_power(use_power == POWER_USE_ACTIVE ? POWER_USE_IDLE : POWER_USE_ACTIVE)
+			update_icon()
+			return TRUE
+		if("toggle_direction")
+			direction_out = !direction_out
+			update_icon()
+			return TRUE
+		if("remove_tank")
+			if(holding)
+				holding.dropInto(loc)
+				holding = null
+				update_icon()
+			return TRUE
+		if("adjust_pressure")
+			var/diff = text2num(params["pressure_adj"])
+			target_pressure = min(10 * ONE_ATMOSPHERE, max(0, target_pressure + diff))
+			update_icon()
+			return TRUE
+	return FALSE
+
+/obj/machinery/portable_atmospherics/powered/pump/ui_state(mob/user)
+	return GLOB.tgui_physical_state

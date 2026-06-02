@@ -381,17 +381,25 @@
 		SPECIES_UNATHI = 'maps/torch/icons/mob/unathi/onmob_head_solgov_unathi.dmi'
 		)
 
+/obj/item/clothing/head/helmet/solgov/infantry
+	name = "M22 helmet"
+	desc = "A clamshell-design helmet with in wide service with the SCGMC and the Fleet. Rated for rifle rounds."
+	icon_state = "helmet_security"
+	icon = 'maps/torch/icons/obj/obj_head_solgov.dmi'
+	item_icons = list(slot_head_str = 'maps/torch/icons/mob/onmob_head_solgov.dmi')
+	accessories = list(/obj/item/clothing/accessory/helmet_cover/green)
+
 /obj/item/clothing/head/helmet/solgov/security
-	name = "security helmet"
-	desc = "A helmet with 'POLICE' printed on the back in silver lettering."
+	name = "M22 security helmet"
+	desc = "A clamshell-design helmet with 'POLICE' printed on the back in silver lettering."
 	icon_state = "helmet_security"
 	icon = 'maps/torch/icons/obj/obj_head_solgov.dmi'
 	item_icons = list(slot_head_str = 'maps/torch/icons/mob/onmob_head_solgov.dmi')
 	accessories = null
 
 /obj/item/clothing/head/helmet/solgov/command
-	name = "command helmet"
-	desc = "A helmet with 'SOL CENTRAL GOVERNMENT' printed on the back in gold lettering."
+	name = "M22 command helmet"
+	desc = "A clamshell-design helmet with 'SCG' printed on the back in gold lettering."
 	icon_state = "helmet_command"
 	icon = 'maps/torch/icons/obj/obj_head_solgov.dmi'
 	item_icons = list(slot_head_str = 'maps/torch/icons/mob/onmob_head_solgov.dmi')

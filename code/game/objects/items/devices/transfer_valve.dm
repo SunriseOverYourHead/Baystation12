@@ -41,7 +41,7 @@
 		attached_device.holder = src
 		attached_device.set_secure(TRUE)
 		attacher = user
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		GLOB.bombers += "[key_name(user)] attach \a [tool] to a transfer valve."
 		log_and_message_admins("[key_name_admin(user)] attached \a [tool] to a transfer valve.", user, get_turf(src))
 		user.visible_message(
@@ -89,7 +89,7 @@
 			log_and_message_admins("[key_name_admin(user)] attached both tanks to a transfer valve.", user, get_turf(src))
 		w_class = max(initial(w_class), tank_one.w_class, tank_two?.w_class)
 		update_icon()
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		user.visible_message(
 			SPAN_NOTICE("\The [user] attaches \a [tool] to \a [src]."),
 			SPAN_NOTICE("You attach \the [tool] to \the [src].")
@@ -112,57 +112,60 @@
 		return
 	ui_interact(user)
 
-/obj/item/device/transfer_valve/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/item/device/transfer_valve/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "TransferValve", "Tank Transfer Valve", ui)
 
-	// this is the data which will be sent to the ui
-	var/data = list()
-	data["attachmentOne"] = tank_one ? tank_one.name : null
-	data["attachmentTwo"] = tank_two ? tank_two.name : null
-	data["valveAttachment"] = attached_device ? attached_device.name : null
-	data["valveOpen"] = valve_open ? TRUE : FALSE
-	data["armed"] = armed ? TRUE : FALSE
+/obj/item/device/transfer_valve/ui_data(mob/user)
+	return list(
+		"attachmentOne"    = tank_one ? tank_one.name : null,
+		"attachmentTwo"    = tank_two ? tank_two.name : null,
+		"valveAttachment"  = attached_device ? attached_device.name : null,
+		"valveOpen"        = valve_open ? TRUE : FALSE,
+		"armed"            = armed ? TRUE : FALSE,
+	)
 
-	// update the ui if it exists, returns null if no ui is passed/found
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		// the ui does not exist, so we'll create a new() one
-		// for a list of parameters and their descriptions see the code docs in \code\modules\nano\nanoui.dm
-		ui = new(user, src, ui_key, "transfer_valve.tmpl", "Tank Transfer Valve", 460, 280)
-		// when the ui is first opened this is the data it will use
-		ui.set_initial_data(data)
-		// open the new ui window
-		ui.open()
-		// auto update every Master Controller tick
-		//ui.set_auto_update(1)
-
-/obj/item/device/transfer_valve/Topic(href, href_list)
-	..()
-	if ( usr.stat || usr.restrained() )
-		return FALSE
-	if (src.loc != usr)
-		return FALSE
-	if (!armed)
-		if(tank_one && href_list["tankone"])
-			remove_tank(tank_one)
-		else if(tank_two && href_list["tanktwo"])
-			remove_tank(tank_two)
-		else if(href_list["open"])
-			toggle_valve()
-		else if(attached_device)
-			if (href_list["rem_device"])
+/obj/item/device/transfer_valve/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("eject_tank")
+			if(!armed)
+				if(params["tankone"] && tank_one)
+					remove_tank(tank_one)
+					return TRUE
+				if(params["tanktwo"] && tank_two)
+					remove_tank(tank_two)
+					return TRUE
+		if("toggle_valve")
+			if(!armed)
+				toggle_valve()
+				return TRUE
+		if("remove_device")
+			if(!armed && attached_device)
 				attached_device.dropInto(loc)
 				attached_device:holder = null
 				attached_device = null
 				update_icon()
-			if (href_list["device"])
+				return TRUE
+		if("view_device")
+			if(attached_device)
 				attached_device.attack_self(usr)
-			if (href_list["arm"])
+				return TRUE
+		if("arm_device")
+			if(!armed)
 				toggle_armed()
-	if(armed && href_list["activate"])
-		attached_device.activate()
-		visible_message(SPAN_WARNING("The [attached_device] blips!"), range = 3)
-		message_admins("[key_name_admin(usr)] triggered \the [src]. (<A HREF='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[src.loc.x];Y=[src.loc.y];Z=[src.loc.z]'>JMP</a>)")
-	return TRUE // Returning 1 sends an update to attached UIs
+				return TRUE
+		if("trigger_device")
+			if(armed && attached_device)
+				attached_device.activate()
+				visible_message(SPAN_WARNING("The [attached_device] blips!"), range = 3)
+				message_admins("[key_name_admin(usr)] triggered \the [src]. (<A HREF='byond://?_src_=holder;adminplayerobservecoodjump=1;X=[src.loc.x];Y=[src.loc.y];Z=[src.loc.z]'>JMP</a>)")
+				return TRUE
+	return FALSE
+
+/obj/item/device/transfer_valve/ui_state(mob/user)
+	return GLOB.tgui_physical_state
 
 /obj/item/device/transfer_valve/process_activation(obj/item/device/D)
 	if(toggle)

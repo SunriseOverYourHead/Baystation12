@@ -129,17 +129,15 @@
 			message += "is lacking a cell."
 		to_chat(user, jointext(message,.))
 
-/obj/item/device/suit_sensor_jammer/CanUseTopic(user, state)
-	if(!bcell || bcell.charge <= 0)
-		return STATUS_CLOSE
-	return ..()
+/obj/item/device/suit_sensor_jammer/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "SuitSensorJammer", "Sensor Jammer", ui)
 
-/obj/item/device/suit_sensor_jammer/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/item/device/suit_sensor_jammer/ui_data(mob/user)
 	var/list/methods = new
 	for(var/suit_sensor_jammer_method/ssjm in suit_sensor_jammer_methods)
 		methods[LIST_PRE_INC(methods)] = list("name" = ssjm.name, "cost" = ssjm.energy_cost, "ref" = "\ref[ssjm]")
 
-	var/list/data = list(
+	return list(
 		"active" = active,
 		"current_charge" = bcell ? round(bcell.charge, 1) : 0,
 		"max_charge" = bcell ? bcell.maxcharge : 0,
@@ -151,33 +149,32 @@
 		"total_cost" = "[ceil(JAMMER_POWER_CONSUMPTION(10))]"
 	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "suit_sensor_jammer.tmpl", "Sensor Jammer", 300, 640)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/item/device/suit_sensor_jammer/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("enable_jammer")
+			enable()
+			return TRUE
+		if("disable_jammer")
+			disable()
+			return TRUE
+		if("increase_range")
+			set_range(range + 1)
+			return TRUE
+		if("decrease_range")
+			set_range(range - 1)
+			return TRUE
+		if("select_method")
+			var/method = locate(params["select_method"]) in suit_sensor_jammer_methods
+			if(method)
+				set_method(method)
+			return TRUE
+	return FALSE
 
-/obj/item/device/suit_sensor_jammer/OnTopic(mob/user, list/href_list, state)
-	if (href_list["enable_jammer"])
-		enable()
-		return TOPIC_REFRESH
-	if (href_list["disable_jammer"])
-		disable()
-		return TOPIC_REFRESH
-
-	if (href_list["increase_range"])
-		set_range(range + 1)
-		return TOPIC_REFRESH
-	if (href_list["decrease_range"])
-		set_range(range - 1)
-		return TOPIC_REFRESH
-
-	if (href_list["select_method"])
-		var/method = locate(href_list["select_method"]) in suit_sensor_jammer_methods
-		if(method)
-			set_method(method)
-			return TOPIC_REFRESH
+/obj/item/device/suit_sensor_jammer/ui_state(mob/user)
+	return GLOB.tgui_physical_state
 
 /obj/item/device/suit_sensor_jammer/Process(wait)
 	if(bcell)

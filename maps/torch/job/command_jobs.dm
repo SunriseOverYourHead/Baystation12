@@ -76,7 +76,7 @@
 		access_explorer, access_pathfinder, access_pilot, access_commissary, access_petrov, access_petrov_helm, access_petrov_analysis, access_petrov_phoron,
 		access_petrov_toxins, access_petrov_chemistry, access_petrov_control, access_petrov_maint, access_rd, access_petrov_rd, access_torch_fax, access_torch_helm,
 		access_radio_comm, access_radio_eng, access_radio_med, access_radio_sec, access_radio_sup, access_radio_serv, access_radio_exp, access_radio_sci, access_research_storage,
-		access_fabrication
+		access_fabrication, access_rifleman, access_comtech, access_ftlead, access_squadlead, access_platoon, access_radio_inf
 	)
 
 	software_on_spawn = list(/datum/computer_file/program/comm,
@@ -315,12 +315,12 @@
 	                    SKILL_FORENSICS   = SKILL_MAX)
 
 	access = list(
-		access_security, access_brig, access_armory, access_forensics_lockers,
+		access_radio_inf, access_rifleman, access_comtech, access_squadlead, access_ftlead,
 		access_maint_tunnels, access_external_airlocks, access_emergency_storage,
 		access_teleporter, access_eva, access_bridge, access_heads, access_aquila,
-		access_hos, access_RC_announce, access_keycard_auth, access_sec_doors,
+		access_hos, access_RC_announce, access_keycard_auth,
 		access_solgov_crew, access_gun, access_emergency_armory, access_hangar, access_torch_fax,
-		access_radio_comm, access_radio_sec
+		access_radio_comm, access_radio_inf, access_platoon
 	)
 
 	software_on_spawn = list(/datum/computer_file/program/comm,

@@ -195,30 +195,55 @@ var/global/list/turret_icons
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/porta_turret/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/list/data = list()
-	data["access"] = !isLocked(user)
-	data["locked"] = locked
-	data["enabled"] = enabled
-	data["is_lethal"] = 1
-	data["lethal"] = lethal
+/obj/machinery/porta_turret/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "TurretControl", "Turret Controls", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	if(data["access"])
+/obj/machinery/porta_turret/ui_data(mob/user)
+	var/has_access = !isLocked(user)
+	var/list/data = list(
+		"access" = has_access,
+		"locked" = locked,
+		"enabled" = enabled,
+		"lethal" = lethal
+	)
+	if (has_access)
 		var/list/settings = list()
-		settings[LIST_PRE_INC(settings)] = list("category" = "Neutralize All Non-Synthetics", "setting" = "check_synth", "value" = check_synth)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Weapon Authorization", "setting" = "check_weapons", "value" = check_weapons)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Security Records", "setting" = "check_records", "value" = check_records)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Arrest Status", "setting" = "check_arrest", "value" = check_arrest)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Access Authorization", "setting" = "check_access", "value" = check_access)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check misc. Lifeforms", "setting" = "check_anomalies", "value" = check_anomalies)
+		settings += list(list("category" = "Neutralize All Non-Synthetics", "setting" = "check_synth", "value" = check_synth))
+		settings += list(list("category" = "Check Weapon Authorization", "setting" = "check_weapons", "value" = check_weapons))
+		settings += list(list("category" = "Check Security Records", "setting" = "check_records", "value" = check_records))
+		settings += list(list("category" = "Check Arrest Status", "setting" = "check_arrest", "value" = check_arrest))
+		settings += list(list("category" = "Check Access Authorization", "setting" = "check_access", "value" = check_access))
+		settings += list(list("category" = "Check misc. Lifeforms", "setting" = "check_anomalies", "value" = check_anomalies))
 		data["settings"] = settings
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "turret_control.tmpl", "Turret Controls", 500, 300)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/porta_turret/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	if (!isLocked(usr))
+		if (action == "toggle" && params["command"] && !isnull(params["value"]))
+			var/command = params["command"]
+			var/value = text2num(params["value"])
+			if (command == "enable")
+				enabled = value
+			else if (command == "lethal")
+				lethal = value
+			else if (command == "check_synth")
+				check_synth = value
+			else if (command == "check_weapons")
+				check_weapons = value
+			else if (command == "check_records")
+				check_records = value
+			else if (command == "check_arrest")
+				check_arrest = value
+			else if (command == "check_access")
+				check_access = value
+			else if (command == "check_anomalies")
+				check_anomalies = value
+			. = TRUE
 
 /obj/machinery/porta_turret/proc/HasController()
 	var/area/A = get_area(src)
@@ -239,30 +264,6 @@ var/global/list/turret_icons
 	return ..()
 
 
-/obj/machinery/porta_turret/Topic(href, href_list)
-	if(..())
-		return 1
-
-	if(href_list["command"] && href_list["value"])
-		var/value = text2num(href_list["value"])
-		if(href_list["command"] == "enable")
-			enabled = value
-		else if(href_list["command"] == "lethal")
-			lethal = value
-		else if(href_list["command"] == "check_synth")
-			check_synth = value
-		else if(href_list["command"] == "check_weapons")
-			check_weapons = value
-		else if(href_list["command"] == "check_records")
-			check_records = value
-		else if(href_list["command"] == "check_arrest")
-			check_arrest = value
-		else if(href_list["command"] == "check_access")
-			check_access = value
-		else if(href_list["command"] == "check_anomalies")
-			check_anomalies = value
-
-		return 1
 
 /obj/machinery/porta_turret/power_change()
 	if(powered())
@@ -801,7 +802,39 @@ var/global/list/turret_icons
 /atom/movable/porta_turret_cover
 	icon = 'icons/obj/machines/turrets.dmi'
 
+// Turret subtypes
 
+/obj/machinery/porta_turret/ssv
+	name = "Skrellian anti-personnel battery"
+	desc = "An automated turret of Skrellian manufacture."
+	enabled = 1
+	ailock = 1
+	lethal = 1
+	check_synth	 = 0
+	check_access = 1
+	check_arrest = 0
+	check_records = 0
+	check_weapons = 0
+	check_anomalies = 0
+	installation = /obj/item/gun/energy/pulse_rifle/skrell
+	color = COLOR_DARK_GRAY
+	req_access = list("ACCESS_SKRELLSCOUT")
+
+/obj/machinery/porta_turret/mantid
+	name = "Mantid Defence Battery"
+	desc = "An automated turret emplacement of Mantid origin."
+	enabled = 1
+	ailock = 1
+	lethal = 1
+	check_synth	 = 0
+	check_access = 1
+	check_arrest = 0
+	check_records = 0
+	check_weapons = 0
+	check_anomalies = 0
+	installation = /obj/item/gun/energy/particle
+	color = COLOR_PURPLE
+	req_access = list("ACCESS_ASCENT")
 
 
 #undef TURRET_PRIORITY_TARGET

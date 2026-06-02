@@ -266,84 +266,76 @@ var/global/list/all_gps_units = list()
 	else
 		.["no_signals"] = TRUE
 
-/obj/item/device/gps/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, master_ui = null, datum/topic_state/state = GLOB.default_state)
+/obj/item/device/gps/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "Gps", name, ui)
 
-	var/data = ui_data()
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "gps.tmpl", name, 500, 300, master_ui = master_ui, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/item/device/gps/OnTopic(mob/user, list/href_list)
-
-	if(href_list["toggle_power"])
-		toggle_tracking()
-		. = TOPIC_REFRESH
-
-	if(href_list["track_label"])
-		var/gps_ref = href_list["track_label"]
-		var/obj/item/device/gps/gps = locate(gps_ref)
-		if(istype(gps) && !QDELETED(gps) && !LAZYACCESS(showing_tracked_names, gps_ref))
-			LAZYSET(showing_tracked_names, gps_ref, TRUE)
-		else
+/obj/item/device/gps/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("toggle_power")
+			toggle_tracking(usr)
+			return TRUE
+		if("track_label")
+			var/gps_ref = params["track_label"]
+			var/obj/item/device/gps/gps = locate(gps_ref)
+			if(istype(gps) && !QDELETED(gps) && !LAZYACCESS(showing_tracked_names, gps_ref))
+				LAZYSET(showing_tracked_names, gps_ref, TRUE)
+			else
+				LAZYREMOVE(showing_tracked_names, gps_ref)
+			to_chat(usr, SPAN_NOTICE("\The [src] is [LAZYACCESS(showing_tracked_names, gps_ref) ? "now showing" : "no longer showing"] labels for [gps.gps_tag]."))
+			return TRUE
+		if("stop_track")
+			var/gps_ref = params["stop_track"]
+			var/obj/item/device/gps/gps = locate(gps_ref)
+			compass.clear_waypoint(gps_ref)
+			LAZYREMOVE(tracking_devices, gps_ref)
 			LAZYREMOVE(showing_tracked_names, gps_ref)
-		to_chat(user, SPAN_NOTICE("\The [src] is [LAZYACCESS(showing_tracked_names, gps_ref) ? "now showing" : "no longer showing"] labels for [gps.gps_tag]."))
-		. = TOPIC_REFRESH
-
-	if(href_list["stop_track"])
-		var/gps_ref = href_list["stop_track"]
-		var/obj/item/device/gps/gps = locate(gps_ref)
-		compass.clear_waypoint(gps_ref)
-		LAZYREMOVE(tracking_devices, gps_ref)
-		LAZYREMOVE(showing_tracked_names, gps_ref)
-		if(istype(gps) && !QDELETED(gps))
-			to_chat(user, SPAN_NOTICE("\The [src] is no longer tracking [gps.gps_tag]."))
-		update_compass()
-		. = TOPIC_REFRESH
-
-	if(href_list["start_track"])
-		var/gps_ref = href_list["start_track"]
-		var/obj/item/device/gps/gps = locate(gps_ref)
-		if(istype(gps) && !QDELETED(gps))
-			LAZYSET(tracking_devices, gps_ref, COLOR_SILVER)
-			LAZYSET(showing_tracked_names, gps_ref, TRUE)
-			to_chat(user, SPAN_NOTICE("\The [src] is now tracking [gps.gps_tag]."))
+			if(istype(gps) && !QDELETED(gps))
+				to_chat(usr, SPAN_NOTICE("\The [src] is no longer tracking [gps.gps_tag]."))
 			update_compass()
-			. = TOPIC_REFRESH
-
-	if(href_list["track_color"])
-		var/obj/item/device/gps/gps = locate(href_list["track_color"])
-		if(istype(gps) && !QDELETED(gps))
-			var/new_colour = input("Enter a new tracking color.", "GPS Waypoint Color") as color|null
-			if(new_colour && istype(gps) && !QDELETED(gps) && holder == user && !user.incapacitated())
-				to_chat(user, SPAN_NOTICE("You adjust the colour \the [src] is using to highlight [gps.gps_tag]."))
-				LAZYSET(tracking_devices, href_list["track_color"], new_colour)
+			return TRUE
+		if("start_track")
+			var/gps_ref = params["start_track"]
+			var/obj/item/device/gps/gps = locate(gps_ref)
+			if(istype(gps) && !QDELETED(gps))
+				LAZYSET(tracking_devices, gps_ref, COLOR_SILVER)
+				LAZYSET(showing_tracked_names, gps_ref, TRUE)
+				to_chat(usr, SPAN_NOTICE("\The [src] is now tracking [gps.gps_tag]."))
 				update_compass()
-				. = TOPIC_REFRESH
+			return TRUE
+		if("track_color")
+			var/obj/item/device/gps/gps = locate(params["track_color"])
+			if(istype(gps) && !QDELETED(gps))
+				var/new_colour = input(usr, "Enter a new tracking color.", "GPS Waypoint Color") as color|null
+				if(new_colour && istype(gps) && !QDELETED(gps) && holder == usr && !usr.incapacitated())
+					to_chat(usr, SPAN_NOTICE("You adjust the colour \the [src] is using to highlight [gps.gps_tag]."))
+					LAZYSET(tracking_devices, params["track_color"], new_colour)
+					update_compass()
+			return TRUE
+		if("tag")
+			var/a = input(usr, "Please enter desired tag.", name, gps_tag) as text
+			a = uppertext(copytext(sanitize(a), 1, 11))
+			if(in_range(src, usr))
+				gps_tag = a
+				name = "[initial(name)] ([gps_tag])"
+				to_chat(usr, SPAN_NOTICE("You set your GPS's tag to '[gps_tag]'."))
+			return TRUE
+		if("range")
+			local_mode = !local_mode
+			to_chat(usr, SPAN_NOTICE("You set the signal receiver to [local_mode ? "'NARROW'" : "'BROAD'"]."))
+			return TRUE
+		if("hide")
+			if(!can_hide_signal)
+				return TRUE
+			hide_signal = !hide_signal
+			to_chat(usr, SPAN_NOTICE("You set the device to [hide_signal ? "not " : ""]broadcast a signal while scanning for other signals."))
+			return TRUE
+	return FALSE
 
-	if(href_list["tag"])
-		/// Used to hold the sanitised input.
-		var/a = input("Please enter desired tag.", name, gps_tag) as text
-		a = uppertext(copytext(sanitize(a), 1, 11))
-		if(in_range(src, user))
-			gps_tag = a
-			name = "[initial(name)] ([gps_tag])"
-			to_chat(user, SPAN_NOTICE("You set your GPS's tag to '[gps_tag]'."))
-			. = TOPIC_REFRESH
-
-	if(href_list["range"])
-		local_mode = !local_mode
-		to_chat(user, SPAN_NOTICE("You set the signal receiver to [local_mode ? "'NARROW'" : "'BROAD'"]."))
-		. = TOPIC_REFRESH
-
-	if(href_list["hide"])
-		if(!can_hide_signal)
-			return
-		hide_signal = !hide_signal
-		to_chat(user, SPAN_NOTICE("You set the device to [hide_signal ? "not " : ""]broadcast a signal while scanning for other signals."))
-		. = TOPIC_REFRESH
+/obj/item/device/gps/ui_state(mob/user)
+	return GLOB.tgui_physical_state
 
 /obj/item/device/gps/AltClick(mob/user)
 	toggle_tracking(user)

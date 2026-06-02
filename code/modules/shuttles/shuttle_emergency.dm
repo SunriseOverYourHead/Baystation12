@@ -170,11 +170,18 @@
 	read_authorization(W)
 	return ..()
 
-/obj/machinery/computer/shuttle_control/emergency/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
+/obj/machinery/computer/shuttle_control/emergency/ui_interact(mob/user, datum/tgui/ui)
 	var/datum/shuttle/autodock/ferry/emergency/shuttle = SSshuttle.shuttles[shuttle_tag]
 	if (!istype(shuttle))
 		return
+	ui = tgui_interact(user, src, "ShuttleEmergency", "Emergency Shuttle Control", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/machinery/computer/shuttle_control/emergency/ui_data(mob/user)
+	var/datum/shuttle/autodock/ferry/emergency/shuttle = SSshuttle.shuttles[shuttle_tag]
+	if (!istype(shuttle))
+		return list()
 
 	var/shuttle_state
 	switch(shuttle.moving_status)
@@ -198,54 +205,43 @@
 		if(WAIT_FINISH)
 			shuttle_status = "Arriving at destination now."
 
-	//build a list of authorizations
 	var/list/auth_list[req_authorizations]
-
 	if (!emagged)
 		var/i = 1
 		for (var/dna_hash in authorized)
-			auth_list[i++] = list("auth_name"=authorized[dna_hash], "auth_hash"=dna_hash)
-
-		while (i <= req_authorizations)	//fill up the rest of the list with blank entries
-			auth_list[i++] = list("auth_name"="", "auth_hash"=null)
+			auth_list[i++] = list("auth_name" = authorized[dna_hash], "auth_hash" = dna_hash)
+		while (i <= req_authorizations)
+			auth_list[i++] = list("auth_name" = "", "auth_hash" = null)
 	else
 		for (var/i = 1; i <= req_authorizations; i++)
-			auth_list[i] = list("auth_name"="[SPAN_COLOR("red", "ERROR")]", "auth_hash"=null)
+			auth_list[i] = list("auth_name" = "ERROR", "auth_hash" = null)
 
-	var/has_auth = has_authorization()
-
-	data = list(
+	return list(
 		"shuttle_status" = shuttle_status,
 		"shuttle_state" = shuttle_state,
-		"has_docking" = shuttle.active_docking_controller? 1 : 0,
-		"docking_status" = shuttle.active_docking_controller? shuttle.active_docking_controller.get_docking_status() : null,
-		"docking_override" = shuttle.active_docking_controller? shuttle.active_docking_controller.override_enabled : null,
+		"has_docking" = shuttle.active_docking_controller ? 1 : 0,
+		"docking_status" = shuttle.active_docking_controller ? shuttle.active_docking_controller.get_docking_status() : null,
 		"can_launch" = shuttle.can_launch(src),
 		"can_cancel" = shuttle.can_cancel(src),
 		"can_force" = shuttle.can_force(src),
 		"auth_list" = auth_list,
-		"has_auth" = has_auth,
-		"user" = debug? user : null,
+		"has_auth" = has_authorization(),
 	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-
-	if (!ui)
-		ui = new(user, src, ui_key, "escape_shuttle_control_console.tmpl", "Shuttle Control", 470, 420)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/computer/shuttle_control/emergency/OnTopic(user, href_list)
-	if(href_list["removeid"])
-		var/dna_hash = href_list["removeid"]
-		authorized -= dna_hash
-		. = TOPIC_REFRESH
-
-	else if(!emagged && href_list["scanid"])
-		//They selected an empty entry. Try to scan their id.
-		var/mob/living/carbon/human/H = user
-		if (istype(H))
-			if (!read_authorization(H.get_active_hand()))	//try to read what's in their hand first
-				read_authorization(H.wear_id)
-				. = TOPIC_REFRESH
+/obj/machinery/computer/shuttle_control/emergency/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if (.)
+		return
+	switch(action)
+		if("removeid")
+			var/dna_hash = params["hash"]
+			if (dna_hash)
+				authorized -= dna_hash
+			. = TRUE
+		if("scanid")
+			if (!emagged)
+				var/mob/living/carbon/human/H = ui.user
+				if (istype(H))
+					if (!read_authorization(H.get_active_hand()))
+						read_authorization(H.wear_id)
+			. = TRUE

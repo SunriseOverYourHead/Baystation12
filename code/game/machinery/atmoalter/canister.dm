@@ -221,88 +221,85 @@
 
 	. = ..()
 
-	SSnano.update_uis(src) // Update all NanoUIs attached to src
+	SStgui.update_uis(src)
 
 /obj/machinery/portable_atmospherics/canister/interface_interact(mob/user)
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/portable_atmospherics/canister/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	// this is the data which will be sent to the ui
-	var/data = list()
-	data["name"] = name
-	data["canLabel"] = can_label ? 1 : 0
-	data["portConnected"] = connected_port ? 1 : 0
-	data["tankPressure"] = round(air_contents.return_pressure() ? air_contents.return_pressure() : 0)
-	data["releasePressure"] = round(release_pressure ? release_pressure : 0)
-	data["minReleasePressure"] = round(ONE_ATMOSPHERE/10)
-	data["maxReleasePressure"] = round(10*ONE_ATMOSPHERE)
-	data["valveOpen"] = valve_open ? 1 : 0
+/obj/machinery/portable_atmospherics/canister/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "GasCanister", "Canister", ui)
 
-	data["hasHoldingTank"] = holding ? 1 : 0
-	if (holding)
+/obj/machinery/portable_atmospherics/canister/ui_data(mob/user)
+	var/list/data = list(
+		"name"               = name,
+		"canLabel"           = can_label ? 1 : 0,
+		"portConnected"      = connected_port ? 1 : 0,
+		"tankPressure"       = round(air_contents.return_pressure() ? air_contents.return_pressure() : 0),
+		"releasePressure"    = round(release_pressure ? release_pressure : 0),
+		"minReleasePressure" = round(ONE_ATMOSPHERE / 10),
+		"maxReleasePressure" = round(10 * ONE_ATMOSPHERE),
+		"valveOpen"          = valve_open ? 1 : 0,
+		"hasHoldingTank"     = holding ? 1 : 0,
+	)
+	if(holding)
 		data["holdingTank"] = list("name" = holding.name, "tankPressure" = round(holding.air_contents.return_pressure()))
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "canister.tmpl", "Canister", 480, 400)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/portable_atmospherics/canister/OnTopic(mob/user, href_list, state)
-	if(href_list["toggle"])
-		if (!valve_open)
-			if(!holding)
-				log_open(user)
-		valve_open = !valve_open
-		. = TOPIC_REFRESH
-
-	else if (href_list["remove_tank"])
-		if(!holding)
-			return TOPIC_HANDLED
-		if (valve_open)
-			valve_open = 0
-		if(istype(holding, /obj/item/tank))
-			holding.manipulated_by = user.real_name
-		holding.dropInto(loc)
-		holding = null
-		update_icon()
-		. = TOPIC_REFRESH
-
-	else if (href_list["pressure_adj"])
-		var/diff = text2num(href_list["pressure_adj"])
-		if(diff > 0)
-			release_pressure = min(10*ONE_ATMOSPHERE, release_pressure+diff)
-		else
-			release_pressure = max(ONE_ATMOSPHERE/10, release_pressure+diff)
-		. = TOPIC_REFRESH
-
-	else if (href_list["relabel"])
-		if (!can_label)
-			return 0
-		var/list/colors = list(\
-			"\[N2O\]" = "redws", \
-			"\[N2\]" = "red", \
-			"\[O2\]" = "blue", \
-			"\[Phoron\]" = "orange", \
-			"\[CO2\]" = "black", \
-			"\[H2\]" = "purple", \
-			"\[Air\]" = "grey", \
-			"\[CAUTION\]" = "yellow", \
-		)
-		var/label = input(user, "Choose canister label", "Gas canister") as null|anything in colors
-		if (label && CanUseTopic(user, state))
-			canister_color = colors[label]
-			icon_state = colors[label]
-			SetName("\improper Canister: [label]")
-		update_icon()
-		. = TOPIC_REFRESH
-
-/obj/machinery/portable_atmospherics/canister/CanUseTopic()
+/obj/machinery/portable_atmospherics/canister/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
 	if(destroyed)
-		return STATUS_CLOSE
-	return ..()
+		return FALSE
+	switch(action)
+		if("toggle_valve")
+			if(!valve_open && !holding)
+				log_open(usr)
+			valve_open = !valve_open
+			return TRUE
+		if("remove_tank")
+			if(!holding)
+				return FALSE
+			if(valve_open)
+				valve_open = 0
+			if(istype(holding, /obj/item/tank))
+				holding.manipulated_by = usr.real_name
+			holding.dropInto(loc)
+			holding = null
+			update_icon()
+			return TRUE
+		if("adjust_pressure")
+			var/diff = text2num(params["pressure_adj"])
+			if(diff > 0)
+				release_pressure = min(10 * ONE_ATMOSPHERE, release_pressure + diff)
+			else
+				release_pressure = max(ONE_ATMOSPHERE / 10, release_pressure + diff)
+			return TRUE
+		if("relabel")
+			if(!can_label)
+				return FALSE
+			var/list/colors = list(
+				"\[N2O\]"     = "redws",
+				"\[N2\]"      = "red",
+				"\[O2\]"      = "blue",
+				"\[Phoron\]"  = "orange",
+				"\[CO2\]"     = "black",
+				"\[H2\]"      = "purple",
+				"\[Air\]"     = "grey",
+				"\[CAUTION\]" = "yellow",
+			)
+			var/label = input(usr, "Choose canister label", "Gas canister") as null|anything in colors
+			if(label)
+				canister_color = colors[label]
+				icon_state = colors[label]
+				SetName("\improper Canister: [label]")
+			update_icon()
+			return TRUE
+	return FALSE
+
+/obj/machinery/portable_atmospherics/canister/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 /obj/machinery/portable_atmospherics/canister/phoron/New()
 	..()

@@ -26,7 +26,9 @@
 		"ICGNV Hound" = list("nav_hound_dock"),
 		"SFV Arbiter" = list("nav_sfv_arbiter_dock"),
 		"FTV Cubkitten" = list("nav_hangar_cubkitten_torch"),
-		"ISV Crab" = list("nav_salvage_shuttle_torch_eva_dock")
+		"ISV Crab" = list("nav_salvage_shuttle_torch_eva_dock"),
+		"Ascent Seedship" = list("nav_ascent_main_dock"), //restritcts the main ascent ship to dock on deck 4 starboard quarter.
+		"Amphiesmenoptera" = list("nav_trichoptera_altdock"), //restricts Amphiesmenoptera specific docking waypoint on deck 4 portside
 	)
 
 	initial_generic_waypoints = list(

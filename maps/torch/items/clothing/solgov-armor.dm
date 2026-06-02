@@ -31,28 +31,28 @@
 /obj/item/clothing/suit/armor/pcarrier/blue/sol
 	name = "peacekeeper plate carrier"
 	desc = "A lightweight plate carrier vest in SCG Peacekeeper colors. It can be equipped with armor plates, but provides no protection of its own."
-	accessories = list(/obj/item/clothing/accessory/armor_plate/medium, /obj/item/clothing/accessory/storage/pouches/blue, /obj/item/clothing/accessory/arm_guards/blue, /obj/item/clothing/accessory/armor_tag/solgov)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/III, /obj/item/clothing/accessory/storage/pouches/blue, /obj/item/clothing/accessory/arm_guards/blue, /obj/item/clothing/accessory/armor_tag/solgov)
 
 /obj/item/clothing/suit/armor/pcarrier/light/sol
 	accessories = list(/obj/item/clothing/accessory/armor_plate, /obj/item/clothing/accessory/armor_tag/solgov)
 
 /obj/item/clothing/suit/armor/pcarrier/medium/sol
-	accessories = list(/obj/item/clothing/accessory/armor_plate/medium, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/III, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov)
 
 /obj/item/clothing/suit/armor/pcarrier/medium/security
-	accessories = list(/obj/item/clothing/accessory/armor_plate/medium, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov/sec)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/III, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov/sec)
 
 /obj/item/clothing/suit/armor/pcarrier/medium/command
-	accessories = list(/obj/item/clothing/accessory/armor_plate/medium, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov/com)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/III, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov/com)
 
 /obj/item/clothing/suit/armor/pcarrier/medium/command/security
-	accessories = list(/obj/item/clothing/accessory/armor_plate/medium, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov/com/sec)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/III, /obj/item/clothing/accessory/storage/pouches, /obj/item/clothing/accessory/armor_tag/solgov/com/sec)
 
 // SCGDF Combat Plate Carriers -- Non-standard issue for Torch, provides roughly the same protection as merc armor
 /obj/item/clothing/suit/armor/pcarrier/fleet
 	name = "\improper SCGF Plate Carrier"
 	desc = "A black plate carrier with SOL CENTRAL GOVERNMENT FLEET printed in silver lettering on the chest."
-	accessories = list(/obj/item/clothing/accessory/armor_plate/merc, /obj/item/clothing/accessory/storage/pouches/navy, /obj/item/clothing/accessory/leg_guards/heavy, /obj/item/clothing/accessory/arm_guards/heavy, /obj/item/clothing/accessory/armor_tag/solgov)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/IV, /obj/item/clothing/accessory/storage/pouches/navy, /obj/item/clothing/accessory/leg_guards/heavy, /obj/item/clothing/accessory/arm_guards/heavy, /obj/item/clothing/accessory/armor_tag/solgov)
 
 /obj/item/clothing/suit/armor/pcarrier/fleet/officer
 	name = "\improper SCGF Officer's Plate Carrier"
@@ -61,7 +61,7 @@
 /obj/item/clothing/suit/armor/pcarrier/navy/fleet
 	name = "\improper SCGF Plate Carrier"
 	desc = "A navy blue plate carrier with SOL CENTRAL GOVERNMENT FLEET printed in silver lettering on the chest."
-	accessories = list(/obj/item/clothing/accessory/armor_plate/merc, /obj/item/clothing/accessory/storage/pouches/navy, /obj/item/clothing/accessory/leg_guards/heavy/navy, /obj/item/clothing/accessory/arm_guards/heavy/navy, /obj/item/clothing/accessory/armor_tag/solgov)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/IV, /obj/item/clothing/accessory/storage/pouches/navy, /obj/item/clothing/accessory/leg_guards/heavy/navy, /obj/item/clothing/accessory/arm_guards/heavy/navy, /obj/item/clothing/accessory/armor_tag/solgov)
 
 /obj/item/clothing/suit/armor/pcarrier/navy/fleet/officer
 	name = "\improper SCGF Officer's Plate Carrier"
@@ -70,7 +70,7 @@
 /obj/item/clothing/suit/armor/pcarrier/tan/scgdf
 	name = "\improper SCGDF Plate Carrier"
 	desc = "A tan plate carrier with SOL CENTRAL GOVERNMENT DEFENSE FORCES printed in silver lettering on the chest."
-	accessories = list(/obj/item/clothing/accessory/armor_plate/merc, /obj/item/clothing/accessory/storage/pouches/tan, /obj/item/clothing/accessory/leg_guards/heavy/tan, /obj/item/clothing/accessory/arm_guards/heavy/tan, /obj/item/clothing/accessory/armor_tag/solgov)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/IV, /obj/item/clothing/accessory/storage/pouches/tan, /obj/item/clothing/accessory/leg_guards/heavy/tan, /obj/item/clothing/accessory/arm_guards/heavy/tan, /obj/item/clothing/accessory/armor_tag/solgov)
 
 /obj/item/clothing/suit/armor/pcarrier/tan/scgdf/officer
 	name = "\improper SCGDF Officer's Plate Carrier"
@@ -79,7 +79,7 @@
 /obj/item/clothing/suit/armor/pcarrier/green/scgdf
 	name = "\improper SCGDF Plate Carrier"
 	desc = "A green plate carrier with SOL CENTRAL GOVERNMENT DEFENSE FORCES printed in silver lettering on the chest."
-	accessories = list(/obj/item/clothing/accessory/armor_plate/merc, /obj/item/clothing/accessory/storage/pouches/green, /obj/item/clothing/accessory/leg_guards/heavy/green, /obj/item/clothing/accessory/arm_guards/heavy/green, /obj/item/clothing/accessory/armor_tag/solgov)
+	accessories = list(/obj/item/clothing/accessory/armor_plate/IV, /obj/item/clothing/accessory/storage/pouches/green, /obj/item/clothing/accessory/leg_guards/heavy/green, /obj/item/clothing/accessory/arm_guards/heavy/green, /obj/item/clothing/accessory/armor_tag/solgov)
 
 /obj/item/clothing/suit/armor/pcarrier/green/scgdf/officer
 	name = "\improper SCGDF Officer's Plate Carrier"

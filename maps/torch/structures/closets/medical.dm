@@ -91,8 +91,8 @@
 	return list(
 		/obj/item/clothing/accessory/storage/white_vest,
 		/obj/item/clothing/suit/storage/toggle/fr_jacket,
-		/obj/item/device/radio/headset/headset_med,
-		/obj/item/device/radio/headset/headset_corpsman/alt,
+		/obj/item/device/radio/headset/headset_med/infantry,
+		/obj/item/device/radio/headset/headset_med/infantry/alt,
 		/obj/item/taperoll/medical,
 		/obj/item/storage/belt/medical/emt,
 		/obj/item/clothing/mask/gas/half,

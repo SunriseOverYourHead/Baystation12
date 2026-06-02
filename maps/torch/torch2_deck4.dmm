@@ -3935,6 +3935,9 @@
 	dir = 1;
 	pixel_y = -4
 	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
+	},
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/fourthdeck/fore)
 "nx" = (
@@ -4513,6 +4516,9 @@
 /obj/structure/sign/directions/infirmary{
 	dir = 1;
 	pixel_y = -4
+	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
 	},
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/fourthdeck/fore)
@@ -6376,6 +6382,9 @@
 /obj/structure/sign/directions/science{
 	dir = 1;
 	pixel_y = 3
+	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
 	},
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/fourthdeck/aft)

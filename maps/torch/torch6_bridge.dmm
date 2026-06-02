@@ -602,8 +602,8 @@
 	d2 = 8;
 	icon_state = "4-8"
 	},
-/obj/floor_decal/corner/research{
-	dir = 5
+/obj/floor_decal/corner/lime/half{
+	dir = 1
 	},
 /turf/simulated/floor/tiled,
 /area/crew_quarters/heads/office/rd)
@@ -1096,11 +1096,11 @@
 	d2 = 8;
 	icon_state = "2-8"
 	},
-/obj/floor_decal/corner/research{
-	dir = 5
-	},
 /obj/floor_decal/industrial/outline/yellow,
 /obj/machinery/hologram/holopad/longrange,
+/obj/floor_decal/corner/lime/half{
+	dir = 1
+	},
 /turf/simulated/floor/tiled,
 /area/crew_quarters/heads/office/rd)
 "ck" = (
@@ -1615,11 +1615,6 @@
 /area/maintenance/bridge/forestarboard)
 "cS" = (
 /obj/machinery/door/firedoor,
-/obj/machinery/door/airlock/research{
-	id_tag = "csodoor";
-	name = "Chief Science Officer";
-	secured_wires = 1
-	},
 /obj/structure/cable/green{
 	d1 = 1;
 	d2 = 2;
@@ -1631,6 +1626,11 @@
 	d1 = 2;
 	d2 = 8;
 	icon_state = "2-8"
+	},
+/obj/machinery/door/airlock/infantry{
+	secured_wires = 1;
+	id_tag = "csodoor";
+	name = "Platoon Officer"
 	},
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
@@ -6368,6 +6368,7 @@
 	dir = 1;
 	icon_state = "console"
 	},
+/obj/item/stamp/cos,
 /turf/simulated/floor/tiled/dark/monotile,
 /area/security/bridgecheck)
 "pF" = (
@@ -7654,6 +7655,7 @@
 	dir = 8;
 	pixel_x = 20
 	},
+/obj/floor_decal/corner/lime/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "tl" = (
@@ -10427,6 +10429,7 @@
 	dir = 4;
 	icon_state = "tube1"
 	},
+/obj/floor_decal/corner/lime/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "BW" = (
@@ -12238,15 +12241,13 @@
 	pixel_y = 28;
 	req_access = list("ACCESS_RESEARCH_DIRECTOR")
 	},
-/obj/floor_decal/corner/research/half{
-	dir = 1
-	},
 /obj/machinery/button/windowtint{
 	id = "rd_windows";
 	pixel_x = 28;
 	pixel_y = 18;
 	range = 11
 	},
+/obj/floor_decal/corner/lime/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "IW" = (
@@ -12457,6 +12458,7 @@
 /area/crew_quarters/heads/office/co)
 "Kj" = (
 /obj/machinery/papershredder,
+/obj/floor_decal/corner/lime/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "Km" = (
@@ -12627,6 +12629,9 @@
 /obj/structure/sign/directions/engineering{
 	pixel_y = 3
 	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
+	},
 /turf/simulated/wall/r_wall/prepainted,
 /area/hallway/primary/bridge/fore)
 "Lb" = (
@@ -12739,9 +12744,9 @@
 /area/maintenance/bridge/foreport)
 "Lv" = (
 /obj/structure/table/glass,
-/obj/item/stamp/rd,
-/obj/floor_decal/corner/research{
-	dir = 5
+/obj/item/stamp/po,
+/obj/floor_decal/corner/lime/half{
+	dir = 1
 	},
 /turf/simulated/floor/tiled,
 /area/crew_quarters/heads/office/rd)
@@ -14580,9 +14585,8 @@
 /turf/simulated/floor/tiled/dark/monotile,
 /area/aux_eva)
 "Ti" = (
-/obj/floor_decal/industrial/outline/grey,
-/obj/floor_decal/corner/research/mono,
-/obj/structure/closet/secure_closet/RD_torch,
+/obj/floor_decal/corner/lime/mono,
+/obj/structure/closet/secure_closet/infantry/platoon,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "Tj" = (
@@ -14791,7 +14795,7 @@
 	pixel_y = 30
 	},
 /obj/machinery/photocopier,
-/obj/floor_decal/corner/research/mono,
+/obj/floor_decal/corner/lime/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "Uk" = (
@@ -14978,9 +14982,9 @@
 	pixel_y = 30
 	},
 /obj/item/material/folder/nt,
-/obj/floor_decal/corner/research/mono,
 /obj/item/material/folder/envelope,
 /obj/item/material/folder/envelope,
+/obj/floor_decal/corner/lime/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "Vj" = (
@@ -15205,12 +15209,12 @@
 "Wi" = (
 /obj/structure/table/glass,
 /obj/machinery/photocopier/faxmachine{
-	department = "Torch - Chief Science Officer"
+	department = "Torch - Platoon Officer"
 	},
 /obj/machinery/newscaster{
 	pixel_y = 32
 	},
-/obj/floor_decal/corner/research/mono,
+/obj/floor_decal/corner/lime/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/crew_quarters/heads/office/rd)
 "Wj" = (
@@ -15811,7 +15815,7 @@
 	d2 = 4;
 	icon_state = "0-4"
 	},
-/obj/floor_decal/corner/research/half{
+/obj/floor_decal/corner/lime/half{
 	dir = 1
 	},
 /turf/simulated/floor/tiled/monotile,

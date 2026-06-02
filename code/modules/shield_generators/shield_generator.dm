@@ -242,130 +242,110 @@
 		running = SHIELD_SPINNING_UP
 		spinup_counter = round(spinup_delay / idle_multiplier)
 
-/obj/machinery/power/shield_generator/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
+/obj/machinery/power/shield_generator/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "ShieldGenerator", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	data["running"] = running
-	data["modes"] = get_flag_descriptions()
-	data["overloaded"] = overloaded
-	data["mitigation_max"] = mitigation_max
+/obj/machinery/power/shield_generator/ui_data(mob/user)
+	var/list/data = list()
+	var/max_e = round(max_energy / 1000000, 0.1)
+	var/cur_e = round(current_energy / 1000000, 0.1)
+	data["running"] =             running
+	data["modes"] =               get_flag_descriptions()
+	data["overloaded"] =          overloaded
+	data["mitigation_max"] =      mitigation_max
 	data["mitigation_physical"] = round(mitigation_physical, 0.1)
-	data["mitigation_em"] = round(mitigation_em, 0.1)
-	data["mitigation_heat"] = round(mitigation_heat, 0.1)
-	data["field_integrity"] = field_integrity()
-	data["max_energy"] = round(max_energy / 1000000, 0.1)
-	data["current_energy"] = round(current_energy / 1000000, 0.1)
-	data["percentage_energy"] = max_energy ? round(data["current_energy"] / data["max_energy"] * 100) : 0
-	data["total_segments"] = field_segments ? length(field_segments) : 0
+	data["mitigation_em"] =       round(mitigation_em, 0.1)
+	data["mitigation_heat"] =     round(mitigation_heat, 0.1)
+	data["field_integrity"] =     field_integrity()
+	data["max_energy"] =          max_e
+	data["current_energy"] =      cur_e
+	data["percentage_energy"] =   max_e ? round(cur_e / max_e * 100) : 0
+	data["total_segments"] =      field_segments ? length(field_segments) : 0
 	data["functional_segments"] = damaged_segments ? data["total_segments"] - length(damaged_segments) : data["total_segments"]
-	data["field_radius"] = field_radius
-	data["target_radius"] = target_radius
-	data["input_cap_kw"] = round(input_cap / 1000)
-	data["upkeep_power_usage"] = round(upkeep_power_usage / 1000, 0.1)
-	data["power_usage"] = round(power_usage / 1000)
-	data["hacked"] = hacked
-	data["offline_for"] = offline_for * 2
-	data["idle_multiplier"] = idle_multiplier
-	data["idle_valid_values"] = idle_valid_values
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "shieldgen.tmpl", src.name, 500, 800)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
+	data["field_radius"] =        field_radius
+	data["target_radius"] =       target_radius
+	data["input_cap_kw"] =        round(input_cap / 1000)
+	data["upkeep_power_usage"] =  round(upkeep_power_usage / 1000, 0.1)
+	data["power_usage"] =         round(power_usage / 1000)
+	data["hacked"] =              hacked
+	data["offline_for"] =         offline_for * 2
+	data["idle_multiplier"] =     idle_multiplier
+	data["idle_valid_values"] =   idle_valid_values
+	data["mode_changes_locked"] = mode_changes_locked
+	return data
 
 /obj/machinery/power/shield_generator/interface_interact(mob/user)
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/power/shield_generator/CanUseTopic(mob/user)
-	if (panel_open)
-		return STATUS_CLOSE
-	if(issilicon(user) && !Adjacent(user) && ai_control_disabled)
-		return STATUS_UPDATE
-	return ..()
-
-/obj/machinery/power/shield_generator/OnTopic(user, href_list, datum/topic_state/state)
-	if(href_list["begin_shutdown"])
-		if(running < SHIELD_RUNNING)
-			return
-		var/alert = alert(user, "Are you sure you wish to do this? It will drain the power inside the internal storage rapidly.", "Are you sure?", "Yes", "No")
-		if(!CanInteract(user, state))
-			return
-		if(running < SHIELD_RUNNING)
-			return
-		if(alert == "Yes")
-			set_idle(TRUE) // do this first to clear the field
+/obj/machinery/power/shield_generator/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	if(panel_open)
+		return
+	switch(action)
+		if("begin_shutdown")
+			if(running < SHIELD_RUNNING)
+				return
+			set_idle(TRUE)
 			running = SHIELD_DISCHARGING
-		return TOPIC_REFRESH
-
-	if(href_list["start_generator"])
-		if(offline_for)
-			return
-		set_idle(TRUE)
-		return TOPIC_REFRESH
-
-	if(href_list["toggle_idle"])
-		if(running < SHIELD_RUNNING)
-			return TOPIC_HANDLED
-		set_idle(text2num(href_list["toggle_idle"]))
-		return TOPIC_REFRESH
-
-	// Instantly drops the shield, but causes a cooldown before it may be started again. Also carries a risk of EMP at high charge.
-	if(href_list["emergency_shutdown"])
-		if(!running)
-			return TOPIC_HANDLED
-
-		var/choice = input(user, "Are you sure that you want to initiate an emergency shield shutdown? This will instantly drop the shield, and may result in unstable release of stored electromagnetic energy. Proceed at your own risk.") in list("Yes", "No")
-		if((choice != "Yes") || !running)
-			return TOPIC_HANDLED
-
-		// If the shield would take 5 minutes to disperse and shut down using regular methods, it will take x1.5 (7 minutes and 30 seconds) of this time to cool down after emergency shutdown
-		offline_for = round(current_energy / (SHIELD_SHUTDOWN_DISPERSION_RATE / 1.5))
-		var/old_energy = current_energy
-		shutdown_field()
-		log_and_message_admins("has triggered \the [src]'s emergency shutdown!", user)
-		spawn()
-			empulse(src, old_energy / 60000000, old_energy / 32000000, 1) // If shields are charged at 450 MJ, the EMP will be 7.5, 14.0625. 90 MJ, 1.5, 2.8125
-		old_energy = 0
-
-		return TOPIC_REFRESH
-
-	if(mode_changes_locked)
-		return TOPIC_REFRESH
-
-	if(href_list["set_range"])
-		var/new_range = input(user, "Enter new field range (1-[world.maxx]). Leave blank to cancel.", "Field Radius Control", field_radius) as num
-		if(!new_range)
-			return TOPIC_HANDLED
-		target_radius = clamp(new_range, 1, world.maxx)
-		return TOPIC_REFRESH
-
-	if(href_list["set_input_cap"])
-		var/new_cap = round(input(user, "Enter new input cap (in kW). Enter 0 or nothing to disable input cap.", "Generator Power Control", round(input_cap / 1000)) as num)
-		if(!new_cap)
-			input_cap = 0
-			return
-		input_cap = max(0, new_cap) * 1000
-		return TOPIC_REFRESH
-
-	if(href_list["toggle_mode"])
-		// Toggling hacked-only modes requires the hacked var to be set to 1
-		if((text2num(href_list["toggle_mode"]) & (MODEFLAG_BYPASS | MODEFLAG_OVERCHARGE)) && !hacked)
-			return TOPIC_HANDLED
-
-		toggle_flag(text2num(href_list["toggle_mode"]))
-		return TOPIC_REFRESH
-
-	if(href_list["switch_idle"])
-		if(running == SHIELD_SPINNING_UP)
-			return TOPIC_REFRESH
-		var/new_idle = text2num(href_list["switch_idle"])
-		if(new_idle in idle_valid_values)
-			idle_multiplier = new_idle
-		return TOPIC_REFRESH
+			. = TRUE
+		if("start_generator")
+			if(offline_for)
+				return
+			set_idle(TRUE)
+			. = TRUE
+		if("toggle_idle")
+			if(running < SHIELD_RUNNING)
+				return
+			set_idle(text2num(params["value"]))
+			. = TRUE
+		// Instantly drops the shield, but causes a cooldown before it may be started again. Also carries a risk of EMP at high charge.
+		if("emergency_shutdown")
+			if(!running)
+				return
+			offline_for = round(current_energy / (SHIELD_SHUTDOWN_DISPERSION_RATE / 1.5))
+			var/old_energy = current_energy
+			shutdown_field()
+			log_and_message_admins("has triggered \the [src]'s emergency shutdown!", usr)
+			spawn()
+				empulse(src, old_energy / 60000000, old_energy / 32000000, 1)
+			. = TRUE
+		if("set_range")
+			if(mode_changes_locked)
+				return
+			var/new_range = text2num(params["value"])
+			if(!new_range)
+				return
+			target_radius = clamp(new_range, 1, world.maxx)
+			. = TRUE
+		if("set_input_cap")
+			if(mode_changes_locked)
+				return
+			var/new_cap = round(text2num(params["value"]))
+			if(!new_cap)
+				input_cap = 0
+			else
+				input_cap = max(0, new_cap) * 1000
+			. = TRUE
+		if("toggle_mode")
+			if(mode_changes_locked)
+				return
+			var/flag = text2num(params["flag"])
+			if((flag & (MODEFLAG_BYPASS | MODEFLAG_OVERCHARGE)) && !hacked)
+				return
+			toggle_flag(flag)
+			. = TRUE
+		if("switch_idle")
+			if(mode_changes_locked || running == SHIELD_SPINNING_UP)
+				return
+			var/new_idle = text2num(params["value"])
+			if(new_idle in idle_valid_values)
+				idle_multiplier = new_idle
+			. = TRUE
 
 /obj/machinery/power/shield_generator/proc/field_integrity()
 	if(full_shield_strength)

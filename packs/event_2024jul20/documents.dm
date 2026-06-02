@@ -307,3 +307,31 @@
 <p>&nbsp;<em>This paper has been stamped with the insignia of the Sol Central Government.</em></p>
 <hr /><center><img src="sollogo.png" /></center>
 "}
+
+/obj/item/material/folder/envelope/preset/poorder
+	desc = "A thick envelope. The Expeditionary Corps crest is stamped in the corner, along with 'DISSEMINATE AS NECESSARY. FOR CS/XO EYES.'"
+
+
+/obj/item/material/folder/envelope/preset/poorder/Initialize()
+	. = ..()
+	new /obj/item/paper/poorder (src)
+
+
+/obj/item/paper/poorder // TODO
+	name = "Notice - Crisis and Serenity"
+	info = {"\
+<center><h3>EXPEDITIONARY COMMAND - OBSERVATORY</h3>
+<img src="eclogo.png" /></center>
+<p><tt><tt><strong>FROM:</strong> Lieutenant Sam Nerehel, SCGEC Observatory<br /><strong>TO:</strong> Expeditionary Corps Vessel #3, SEV Torch<br /><strong>CC:</strong> Admiral William Henry Lau, Observatory <br /><strong>SUBJECT:</strong> Notice - Crisis and Serenity<br /></tt></tt></p>
+<hr />
+<p>Good day.</p>
+<p>We are gravely disconcerted with your current situation. Operating a vessel's service crew under times of duress such as these can be challenging.</p>
+<p>It is expected of you to ensure that proper burial and funerary services are being conducted by <strong>Medical</strong> and the <strong>Chaplains</strong>. The bodies must be preserved, and their names must be noted for posterity.</p>
+<p>Upon return to safe harbour, a proper commemoration will be conducted. Ideally with your aid.</p>
+<p>Coordinate with the <strong>Supply</strong> department in order to ensure you have a steady supply of proper rations and uplifting necessities.</p>
+<p>It is suggested that you replenish lost food supplies with cheaper, and more ubiquitous insect protein for the duration of this retreat. While Fleet cargo vessels carry most basic necessities, emergency rationing must be considered.</p>
+<p>The service department is crucial in the adequate maintenance and operation of the craft. Ensure that the standard is well maintained.</p>
+<hr />
+<p>&nbsp;<em>This paper has been stamped with the insignia of the SCGEC Observatory.</em></p>
+<hr /><center><img src="eclogo.png" /></center>
+"}

@@ -14,6 +14,10 @@
 	name = "chief of security's rubber stamp"
 	icon_state = "stamp-cos"
 
+/obj/item/stamp/po
+	name = "platoon officer's rubber stamp"
+	icon_state = "stamp-cos"
+
 /obj/item/stamp/brig
 	name = "brig chief's rubber stamp"
 	icon_state = "stamp-brig"

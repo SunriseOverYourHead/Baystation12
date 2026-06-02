@@ -382,6 +382,17 @@
 	icon_state = "exp_headset_alt"
 	item_state = "exp_headset_alt"
 
+/obj/item/device/radio/headset/infantry/lead/
+	name = "lead infantry headset"
+	desc = "A headset with an inbuilt subspace antenna for better reception."
+	icon_state = "exp_headset"
+	item_state = "headset"
+	ks1type = /obj/item/device/encryptionkey/infantry/lead
+
+/obj/item/device/radio/headset/infantry/lead/alt
+	name = "lead infantry bowman headset"
+	icon_state = "exp_headset_alt"
+	item_state = "exp_headset_alt"
 
 /obj/item/device/radio/headset/headset_med/infantry
 	name = "corpsman radio headset"

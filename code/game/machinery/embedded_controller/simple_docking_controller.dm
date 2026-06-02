@@ -4,24 +4,27 @@
 	program = /datum/computer/file/embedded_program/docking/simple
 	var/tag_door
 
-/obj/machinery/embedded_controller/radio/simple_docking_controller/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/nanoui/master_ui = null, datum/topic_state/state = GLOB.default_state)
-	var/data = list()
-	var/datum/computer/file/embedded_program/docking/simple/docking_program = program
+/obj/machinery/embedded_controller/radio/simple_docking_controller/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "SimpleDockingConsole", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	data = list(
+/obj/machinery/embedded_controller/radio/simple_docking_controller/ui_data(mob/user)
+	var/datum/computer/file/embedded_program/docking/simple/docking_program = program
+	return list(
 		"docking_status" = docking_program.get_docking_status(),
 		"override_enabled" = docking_program.override_enabled,
-		"door_state" = 	docking_program.memory["door_status"]["state"],
-		"door_lock" = 	docking_program.memory["door_status"]["lock"],
+		"door_state" = docking_program.memory["door_status"]["state"],
+		"door_lock" = docking_program.memory["door_status"]["lock"]
 	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-
-	if (!ui)
-		ui = new(user, src, ui_key, "simple_docking_console.tmpl", name, 470, 290, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/embedded_controller/radio/simple_docking_controller/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	if (action in list("force_door", "toggle_override"))
+		program.receive_user_command(action)
+		. = TRUE
 
 //A docking controller program for a simple door based docking port
 /datum/computer/file/embedded_program/docking/simple

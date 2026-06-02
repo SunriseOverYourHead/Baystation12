@@ -245,10 +245,13 @@ var/global/list/tank_gauge_cache = list()
 	if (proxyassembly.assembly)
 		proxyassembly.assembly.attack_self(user)
 
-/obj/item/tank/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/item/tank/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "GasTank", "Tank", ui)
+
+/obj/item/tank/ui_data(mob/user)
 	var/mob/living/carbon/location = null
 
-	if(istype(loc, /obj/item/rig))		// check for tanks in rigs
+	if(istype(loc, /obj/item/rig))
 		if(istype(loc.loc, /mob/living/carbon))
 			location = loc.loc
 	else if(istype(loc, /mob/living/carbon))
@@ -256,69 +259,61 @@ var/global/list/tank_gauge_cache = list()
 
 	var/using_internal
 	if(istype(location))
-		if(location.internal==src)
+		if(location.internal == src)
 			using_internal = 1
 
-	// this is the data which will be sent to the ui
-	var/data = list()
-	data["tankPressure"] = round(air_contents && air_contents.return_pressure() ? air_contents.return_pressure() : 0)
-	data["releasePressure"] = round(distribute_pressure ? distribute_pressure : 0)
-	data["defaultReleasePressure"] = round(initial(distribute_pressure))
-	data["maxReleasePressure"] = round(TANK_MAX_RELEASE_PRESSURE)
-	data["valveOpen"] = using_internal ? 1 : 0
-	data["maskConnected"] = 0
-
+	var/mask_connected = 0
 	if(istype(location))
 		var/mask_check = 0
 
-		if(location.internal == src)	// if tank is current internal
+		if(location.internal == src)
 			mask_check = 1
-		else if(src in location)		// or if tank is in the mobs possession
-			if(!location.internal)		// and they do not have any active internals
+		else if(src in location)
+			if(!location.internal)
 				mask_check = 1
-		else if(istype(loc, /obj/item/rig) && (loc in location))	// or the rig is in the mobs possession
-			if(!location.internal)		// and they do not have any active internals
+		else if(istype(loc, /obj/item/rig) && (loc in location))
+			if(!location.internal)
 				mask_check = 1
 
 		if(mask_check)
 			if(location.wear_mask && (location.wear_mask.item_flags & ITEM_FLAG_AIRTIGHT))
-				data["maskConnected"] = 1
+				mask_connected = 1
 			else if(istype(location, /mob/living/carbon/human))
 				var/mob/living/carbon/human/H = location
 				if(H.head && (H.head.item_flags & ITEM_FLAG_AIRTIGHT))
-					data["maskConnected"] = 1
+					mask_connected = 1
 
-	// update the ui if it exists, returns null if no ui is passed/found
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		// the ui does not exist, so we'll create a new() one
-		// for a list of parameters and their descriptions see the code docs in \code\modules\nano\nanoui.dm
-		ui = new(user, src, ui_key, "tanks.tmpl", "Tank", 500, 300)
-		// when the ui is first opened this is the data it will use
-		ui.set_initial_data(data)
-		// open the new ui window
-		ui.open()
-		// auto update every Master Controller tick
-		ui.set_auto_update(1)
+	return list(
+		"tankPressure"         = round(air_contents && air_contents.return_pressure() ? air_contents.return_pressure() : 0),
+		"releasePressure"      = round(distribute_pressure ? distribute_pressure : 0),
+		"defaultReleasePressure" = round(initial(distribute_pressure)),
+		"maxReleasePressure"   = round(TANK_MAX_RELEASE_PRESSURE),
+		"valveOpen"            = using_internal ? 1 : 0,
+		"maskConnected"        = mask_connected,
+	)
 
-/obj/item/tank/Topic(user, href_list, state = GLOB.inventory_state)
-	..()
+/obj/item/tank/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("adjust_pressure")
+			var/dist_p = params["dist_p"]
+			if(dist_p == "reset")
+				distribute_pressure = initial(distribute_pressure)
+			else if(dist_p == "max")
+				distribute_pressure = TANK_MAX_RELEASE_PRESSURE
+			else
+				distribute_pressure += text2num(dist_p)
+			distribute_pressure = min(max(round(distribute_pressure), 0), TANK_MAX_RELEASE_PRESSURE)
+			return TRUE
+		if("toggle_valve")
+			toggle_valve(usr)
+			return TRUE
+	return FALSE
 
-/obj/item/tank/OnTopic(user, href_list)
-	if (href_list["dist_p"])
-		if (href_list["dist_p"] == "reset")
-			distribute_pressure = initial(distribute_pressure)
-		else if (href_list["dist_p"] == "max")
-			distribute_pressure = TANK_MAX_RELEASE_PRESSURE
-		else
-			var/cp = text2num(href_list["dist_p"])
-			distribute_pressure += cp
-		distribute_pressure = min(max(round(distribute_pressure), 0), TANK_MAX_RELEASE_PRESSURE)
-		return TOPIC_REFRESH
-
-	if (href_list["stat"])
-		toggle_valve(usr)
-		return TOPIC_REFRESH
+/obj/item/tank/ui_state(mob/user)
+	return GLOB.tgui_physical_state
 
 /obj/item/tank/proc/toggle_valve(mob/user)
 

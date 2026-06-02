@@ -1,19 +1,25 @@
-/obj/machinery/fabricator/OnTopic(user, href_list, state)
-	if(href_list["change_category"])
-		var/choice = input("Which category do you wish to display?") as null|anything in SSfabrication.get_categories(fabricator_class)|"All"
-		if(!choice || !CanUseTopic(user, state))
-			return TOPIC_HANDLED
+/obj/machinery/fabricator/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if(.)
+		return
+	if(action == "change_category")
+		var/choice = params["category"]
+		if(!choice)
+			return
+		var/list/valid = SSfabrication.get_categories(fabricator_class)
+		if(choice != "All" && !(choice in valid))
+			return
 		show_category = choice
-		. = TOPIC_REFRESH
-	else if(href_list["make"])
-		try_queue_build(locate(href_list["make"]), text2num(href_list["multiplier"]))
-		. = TOPIC_REFRESH
-	else if(href_list["cancel"])
-		try_cancel_build(locate(href_list["cancel"]))
-		. = TOPIC_REFRESH
-	else if(href_list["eject_mat"])
-		try_dump_material(href_list["eject_mat"])
-		. = TOPIC_REFRESH
+		. = TRUE
+	else if(action == "make")
+		try_queue_build(locate(params["make"]), text2num(params["multiplier"]))
+		. = TRUE
+	else if(action == "cancel")
+		try_cancel_build(locate(params["cancel"]))
+		. = TRUE
+	else if(action == "eject_mat")
+		try_dump_material(params["eject_mat"])
+		. = TRUE
 
 /obj/machinery/fabricator/proc/try_cancel_build(datum/fabricator_build_order/order)
 	if(istype(order) && currently_building != order && is_functioning())

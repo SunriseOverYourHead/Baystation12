@@ -122,96 +122,65 @@ GLOBAL_LIST_EMPTY(admin_departments)
 	emagged = TRUE
 	return TRUE
 
-/obj/machinery/photocopier/faxmachine/interface_interact(mob/user)
-	interact(user)
-	return TRUE
+/obj/machinery/photocopier/faxmachine/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "FaxMachine", "Fax Machine", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-/obj/machinery/photocopier/faxmachine/interact(mob/user)
-	user.set_machine(src)
+/obj/machinery/photocopier/faxmachine/ui_data(mob/user)
+	return list(
+		"department" = department || "Unknown",
+		"scan_name" = scan ? scan.name : null,
+		"authenticated" = authenticated,
+		"destination" = destination,
+		"copyitem" = copyitem ? copyitem.name : null,
+		"linked_pdas" = LAZYLEN(linked_pdas),
+		"departments" = GLOB.alldepartments + GLOB.admin_departments,
+		"boss_name" = GLOB.using_map.boss_name,
+	)
 
-	var/dat = "Fax Machine ([department])<BR>"
-
-	dat += "Linked PDAs: [LAZYLEN(linked_pdas)]<br />"
-
-	var/scan_name
-	if(scan)
-		scan_name = scan.name
-	else
-		scan_name = "--------"
-
-	dat += "Confirm Identity: <a href='byond://?src=\ref[src];scan=1'>[scan_name]</a><br>"
-
-	if(authenticated)
-		dat += "<a href='byond://?src=\ref[src];logout=1'>{Log Out}</a>"
-	else
-		dat += "<a href='byond://?src=\ref[src];auth=1'>{Log In}</a>"
-
-	dat += "<hr>"
-
-	if(authenticated)
-		dat += "<b>Logged in to:</b> [GLOB.using_map.boss_name] Quantum Entanglement Network<br><br>"
-
-		if(copyitem)
-			dat += "<a href='byond://?src=\ref[src];remove=1'>Remove Item</a><br><br>"
-			dat += "<a href='byond://?src=\ref[src];send=1'>Send</a><br>"
-			dat += "<b>Currently sending:</b> [copyitem.name]<br>"
-			dat += "<b>Sending to:</b> <a href='byond://?src=\ref[src];dept=1'>[destination ? destination : "Nobody"]</a><br>"
-
-		else
-			dat += "Please insert paper to send via secure connection.<br><br>"
-
-	else
-		dat += "Proper authentication is required to use this device.<br><br>"
-
-		if(copyitem)
-			dat += "<a href ='byond://?src=\ref[src];remove=1'>Remove Item</a><br>"
-
-	show_browser(user, dat, "window=copier")
-	onclose(user, "copier")
-	return
-
-/obj/machinery/photocopier/faxmachine/OnTopic(mob/user, href_list, state)
-	if(href_list["send"])
-		if(copyitem)
-			if (destination in GLOB.admin_departments)
-				send_admin_fax(user, destination)
+/obj/machinery/photocopier/faxmachine/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if (.)
+		return
+	var/mob/user = ui.user
+	switch(action)
+		if("send")
+			if (copyitem)
+				if (destination in GLOB.admin_departments)
+					send_admin_fax(user, destination)
+				else
+					sendfax(destination)
+			. = TRUE
+		if("remove")
+			OnRemove(user)
+			. = TRUE
+		if("scan")
+			if (scan)
+				if (ishuman(user))
+					user.put_in_hands(scan)
+				else
+					scan.dropInto(loc)
+				scan = null
 			else
-				sendfax(destination)
-		return TOPIC_REFRESH
-
-	if(href_list["remove"])
-		OnRemove(user)
-		return TOPIC_REFRESH
-
-	if(href_list["scan"])
-		if (scan)
-			if(ishuman(user))
-				user.put_in_hands(scan)
-			else
-				scan.dropInto(loc)
-			scan = null
-		else
-			var/obj/item/I = user.get_active_hand()
-			if (istype(I, /obj/item/card/id) && user.unEquip(I, src))
-				scan = I
-		authenticated = 0
-		return TOPIC_REFRESH
-
-	if(href_list["dept"])
-		var/desired_destination = input(user, "Which department?", "Choose a department", "") as null|anything in (GLOB.alldepartments + GLOB.admin_departments)
-		if(desired_destination && CanInteract(user, state))
-			destination = desired_destination
-		return TOPIC_REFRESH
-
-	if(href_list["auth"])
-		if ( (!( authenticated ) && (scan)) )
-			if (has_access(send_access, scan.GetAccess()))
-				authenticated = 1
-		return TOPIC_REFRESH
-
-	if(href_list["logout"])
-		authenticated = 0
-		return TOPIC_REFRESH
+				var/obj/item/I = user.get_active_hand()
+				if (istype(I, /obj/item/card/id) && user.unEquip(I, src))
+					scan = I
+			authenticated = 0
+			. = TRUE
+		if("dept")
+			var/desired_destination = params["destination"]
+			if (desired_destination && ((desired_destination in GLOB.alldepartments) || (desired_destination in GLOB.admin_departments)))
+				destination = desired_destination
+			. = TRUE
+		if("auth")
+			if (!authenticated && scan)
+				if (has_access(send_access, scan.GetAccess()))
+					authenticated = 1
+			. = TRUE
+		if("logout")
+			authenticated = 0
+			. = TRUE
 
 /obj/machinery/photocopier/faxmachine/proc/sendfax(destination)
 	if(inoperable())

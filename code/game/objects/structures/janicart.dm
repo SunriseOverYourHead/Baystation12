@@ -144,50 +144,58 @@
 	ui_interact(user)
 	return
 
-/obj/structure/janitorialcart/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
-	data["name"] = capitalize(name)
-	data["bag"] = mybag ? capitalize(mybag.name) : null
-	data["mop"] = mymop ? capitalize(mymop.name) : null
-	data["spray"] = myspray ? capitalize(myspray.name) : null
-	data["replacer"] = myreplacer ? capitalize(myreplacer.name) : null
-	data["signs"] = signs ? "[signs] sign\s" : null
+/obj/structure/janitorialcart/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "JanitorCart", "Janitorial Cart", ui)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "janitorcart.tmpl", "Janitorial cart", 240, 160)
-		ui.set_initial_data(data)
-		ui.open()
+/obj/structure/janitorialcart/ui_data(mob/user)
+	return list(
+		"name" = capitalize(name),
+		"bag" = mybag ? capitalize(mybag.name) : null,
+		"mop" = mymop ? capitalize(mymop.name) : null,
+		"spray" = myspray ? capitalize(myspray.name) : null,
+		"replacer" = myreplacer ? capitalize(myreplacer.name) : null,
+		"signs" = signs ? "[signs] sign\s" : null,
+	)
 
-/obj/structure/janitorialcart/Topic(href, href_list)
-	if(!in_range(src, usr))
+/obj/structure/janitorialcart/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
 		return
-	if(!isliving(usr))
-		return
-	var/mob/living/user = usr
-
-	if(href_list["take"])
-		switch(href_list["take"])
+	if(action == "take")
+		var/mob/living/user = usr
+		if(!isliving(user))
+			return FALSE
+		if(!in_range(src, user))
+			return FALSE
+		switch(params["item"])
 			if("garbage")
 				if(mybag)
 					user.put_in_hands(mybag)
 					to_chat(user, SPAN_NOTICE("You take [mybag] from [src]."))
 					mybag = null
+				else
+					return FALSE
 			if("mop")
 				if(mymop)
 					user.put_in_hands(mymop)
 					to_chat(user, SPAN_NOTICE("You take [mymop] from [src]."))
 					mymop = null
+				else
+					return FALSE
 			if("spray")
 				if(myspray)
 					user.put_in_hands(myspray)
 					to_chat(user, SPAN_NOTICE("You take [myspray] from [src]."))
 					myspray = null
+				else
+					return FALSE
 			if("replacer")
 				if(myreplacer)
 					user.put_in_hands(myreplacer)
 					to_chat(user, SPAN_NOTICE("You take [myreplacer] from [src]."))
 					myreplacer = null
+				else
+					return FALSE
 			if("sign")
 				if(signs)
 					var/obj/item/caution/Sign = locate() in src
@@ -198,9 +206,16 @@
 					else
 						warning("[src] signs ([signs]) didn't match contents")
 						signs = 0
+				else
+					return FALSE
+			else
+				return FALSE
+		update_icon()
+		return TRUE
+	return FALSE
 
-	update_icon()
-	updateUsrDialog()
+/obj/structure/janitorialcart/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 
 /obj/structure/janitorialcart/on_update_icon()

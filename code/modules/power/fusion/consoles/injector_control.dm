@@ -2,57 +2,55 @@
 	name = "fuel injection control computer"
 	icon_keyboard = "rd_key"
 	icon_screen = "fuel_screen"
-	ui_template = "fusion_injector_control.tmpl"
 
-/obj/machinery/computer/fusion/fuel_control/OnTopic(mob/user, href_list, datum/topic_state/state)
+/obj/machinery/computer/fusion/fuel_control/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "FusionFuelControl", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/machinery/computer/fusion/fuel_control/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if(.)
+		return
 	var/datum/local_network/lan = get_local_network()
-	var/list/fuel_injectors = lan.get_devices(/obj/machinery/fusion_fuel_injector)
-
-	if(href_list["global_toggle"])
+	var/list/fuel_injectors = lan ? lan.get_devices(/obj/machinery/fusion_fuel_injector) : null
+	if(action == "global_toggle")
 		if(!lan || !fuel_injectors)
-			return TOPIC_NOACTION
-
+			return
 		for(var/obj/machinery/fusion_fuel_injector/F in fuel_injectors)
 			if(F.injecting)
 				F.StopInjecting()
 			else
 				F.BeginInjecting()
-		return TOPIC_REFRESH
-
-	if(href_list["global_rate"])
+		. = TRUE
+	else if(action == "global_rate")
 		if(!lan || !fuel_injectors)
-			return TOPIC_NOACTION
-		var/new_injection_rate = input("Enter a new injection rate between 1 and 100. This will affect all injectors!", "Modifying injection rate") as null|num
-		var/new_injection_clamped = clamp(new_injection_rate, 1, 100) / 100
-		if(!new_injection_rate)
-			return TOPIC_NOACTION
-		if(!CanInteract(user,state))
-			return TOPIC_NOACTION
+			return
+		var/new_rate = text2num(params["value"])
+		if(!new_rate)
+			return
+		var/clamped = clamp(new_rate, 1, 100) / 100
 		for(var/obj/machinery/fusion_fuel_injector/F as anything in fuel_injectors)
-			F.injection_rate = new_injection_clamped
-		return TOPIC_REFRESH
-
-	if(href_list["toggle_injecting"] || href_list["injection_rate"])
-		var/obj/machinery/fusion_fuel_injector/I = locate((href_list["toggle_injecting"] || href_list["machine"]))
+			F.injection_rate = clamped
+		. = TRUE
+	else if(action == "toggle_injecting")
+		var/obj/machinery/fusion_fuel_injector/I = locate(params["toggle_injecting"])
 		if(!istype(I) || !lan || !fuel_injectors || !fuel_injectors[I])
-			return TOPIC_NOACTION
-
-		if(href_list["toggle_injecting"])
-			if(I.injecting)
-				I.StopInjecting()
-			else
-				I.BeginInjecting()
-
-		if(href_list["injection_rate"])
-			var/new_injection_rate = input("Enter a new injection rate between 1 and 100.", "Modifying injection rate", I.injection_rate) as null|num
-			if(!istype(I))
-				return TOPIC_NOACTION
-			if(!new_injection_rate)
-				return TOPIC_NOACTION
-			if(!CanInteract(user,state))
-				return TOPIC_NOACTION
-			I.injection_rate = clamp(new_injection_rate, 1, 100) / 100
-		return TOPIC_REFRESH
+			return
+		if(I.injecting)
+			I.StopInjecting()
+		else
+			I.BeginInjecting()
+		. = TRUE
+	else if(action == "injection_rate")
+		var/obj/machinery/fusion_fuel_injector/I = locate(params["machine"])
+		if(!istype(I) || !lan || !fuel_injectors || !fuel_injectors[I])
+			return
+		var/new_rate = text2num(params["value"])
+		if(!new_rate)
+			return
+		I.injection_rate = clamp(new_rate, 1, 100) / 100
+		. = TRUE
 
 /obj/machinery/computer/fusion/fuel_control/build_ui_data()
 	. = ..()

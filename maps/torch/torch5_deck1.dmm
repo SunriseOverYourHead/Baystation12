@@ -6644,6 +6644,9 @@
 	dir = 4;
 	pixel_z = 3
 	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
+	},
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/firstdeck/fore)
 "asD" = (
@@ -7367,6 +7370,9 @@
 	},
 /obj/structure/sign/directions/supply{
 	pixel_y = -4
+	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
 	},
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/firstdeck/center)
@@ -18732,6 +18738,9 @@
 	},
 /obj/structure/sign/directions/engineering{
 	pixel_y = 3
+	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
 	},
 /turf/simulated/wall/prepainted,
 /area/rnd/development)

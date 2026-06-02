@@ -304,3 +304,9 @@ var/global/const/access_radio_exp = "ACCESS_RADIO_EXP"
 	id = access_radio_exp
 	desc = "Exploration Radio"
 	region = ACCESS_REGION_GENERAL
+
+var/global/const/access_radio_inf = "ACCESS_RADIO_INFANTRY"
+/datum/access/access_radio_inf
+	id = access_radio_inf
+	desc = "Infantry Radio"
+	region = ACCESS_REGION_INFANTRY

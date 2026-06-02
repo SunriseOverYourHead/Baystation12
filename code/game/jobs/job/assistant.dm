@@ -1,14 +1,14 @@
 /datum/job/assistant
-	title = "Assistant"
+	title = "Crewman"
 	department = "Civilian"
 	department_flag = CIV
 
 	total_positions = -1
 	spawn_positions = -1
-	supervisors = "absolutely everyone"
+	supervisors = "the head of personnel"
 	economic_power = 1
 	access = list()
-	alt_titles = list("Technical Assistant","Medical Intern","Research Assistant","Visitor")
+	alt_titles = list("Ship Hand","Recruit","Technician Apprentice","Visitor")
 	outfit_type = /singleton/hierarchy/outfit/job/assistant
 
 /datum/job/assistant/get_access()

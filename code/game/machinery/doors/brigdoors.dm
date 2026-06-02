@@ -152,59 +152,74 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/door_timer/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/list/data = list()
+/obj/machinery/door_timer/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "BrigTimer", name, ui)
+	ui.set_autoupdate(TRUE)
 
+/obj/machinery/door_timer/ui_data(mob/user)
 	var/timeval = timing ? timeleft() : timetoset/10
-	data["timing"] = timing
-	data["minutes"] = round(timeval/60)
-	data["seconds"] = timeval % 60
+	var/list/flash_list = list()
+	for(var/obj/machinery/flasher/flash in targets)
+		var/charging = flash.last_flash && (flash.last_flash + 150) > world.time
+		flash_list += list(list("charging" = charging))
+	return list(
+		"timing" = timing,
+		"minutes" = round(timeval/60),
+		"seconds" = timeval % 60,
+		"flash_charging" = length(flash_list) && flash_list[1]["charging"],
+	)
 
-	var/list/flashes = list()
-
-	for(var/obj/machinery/flasher/flash  in targets)
-		var/list/flashdata = list()
-		if(flash.last_flash && (flash.last_flash + 150) > world.time)
-			flashdata["status"] = 0
-		else
-			flashdata["status"] = 1
-		flashes[LIST_PRE_INC(flashes)] = flashdata
-
-	data["flashes"] = flashes
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "brig_timer.tmpl", name, 270, 150)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/door_timer/CanUseTopic(user, state)
-	if(!allowed(user))
-		return STATUS_UPDATE
-	return ..()
-
-/obj/machinery/door_timer/OnTopic(mob/user, list/href_list, state)
-	if (href_list["toggle"])
-		if(timing)
-			timer_end()
-		else
+/obj/machinery/door_timer/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("start")
+			if(!allowed(usr))
+				return FALSE
 			timer_start()
 			if(timetoset > 18000)
-				log_and_message_admins("has started a brig timer over 30 minutes in length!", user)
-		. =  TOPIC_REFRESH
+				log_and_message_admins("has started a brig timer over 30 minutes in length!", usr)
+			update_icon()
+			return TRUE
+		if("stop")
+			if(!allowed(usr))
+				return FALSE
+			timer_end()
+			update_icon()
+			return TRUE
+		if("flash")
+			if(!allowed(usr))
+				return FALSE
+			for(var/obj/machinery/flasher/F in targets)
+				F.flash()
+			return TRUE
+		if("time")
+			if(!allowed(usr))
+				return FALSE
+			var/adj = text2num(params["adjust"])
+			if(isnull(adj))
+				return FALSE
+			timetoset += adj
+			timetoset = clamp(timetoset, 0, 36000)
+			update_icon()
+			return TRUE
+		if("preset")
+			if(!allowed(usr))
+				return FALSE
+			switch(params["preset"])
+				if("short")
+					timetoset = 300 // 30 seconds
+				if("medium")
+					timetoset = 1200 // 2 minutes
+				if("long")
+					timetoset = 3000 // 5 minutes
+			update_icon()
+			return TRUE
+	return FALSE
 
-	if (href_list["flash"])
-		for(var/obj/machinery/flasher/F in targets)
-			F.flash()
-		. =  TOPIC_REFRESH
-
-	if (href_list["adjust"])
-		timetoset += text2num(href_list["adjust"])
-		timetoset = clamp(timetoset, 0, 36000)
-		. = TOPIC_REFRESH
-
-	update_icon()
+/obj/machinery/door_timer/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 
 //icon update function

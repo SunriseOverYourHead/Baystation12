@@ -1,0 +1,1215 @@
+import { sortBy } from 'es-toolkit';
+import { filter, map } from 'es-toolkit/compat';
+import { type ReactNode, useState } from 'react';
+import { useBackend } from 'tgui/backend';
+import { sendAct } from 'tgui/events/act';
+import {
+  Box,
+  Button,
+  Dropdown, // NOVA EDIT ADDITION
+  Floating,
+  Input,
+  LabeledList,
+  Section,
+  Stack,
+} from 'tgui-core/components';
+import { exhaustiveCheck } from 'tgui-core/exhaustive'; // NOVA EDIT ADDITION
+import { classes } from 'tgui-core/react';
+import { createSearch } from 'tgui-core/string';
+import { CharacterPreview } from '../../common/CharacterPreview';
+import { PageButton } from '../components/PageButton'; // NOVA EDIT ADDITION
+import { RandomizationButton } from '../components/RandomizationButton';
+import { features } from '../preferences/features';
+import {
+  type FeatureChoicedServerData,
+  FeatureColorInput,
+  FeatureValueInput,
+} from '../preferences/features/base';
+import { GENDERS, Gender } from '../preferences/gender';
+import {
+  createSetPreference,
+  type PreferencesMenuData,
+  RandomSetting,
+  type ServerData,
+} from '../types';
+import { useRandomToggleState } from '../useRandomToggleState';
+import { useServerPrefs } from '../useServerPrefs';
+import { BackgroundPage } from './BackgroundPage';
+import { DeleteCharacterPopup } from './DeleteCharacterPopup';
+import { MultiNameInput, NameInput } from './names';
+import { VocalsInput, VoiceInput } from './vocals'; // NOVA EDIT ADDITION
+
+const CLOTHING_CELL_SIZE = 48;
+const CLOTHING_SIDEBAR_ROWS = 13.4; // NOVA EDIT CHANGE - ORIGINAL:  9
+
+const CLOTHING_SELECTION_CELL_SIZE = 48;
+const CLOTHING_SELECTION_WIDTH = 5.4;
+const CLOTHING_SELECTION_MULTIPLIER = 5.2;
+
+type CharacterControlsProps = {
+  handleRotate: () => void;
+  handleOpenSpecies: () => void;
+  gender: Gender;
+  setGender: (gender: Gender) => void;
+  showGender: boolean;
+  canDeleteCharacter: boolean;
+  handleDeleteCharacter: () => void;
+};
+
+function CharacterControls(props: CharacterControlsProps) {
+  return (
+    <Stack>
+      <Stack.Item>
+        <Button
+          onClick={props.handleRotate}
+          fontSize="22px"
+          icon="undo"
+          tooltip="Rotate"
+          tooltipPosition="top"
+        />
+      </Stack.Item>
+
+      <Stack.Item>
+        <Button
+          onClick={props.handleOpenSpecies}
+          fontSize="22px"
+          icon="paw"
+          tooltip="Species"
+          tooltipPosition="top"
+        />
+      </Stack.Item>
+
+      {props.showGender && (
+        <Stack.Item>
+          <GenderButton
+            gender={props.gender}
+            handleSetGender={props.setGender}
+          />
+        </Stack.Item>
+      )}
+      <Stack.Item>
+        <Button
+          onClick={props.handleDeleteCharacter}
+          fontSize="22px"
+          icon="trash"
+          color="red"
+          tooltip="Delete Character"
+          tooltipPosition="top"
+          disabled={!props.canDeleteCharacter}
+        />
+      </Stack.Item>
+    </Stack>
+  );
+}
+
+type ChoicedSelectionProps = {
+  name: string;
+  catalog: FeatureChoicedServerData;
+  selected: string;
+  supplementalFeature?: string;
+  supplementalValue?: unknown;
+  onSelect: (value: string) => void;
+};
+
+function ChoicedSelection(props: ChoicedSelectionProps) {
+  const { catalog, supplementalFeature, supplementalValue } = props;
+  const [searchText, setSearchText] = useState('');
+
+  if (!catalog.icons) {
+    return <Box color="red">Provided catalog had no icons!</Box>;
+  }
+
+  return (
+    <Box
+      className="ChoicedSelection"
+      style={{
+        height: `${
+          CLOTHING_SELECTION_CELL_SIZE * CLOTHING_SELECTION_MULTIPLIER
+        }px`,
+        width: `${CLOTHING_SELECTION_CELL_SIZE * CLOTHING_SELECTION_WIDTH}px`,
+      }}
+    >
+      <Stack fill vertical g={0}>
+        <Stack.Item>
+          <Section
+            fill
+            title={`Select ${props.name.toLowerCase()}`}
+            buttons={
+              supplementalFeature && (
+                <FeatureValueInput
+                  shrink
+                  feature={features[supplementalFeature]}
+                  featureId={supplementalFeature}
+                  value={supplementalValue}
+                />
+              )
+            }
+          >
+            <Input
+              autoFocus
+              fluid
+              placeholder="Search..."
+              onChange={setSearchText}
+            />
+          </Section>
+        </Stack.Item>
+        <Stack.Item grow>
+          <Section fill scrollable noTopPadding>
+            <Stack wrap>
+              {searchInCatalog(searchText, catalog.icons).map(
+                ([name, image], index) => {
+                  return (
+                    <Button
+                      key={index}
+                      onClick={() => {
+                        props.onSelect(name);
+                      }}
+                      selected={name === props.selected}
+                      tooltip={name}
+                      tooltipPosition="right"
+                      style={{
+                        height: `${CLOTHING_SELECTION_CELL_SIZE}px`,
+                        width: `${CLOTHING_SELECTION_CELL_SIZE}px`,
+                        position: 'relative',
+                      }}
+                    >
+                      {image.endsWith('.png') ? (
+                        <img
+                          alt=""
+                          src={image}
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translateX(-50%) translateY(-50%)',
+                            width: '32px',
+                            height: '32px',
+                            imageRendering: 'pixelated',
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          className={classes([
+                            'preferences32x32',
+                            image,
+                            'centered-image',
+                          ])}
+                          style={{
+                            transform:
+                              'translateX(-50%) translateY(-50%) scale(0.8)',
+                          }}
+                        />
+                      )}
+                    </Button>
+                  );
+                },
+              )}
+            </Stack>
+          </Section>
+        </Stack.Item>
+      </Stack>
+    </Box>
+  );
+}
+
+function searchInCatalog(searchText = '', catalog: Record<string, string>) {
+  let items = Object.entries(catalog);
+  if (searchText) {
+    items = filter(
+      items,
+      createSearch(searchText, ([name, _icon]) => name),
+    );
+  }
+  return items;
+}
+
+type GenderButtonProps = {
+  handleSetGender: (gender: Gender) => void;
+  gender: Gender;
+};
+
+function GenderButton(props: GenderButtonProps) {
+  return (
+    <Floating
+      placement="right"
+      content={
+        <Stack backgroundColor="white" p={0.3}>
+          {[Gender.Male, Gender.Female, Gender.Other, Gender.Other2].map(
+            (gender) => {
+              return (
+                <Stack.Item key={gender}>
+                  <Button
+                    selected={gender === props.gender}
+                    onClick={() => {
+                      props.handleSetGender(gender);
+                    }}
+                    fontSize="22px"
+                    icon={GENDERS[gender].icon}
+                    tooltip={GENDERS[gender].text}
+                    tooltipPosition="top"
+                  />
+                </Stack.Item>
+              );
+            },
+          )}
+        </Stack>
+      }
+    >
+      <div>
+        <Button
+          fontSize="22px"
+          icon={GENDERS[props.gender].icon}
+          tooltip="Gender"
+          tooltipPosition="top"
+        />
+      </div>
+    </Floating>
+  );
+}
+
+type CatalogItem = {
+  name: string;
+  supplemental_feature?: string;
+};
+
+type MainFeatureProps = {
+  catalog: FeatureChoicedServerData & CatalogItem;
+  currentValue: string;
+  handleSelect: (newClothing: string) => void;
+  randomization?: RandomSetting;
+  setRandomization: (newSetting: RandomSetting) => void;
+};
+
+function MainFeature(props: MainFeatureProps) {
+  const { data } = useBackend<PreferencesMenuData>();
+  const {
+    catalog,
+    currentValue,
+    handleSelect,
+    randomization,
+    setRandomization,
+  } = props;
+
+  const supplementalFeature = catalog.supplemental_feature;
+
+  return (
+    <Floating
+      stopChildPropagation
+      placement="right-start"
+      content={
+        <ChoicedSelection
+          name={catalog.name}
+          catalog={catalog}
+          selected={currentValue}
+          supplementalFeature={supplementalFeature}
+          supplementalValue={
+            supplementalFeature &&
+            data.character_preferences.supplemental_features[
+              supplementalFeature
+            ]
+          }
+          onSelect={handleSelect}
+        />
+      }
+    >
+      <Button
+        style={{
+          height: `${CLOTHING_CELL_SIZE}px`,
+          width: `${CLOTHING_CELL_SIZE}px`,
+        }}
+        position="relative"
+      >
+        <Box
+          className={classes([
+            'preferences32x32',
+            catalog.icons![currentValue],
+            'centered-image',
+          ])}
+          style={{
+            transform: randomization
+              ? 'translateX(-70%) translateY(-70%) scale(1.1)'
+              : 'translateX(-50%) translateY(-50%) scale(1.3)',
+          }}
+        />
+
+        {randomization && (
+          <RandomizationButton
+            dropdownProps={{
+              dropdownStyle: {
+                bottom: 0,
+                position: 'absolute',
+                right: '1px',
+              },
+
+              onOpen: (event) => {
+                // We're a button inside a button.
+                // Did you know that's against the W3C standard? :)
+                // FIXME: Button unclickable!
+                event.cancelBubble = true;
+                event.stopPropagation();
+              },
+            }}
+            value={randomization}
+            setValue={setRandomization}
+          />
+        )}
+      </Button>
+    </Floating>
+  );
+}
+
+const createSetRandomization =
+  (preference: string) => (newSetting: RandomSetting) => {
+    sendAct('set_random_preference', {
+      preference,
+      value: newSetting,
+    });
+  };
+
+function sortPreferences(array: [string, unknown][]) {
+  return sortBy(array, [([featureId]) => features[featureId]?.name]);
+}
+
+type PreferenceListProps = {
+  preferences: Record<string, unknown>;
+  randomizations: Record<string, RandomSetting>;
+  maxHeight: string;
+  children?: ReactNode;
+};
+
+export function PreferenceList(props: PreferenceListProps) {
+  const { act } = useBackend<PreferencesMenuData>();
+  const { preferences, randomizations, maxHeight, children } = props;
+
+  return (
+    <Stack.Item
+      basis="50%"
+      grow
+      style={{
+        background: 'rgba(0, 0, 0, 0.5)',
+        padding: '4px',
+      }}
+      overflowX="hidden"
+      overflowY="auto"
+      maxHeight={maxHeight}
+    >
+      <LabeledList>
+        {sortPreferences(Object.entries(preferences)).map(
+          ([featureId, value]) => {
+            const feature = features[featureId];
+            const randomSetting = randomizations[featureId];
+
+            if (feature === undefined) {
+              return (
+                <Stack.Item key={featureId}>
+                  <b>Feature {featureId} is not recognized.</b>
+                </Stack.Item>
+              );
+            }
+
+            return (
+              <LabeledList.Item
+                key={featureId}
+                // NOVA EDIT CHANGE - ORIGINAL: label={feature.name}
+                label={<Box mt={0.5}>{feature.name}</Box>} // replicate middle align
+                tooltip={feature.description}
+                verticalAlign="top" // NOVA EDIT CHANGE - Original: middle
+              >
+                <Stack fill>
+                  {randomSetting && (
+                    <Stack.Item>
+                      <RandomizationButton
+                        setValue={createSetRandomization(featureId)}
+                        value={randomSetting}
+                      />
+                    </Stack.Item>
+                  )}
+
+                  <Stack.Item grow>
+                    <FeatureValueInput
+                      feature={feature}
+                      featureId={featureId}
+                      value={value}
+                    />
+                  </Stack.Item>
+                </Stack>
+              </LabeledList.Item>
+            );
+          },
+        )}
+      </LabeledList>
+
+      {children}
+    </Stack.Item>
+  );
+}
+
+export function getRandomization(
+  preferences: Record<string, unknown>,
+  serverData: ServerData | undefined,
+  randomBodyEnabled: boolean,
+): Record<string, RandomSetting> {
+  const { data } = useBackend<PreferencesMenuData>();
+
+  if (!randomBodyEnabled || !serverData) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    map(
+      filter(Object.keys(preferences), (key) =>
+        serverData.random.randomizable.includes(key),
+      ),
+      (key) => [
+        key,
+        data.character_preferences.randomization[key] || RandomSetting.Disabled,
+      ],
+    ),
+  );
+}
+
+// Hair/facial-hair keys extracted from the contextual list and shown inline
+const HAIR_INLINE_KEYS = new Set([
+  'head_hair_style',
+  'hair_color',
+  'facial_hair_style',
+  'facial_hair_color',
+]);
+
+function HairPanel() {
+  const { act, data } = useBackend<PreferencesMenuData>();
+  const serverPrefs = useServerPrefs();
+  const prefs = data.character_preferences.secondary_features || {};
+
+  const hairStyle = prefs['head_hair_style'] as string | undefined;
+  const hairColor = prefs['hair_color'] as string | undefined;
+  const facialStyle = prefs['facial_hair_style'] as string | undefined;
+  const facialColor = prefs['facial_hair_color'] as string | undefined;
+
+  const hairChoices =
+    (serverPrefs?.head_hair_style as FeatureChoicedServerData | undefined)
+      ?.choices ?? [];
+  const facialChoices =
+    (serverPrefs?.facial_hair_style as FeatureChoicedServerData | undefined)
+      ?.choices ?? [];
+
+  if (hairStyle === undefined && facialStyle === undefined) return null;
+
+  const setHair = createSetPreference(act, 'head_hair_style');
+  const setFacial = createSetPreference(act, 'facial_hair_style');
+
+  return (
+    <Stack.Item>
+      <Section title="Hair">
+        <LabeledList>
+          {hairStyle !== undefined && (
+            <LabeledList.Item label="Hair">
+              <Stack>
+                <Stack.Item grow>
+                  <Dropdown
+                    buttons
+                    options={hairChoices}
+                    selected={hairStyle}
+                    onSelected={setHair}
+                    width="100%"
+                  />
+                </Stack.Item>
+                {hairColor !== undefined && (
+                  <Stack.Item>
+                    <FeatureColorInput
+                      featureId="hair_color"
+                      handleSetValue={() => {}}
+                      value={hairColor}
+                      serverData={undefined}
+                      shrink
+                    />
+                  </Stack.Item>
+                )}
+              </Stack>
+            </LabeledList.Item>
+          )}
+          {facialStyle !== undefined && (
+            <LabeledList.Item label="Facial Hair">
+              <Stack>
+                <Stack.Item grow>
+                  <Dropdown
+                    buttons
+                    options={facialChoices}
+                    selected={facialStyle}
+                    onSelected={setFacial}
+                    width="100%"
+                  />
+                </Stack.Item>
+                {facialColor !== undefined && (
+                  <Stack.Item>
+                    <FeatureColorInput
+                      featureId="facial_hair_color"
+                      handleSetValue={() => {}}
+                      value={facialColor}
+                      serverData={undefined}
+                      shrink
+                    />
+                  </Stack.Item>
+                )}
+              </Stack>
+            </LabeledList.Item>
+          )}
+        </LabeledList>
+      </Section>
+    </Stack.Item>
+  );
+}
+
+// BS12: Sidebar quick-access buttons shown to the right of the character preview
+function SidebarSprite(props: { src?: string; fallbackIcon: string }) {
+  const { src, fallbackIcon } = props;
+  if (src) {
+    return (
+      <img
+        alt=""
+        src={src}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translateX(-50%) translateY(-50%)',
+          width: `${CLOTHING_CELL_SIZE}px`,
+          height: `${CLOTHING_CELL_SIZE}px`,
+          imageRendering: 'pixelated',
+        }}
+      />
+    );
+  }
+  return <Box className={`fa fa-${fallbackIcon}`} />;
+}
+
+function CharacterSideBar() {
+  const { act, data } = useBackend<PreferencesMenuData>();
+  const serverPrefs = useServerPrefs();
+  const prefs = data.character_preferences.secondary_features || {};
+  const sidebarIcons = data.sidebar_icons ?? { underwear: {} };
+
+  const hairStyle = prefs['head_hair_style'] as string | undefined;
+  const hairColor = prefs['hair_color'] as string | undefined;
+  const facialStyle = prefs['facial_hair_style'] as string | undefined;
+  const facialColor = prefs['facial_hair_color'] as string | undefined;
+
+  const hairCatalog = serverPrefs?.head_hair_style as
+    | (FeatureChoicedServerData & { name: string })
+    | undefined;
+  const facialCatalog = serverPrefs?.facial_hair_style as
+    | (FeatureChoicedServerData & { name: string })
+    | undefined;
+
+  const hairChoices = hairCatalog?.choices ?? [];
+  const facialChoices = facialCatalog?.choices ?? [];
+  const hairHasIcons = !!(hairCatalog?.icons && Object.keys(hairCatalog.icons).length);
+  const facialHasIcons = !!(facialCatalog?.icons && Object.keys(facialCatalog.icons).length);
+
+  const backpackCatalog = serverPrefs?.backpack_options;
+  const underwearCatalogs = serverPrefs?.underwear_options ?? {};
+  const backpackHasIcons = backpackCatalog?.icons != null && Object.keys(backpackCatalog.icons).length > 0;
+
+  const buttonStyle = {
+    height: `${CLOTHING_CELL_SIZE}px`,
+    width: `${CLOTHING_CELL_SIZE}px`,
+    position: 'relative' as const,
+  };
+
+  const panelStyle = {
+    background: 'rgba(15,15,15,0.97)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    minWidth: '240px',
+    padding: '6px',
+  };
+
+  return (
+    <Stack vertical g={0}>
+      {/* Hair button */}
+      {hairStyle !== undefined && (
+        <Stack.Item>
+          <Floating
+            placement="right-start"
+            stopChildPropagation
+            content={
+              hairHasIcons ? (
+                <ChoicedSelection
+                  name="Hair"
+                  catalog={hairCatalog}
+                  selected={hairStyle}
+                  supplementalFeature={hairColor !== undefined ? 'hair_color' : undefined}
+                  supplementalValue={hairColor}
+                  onSelect={createSetPreference(act, 'head_hair_style')}
+                />
+              ) : (
+                <Box style={panelStyle}>
+                  <LabeledList>
+                    <LabeledList.Item label="Hair">
+                      <Stack>
+                        <Stack.Item grow>
+                          <Dropdown
+                            buttons
+                            options={hairChoices}
+                            selected={hairStyle}
+                            onSelected={createSetPreference(act, 'head_hair_style')}
+                            width="100%"
+                          />
+                        </Stack.Item>
+                        {hairColor !== undefined && (
+                          <Stack.Item>
+                            <FeatureColorInput
+                              featureId="hair_color"
+                              handleSetValue={() => {}}
+                              value={hairColor}
+                              serverData={undefined}
+                              shrink
+                            />
+                          </Stack.Item>
+                        )}
+                      </Stack>
+                    </LabeledList.Item>
+                  </LabeledList>
+                </Box>
+              )
+            }
+          >
+            <Button tooltip={`Hair: ${hairStyle}`} tooltipPosition="right" style={buttonStyle}>
+              <SidebarSprite src={sidebarIcons.hair} fallbackIcon="scissors" />
+            </Button>
+          </Floating>
+        </Stack.Item>
+      )}
+      {/* Facial hair button */}
+      {facialStyle !== undefined && (
+        <Stack.Item>
+          <Floating
+            placement="right-start"
+            stopChildPropagation
+            content={
+              facialHasIcons ? (
+                <ChoicedSelection
+                  name="Facial Hair"
+                  catalog={facialCatalog}
+                  selected={facialStyle}
+                  supplementalFeature={facialColor !== undefined ? 'facial_hair_color' : undefined}
+                  supplementalValue={facialColor}
+                  onSelect={createSetPreference(act, 'facial_hair_style')}
+                />
+              ) : (
+                <Box style={panelStyle}>
+                  <LabeledList>
+                    <LabeledList.Item label="Facial Hair">
+                      <Stack>
+                        <Stack.Item grow>
+                          <Dropdown
+                            buttons
+                            options={facialChoices}
+                            selected={facialStyle}
+                            onSelected={createSetPreference(act, 'facial_hair_style')}
+                            width="100%"
+                          />
+                        </Stack.Item>
+                        {facialColor !== undefined && (
+                          <Stack.Item>
+                            <FeatureColorInput
+                              featureId="facial_hair_color"
+                              handleSetValue={() => {}}
+                              value={facialColor}
+                              serverData={undefined}
+                              shrink
+                            />
+                          </Stack.Item>
+                        )}
+                      </Stack>
+                    </LabeledList.Item>
+                  </LabeledList>
+                </Box>
+              )
+            }
+          >
+            <Button tooltip={`Facial Hair: ${facialStyle}`} tooltipPosition="right" style={buttonStyle}>
+              <SidebarSprite src={sidebarIcons.facial_hair} fallbackIcon="user" />
+            </Button>
+          </Floating>
+        </Stack.Item>
+      )}
+      {/* Backpack button */}
+      {backpackCatalog && backpackCatalog.choices.length > 0 && (
+        <Stack.Item>
+          <Floating
+            placement="right-start"
+            stopChildPropagation
+            content={
+              backpackHasIcons ? (
+                <ChoicedSelection
+                  name="Backpack"
+                  catalog={backpackCatalog}
+                  selected={data.backpack ?? ''}
+                  onSelect={(val: string) =>
+                    act('set_backpack', { backpack: val })
+                  }
+                />
+              ) : (
+                <Box style={panelStyle}>
+                  <LabeledList>
+                    <LabeledList.Item label="Backpack">
+                      <Dropdown
+                        width="100%"
+                        options={backpackCatalog.choices}
+                        selected={data.backpack ?? ''}
+                        onSelected={(val: string) =>
+                          act('set_backpack', { backpack: val })
+                        }
+                      />
+                    </LabeledList.Item>
+                  </LabeledList>
+                </Box>
+              )
+            }
+          >
+            <Button
+              tooltip={`Backpack: ${data.backpack ?? ''}`}
+              tooltipPosition="right"
+              style={buttonStyle}
+            >
+              <SidebarSprite src={sidebarIcons.backpack} fallbackIcon="bag-shopping" />
+            </Button>
+          </Floating>
+        </Stack.Item>
+      )}
+      {/* One button per underwear category */}
+      {Object.entries(underwearCatalogs).map(([category, catalog]) => {
+        const categoryHasIcons = catalog.icons != null && Object.keys(catalog.icons).length > 0;
+        return (
+          <Stack.Item key={category}>
+            <Floating
+              placement="right-start"
+              stopChildPropagation
+              content={
+                categoryHasIcons ? (
+                  <ChoicedSelection
+                    name={category}
+                    catalog={catalog}
+                    selected={data.underwear?.[category] ?? catalog.choices[0]}
+                    onSelect={(val: string) =>
+                      act('set_underwear', { category, item: val })
+                    }
+                  />
+                ) : (
+                  <Box style={panelStyle}>
+                    <LabeledList>
+                      <LabeledList.Item label={category}>
+                        <Dropdown
+                          width="100%"
+                          options={catalog.choices}
+                          selected={data.underwear?.[category] ?? catalog.choices[0]}
+                          onSelected={(val: string) =>
+                            act('set_underwear', { category, item: val })
+                          }
+                        />
+                      </LabeledList.Item>
+                    </LabeledList>
+                  </Box>
+                )
+              }
+            >
+              <Button
+                tooltip={`${category}: ${data.underwear?.[category] ?? catalog.choices[0]}`}
+                tooltipPosition="right"
+                style={buttonStyle}
+              >
+                <SidebarSprite
+                  src={sidebarIcons.underwear?.[category]}
+                  fallbackIcon="tshirt"
+                />
+              </Button>
+            </Floating>
+          </Stack.Item>
+        );
+      })}
+    </Stack>
+  );
+}
+
+function BackpackRow() {
+  const { act, data } = useBackend<PreferencesMenuData>();
+  const serverPrefs = useServerPrefs();
+  const backpackChoices = serverPrefs?.backpack_options?.choices ?? [];
+  if (!backpackChoices.length) return null;
+  return (
+    <Stack.Item>
+      <Section title="Backpack">
+        <Dropdown
+          width="100%"
+          options={backpackChoices}
+          selected={data.backpack ?? ''}
+          onSelected={(val: string) => act('set_backpack', { backpack: val })}
+        />
+      </Section>
+    </Stack.Item>
+  );
+}
+
+// BS12: Equipment preferences (sensor mode, underwear — backpack moved to Visual tab)
+const SENSOR_LABELS: Record<number, string> = {
+  0: 'Off',
+  1: 'Binary',
+  2: 'Vitals',
+  3: 'Tracking',
+};
+
+function EquipmentPrefs() {
+  const { act, data } = useBackend<PreferencesMenuData>();
+  const serverPrefs = useServerPrefs();
+  const backpackOptions = serverPrefs?.backpack_options?.choices ?? [];
+  const underwearOptions = serverPrefs?.underwear_options ?? {};
+  const currentBackpack = data.backpack ?? '';
+  const currentSensor = data.sensor_setting ?? 0;
+  const currentUnderwear = data.underwear ?? {};
+
+  return (
+    <Stack vertical>
+      <Stack.Item>
+        <Section title="Equipment">
+          <LabeledList>
+            <LabeledList.Item label="Backpack">
+              <Dropdown
+                width="200px"
+                options={backpackOptions}
+                selected={currentBackpack}
+                onSelected={(val: string) =>
+                  act('set_backpack', { backpack: val })
+                }
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Suit Sensors">
+              <Dropdown
+                width="200px"
+                options={[0, 1, 2, 3]}
+                selected={currentSensor}
+                displayText={SENSOR_LABELS[currentSensor] ?? 'Off'}
+                onSelected={(val: number) =>
+                  act('set_sensor', { sensor: val })
+                }
+              />
+            </LabeledList.Item>
+          </LabeledList>
+        </Section>
+      </Stack.Item>
+      {Object.keys(underwearOptions).length > 0 && (
+        <Stack.Item>
+          <Section title="Underwear">
+            <LabeledList>
+              {Object.entries(underwearOptions).map(([category, catalog]) => (
+                <LabeledList.Item key={category} label={category}>
+                  <Dropdown
+                    width="200px"
+                    options={catalog.choices}
+                    selected={currentUnderwear[category] ?? catalog.choices[0]}
+                    onSelected={(val: string) =>
+                      act('set_underwear', { category, item: val })
+                    }
+                  />
+                </LabeledList.Item>
+              ))}
+            </LabeledList>
+          </Section>
+        </Stack.Item>
+      )}
+    </Stack>
+  );
+}
+
+type MainPageProps = {
+  openSpecies: () => void;
+};
+
+export function MainPage(props: MainPageProps) {
+  const { act, data } = useBackend<PreferencesMenuData>();
+
+  const [deleteCharacterPopupOpen, setDeleteCharacterPopupOpen] =
+    useState(false);
+  const [multiNameInputOpen, setMultiNameInputOpen] = useState(false);
+  const [vocalsInputOpen, setVocalsInputOpen] = useState(false); // NOVA EDIT ADDITION
+  const [randomToggleEnabled] = useRandomToggleState();
+
+  const serverData = useServerPrefs();
+
+  const currentSpeciesData =
+    serverData?.species[data.character_preferences.misc.species];
+
+  const contextualPreferences =
+    data.character_preferences.secondary_features || [];
+
+  const mainFeatures = [
+    ...Object.entries(data.character_preferences.clothing ?? {}),
+    ...Object.entries(data.character_preferences.features ?? {}),
+  ];
+
+  const randomBodyEnabled =
+    data.character_preferences.non_contextual.random_body !==
+      RandomSetting.Disabled || randomToggleEnabled;
+
+  const randomizationOfMainFeatures = getRandomization(
+    Object.fromEntries(mainFeatures),
+    serverData,
+    randomBodyEnabled,
+  );
+
+  const nonContextualPreferences = {
+    ...data.character_preferences.non_contextual,
+  };
+
+  if (randomBodyEnabled) {
+    nonContextualPreferences.random_species =
+      data.character_preferences.randomization.species;
+  } else {
+    // We can't use random_name/is_accessible because the
+    // server doesn't know whether the random toggle is on.
+    delete nonContextualPreferences.random_name;
+  }
+  // NOVA EDIT ADDITION BEGIN: SWAPPABLE PREF MENUS
+  enum PrefPage {
+    Visual, // The visual parts
+    Profile, // Age, blood type, flavor text, records, culture
+    Equipment, // BS12: backpack, sensor, underwear
+  }
+
+  const [currentPrefPage, setCurrentPrefPage] = useState(PrefPage.Visual);
+
+  let prefPageContents;
+  switch (currentPrefPage) {
+    case PrefPage.Visual: {
+      const visualPrefs = Object.fromEntries(
+        Object.entries(contextualPreferences).filter(
+          ([k]) => !HAIR_INLINE_KEYS.has(k),
+        ),
+      );
+      prefPageContents = (
+        <Stack vertical fill>
+          <HairPanel />
+          <BackpackRow />
+          <PreferenceList
+            randomizations={getRandomization(
+              visualPrefs,
+              serverData,
+              randomBodyEnabled,
+            )}
+            preferences={visualPrefs}
+            maxHeight="auto"
+          />
+        </Stack>
+      );
+      break;
+    }
+    case PrefPage.Profile:
+      prefPageContents = (
+        <Stack vertical fill>
+          <Stack.Item>
+            <PreferenceList
+              randomizations={getRandomization(
+                nonContextualPreferences,
+                serverData,
+                randomBodyEnabled,
+              )}
+              preferences={nonContextualPreferences}
+              maxHeight="auto"
+            />
+          </Stack.Item>
+          <Stack.Item grow>
+            <BackgroundPage />
+          </Stack.Item>
+        </Stack>
+      );
+      break;
+    case PrefPage.Equipment:
+      prefPageContents = <EquipmentPrefs />;
+      break;
+    default:
+      exhaustiveCheck(currentPrefPage);
+  }
+  // NOVA EDIT ADDITION END
+
+  return (
+    <>
+      {multiNameInputOpen && (
+        <MultiNameInput
+          handleClose={() => setMultiNameInputOpen(false)}
+          handleRandomizeName={(preference) =>
+            act('randomize_name', {
+              preference,
+            })
+          }
+          handleUpdateName={(nameType, value) =>
+            act('set_preference', {
+              preference: nameType,
+              value,
+            })
+          }
+          names={data.character_preferences.names}
+        />
+      )}
+      {/* NOVA EDIT ADDITION START */}
+      {vocalsInputOpen && (
+        <VocalsInput
+          handleClose={() => setVocalsInputOpen(false)}
+          vocals={data.character_preferences.vocals}
+        />
+      )}
+      {/* NOVA EDIT ADDITION END */}
+
+      {deleteCharacterPopupOpen && (
+        <DeleteCharacterPopup
+          close={() => setDeleteCharacterPopupOpen(false)}
+        />
+      )}
+
+      <Stack height={`${CLOTHING_SIDEBAR_ROWS * CLOTHING_CELL_SIZE}px`}>
+        <Stack.Item>
+          <Stack vertical fill>
+            <Stack.Item>
+              <CharacterControls
+                gender={data.character_preferences.misc.gender}
+                handleOpenSpecies={props.openSpecies}
+                handleRotate={() => {
+                  act('rotate');
+                }}
+                setGender={createSetPreference(act, 'gender')}
+                showGender={
+                  currentSpeciesData ? !!currentSpeciesData.sexes : true
+                }
+                canDeleteCharacter={
+                  Object.values(data.character_profiles).filter(
+                    (name) => !!name,
+                  ).length > 1
+                }
+                handleDeleteCharacter={() => setDeleteCharacterPopupOpen(true)}
+              />
+            </Stack.Item>
+
+            <Stack.Item grow>
+              <CharacterPreview
+                height="80%" // NOVA EDIT - ORIGINAL: height="100%"
+                id={data.character_preview_view}
+              />
+            </Stack.Item>
+
+            <Stack.Item position="relative">
+              <NameInput
+                name={data.character_preferences.names[data.name_to_use]}
+                handleUpdateName={createSetPreference(act, data.name_to_use)}
+                openMultiNameInput={() => {
+                  setMultiNameInputOpen(true);
+                }}
+              />
+            </Stack.Item>
+            {/* NOVA EDIT ADDITION START */}
+            <Stack.Item position="relative">
+              <VoiceInput
+                openVocalsInput={() => {
+                  setVocalsInputOpen(true);
+                }}
+              />
+            </Stack.Item>
+            {/* NOVA EDIT ADDITION END */}
+          </Stack>
+        </Stack.Item>
+
+        {/* BS12: Quick-access sidebar buttons (hair, backpack, underwear) */}
+        <Stack.Item>
+          <CharacterSideBar />
+        </Stack.Item>
+
+        <Stack.Item>
+          <Stack fill vertical wrap>
+            {mainFeatures.map(([clothingKey, clothing]) => {
+              const catalog = serverData?.[
+                clothingKey
+              ] as FeatureChoicedServerData & {
+                name: string;
+              };
+
+              return (
+                <Stack.Item key={clothingKey}>
+                  {!catalog ? (
+                    // Skeleton button
+                    <Button height={4} width={4} disabled />
+                  ) : (
+                    <MainFeature
+                      catalog={catalog}
+                      currentValue={clothing}
+                      handleSelect={createSetPreference(act, clothingKey)}
+                      randomization={randomizationOfMainFeatures[clothingKey]}
+                      setRandomization={createSetRandomization(clothingKey)}
+                    />
+                  )}
+                </Stack.Item>
+              );
+            })}
+          </Stack>
+        </Stack.Item>
+
+        {/* NOVA EDIT CHANGE: Swappable pref menus */}
+        {/* ORIGINAL: <Stack.Item grow basis={0}> */}
+        <Stack.Item grow basis={0} ml="4px">
+          <Stack vertical fill>
+            {/* NOVA EDIT REMOVAL START
+             <PreferenceList
+              randomizations={getRandomization(
+                contextualPreferences,
+                serverData,
+                randomBodyEnabled,
+              )}
+              preferences={contextualPreferences}
+              maxHeight="auto"
+            />
+
+            <PreferenceList
+              randomizations={getRandomization(
+                nonContextualPreferences,
+                serverData,
+                randomBodyEnabled,
+              )}
+              preferences={nonContextualPreferences}
+              maxHeight="auto"
+            />
+            */ // NOVA EDIT REMOVAL END
+            }
+            {/* NOVA EDIT ADDITION BEGIN: Swappable pref menus */}
+            <Stack>
+              <Stack.Item grow={2}>
+                <PageButton
+                  currentPage={currentPrefPage}
+                  page={PrefPage.Visual}
+                  setPage={setCurrentPrefPage}
+                >
+                  Character Visuals
+                </PageButton>
+              </Stack.Item>
+              <Stack.Item grow={2}>
+                <PageButton
+                  currentPage={currentPrefPage}
+                  page={PrefPage.Profile}
+                  setPage={setCurrentPrefPage}
+                >
+                  Character Profile
+                </PageButton>
+              </Stack.Item>
+              <Stack.Item grow={2}>
+                <PageButton
+                  currentPage={currentPrefPage}
+                  page={PrefPage.Equipment}
+                  setPage={setCurrentPrefPage}
+                >
+                  Equipment
+                </PageButton>
+              </Stack.Item>
+            </Stack>
+            {prefPageContents}
+          </Stack>
+        </Stack.Item>
+        {/* NOVA EDIT ADDITION END: Swappable pref menus */}
+      </Stack>
+    </>
+  );
+}

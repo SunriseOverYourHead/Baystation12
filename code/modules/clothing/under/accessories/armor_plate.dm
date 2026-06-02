@@ -1,6 +1,6 @@
-/obj/item/clothing/accessory/armor_plate
+/obj/item/clothing/accessory/armor_plate // Anything lower and it should be a soft vest.
 	name = "IIIA+ armor plate"
-	desc = "A basic, level IIIA+ armor plate made of steel-reinforced synthetic fibers. Attaches to a plate carrier."
+	desc = "A level IIIA+ armor plate made of steel-reinforced synthetic fibers. Provides great protection against pistol rounds and limited protection to rifle rounds. Attaches to a plate carrier."
 	icon = 'icons/obj/clothing/obj_suit_modular_armor.dmi'
 	icon_state = "armor_light"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
@@ -15,9 +15,9 @@
 	flags_inv = CLOTHING_BULKY
 
 
-/obj/item/clothing/accessory/armor_plate/medium
+/obj/item/clothing/accessory/armor_plate/III
 	name = "III armor plate"
-	desc = "A level III armor plate, providing good protection. Attaches to a plate carrier."
+	desc = "A level III armor plate, providing good protection against rifle rounds. Attaches to a plate carrier."
 	icon_state = "armor_medium"
 	armor = list(
 		melee = ARMOR_MELEE_KNIVES,
@@ -28,9 +28,9 @@
 	)
 
 
-/obj/item/clothing/accessory/armor_plate/tactical
+/obj/item/clothing/accessory/armor_plate/IIIP
 	name = "III+ armor plate"
-	desc = "A III+ armor plate with additional material. Attaches to a plate carrier."
+	desc = "A III+ armor plate with additional material. Provides great protection against rifle rounds. Attaches to a plate carrier."
 	icon_state = "armor_tactical"
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
@@ -41,9 +41,9 @@
 	)
 
 
-/obj/item/clothing/accessory/armor_plate/merc
+/obj/item/clothing/accessory/armor_plate/IV
 	name = "IV armor plate"
-	desc = "A level IV ceramics-reinforced synthetic armor plate, providing state of of the art protection. Attaches to a plate carrier."
+	desc = "A level IV ceramics-reinforced synthetic armor plate, providing state of of the art protection against rifle rounds. Attaches to a plate carrier."
 	icon_state = "armor_merc"
 	armor = list(
 		melee = ARMOR_MELEE_MAJOR,

@@ -481,31 +481,23 @@
 	Consume(user)
 
 // This is purely informational UI that may be accessed by AIs or robots
-/obj/machinery/power/supermatter/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
+/obj/machinery/power/supermatter/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "SupermatterCrystal", "Supermatter Crystal", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	data["integrity_percentage"] = round(get_integrity())
+/obj/machinery/power/supermatter/ui_data(mob/user)
 	var/datum/gas_mixture/env = null
 	var/turf/T = get_turf(src)
-
 	if(istype(T))
 		env = T.return_air()
-
-	if(!env)
-		data["ambient_temp"] = 0
-		data["ambient_pressure"] = 0
-	else
-		data["ambient_temp"] = round(env.temperature)
-		data["ambient_pressure"] = round(env.return_pressure())
-	data["detonating"] = grav_pulling
-	data["energy"] = power
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "supermatter_crystal.tmpl", "Supermatter Crystal", 500, 300)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+	return list(
+		"integrity_percentage" = round(get_integrity()),
+		"ambient_temp" = env ? round(env.temperature) : 0,
+		"ambient_pressure" = env ? round(env.return_pressure()) : 0,
+		"detonating" = grav_pulling,
+		"energy" = power,
+	)
 
 
 /obj/machinery/power/supermatter/use_tool(obj/item/W, mob/living/user, list/click_params)

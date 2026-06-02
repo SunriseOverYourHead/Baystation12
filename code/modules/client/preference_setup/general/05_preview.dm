@@ -7,6 +7,7 @@
 /datum/preferences/var/preview_gear = TRUE
 
 /datum/preferences/var/icon/preview_icon
+/datum/preferences/var/tgui_preview_version = 0
 
 
 /datum/preferences/VV_static()
@@ -74,6 +75,7 @@
 		var/mob/living/carbon/human/dummy/mannequin/mannequin = get_mannequin(client_ckey)
 		mannequin.delete_inventory(TRUE)
 		dress_preview_mob(mannequin)
+		mannequin.update_icons()
 		mannequin.ImmediateOverlayUpdate()
 		last_built_icon = icon('icons/effects/128x48.dmi', bgstate)
 		last_built_icon.Scale(48+32, 16+32)

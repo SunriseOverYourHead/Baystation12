@@ -689,8 +689,8 @@
 
 /area/crew_quarters/heads/office/rd
 	icon_state = "heads_rd"
-	name = "\improper Command - CSO's Office"
-	req_access = list(access_rd)
+	name = "\improper Command - PO's Office"
+	req_access = list(access_platoon)
 	lighting_tone = AREA_LIGHTING_COOL
 
 /area/crew_quarters/heads/office/cmo
@@ -925,7 +925,7 @@
 
 // Research
 /area/rnd/canister
-	name = "\improper Canister Storage"
+	name = "\improper Auxiliary Canister Storage"
 	icon_state = "toxstorage"
 	req_access = list(access_tox_storage)
 
@@ -1601,6 +1601,33 @@
 /area/rnd/research
 	name = "\improper Research Hallway"
 	icon_state = "research"
+
+// Infantry
+/area/infantry
+	name = "\improper Infantry - Prep Room"
+	icon_state = "Warden"
+	req_access = list(access_rifleman)
+	holomap_color = HOLOMAP_AREACOLOR_INFANTRY
+
+/area/infantry/sl
+	name = "\improper Infantry - SL Prep"
+	icon_state = "security"
+	req_access = list(access_squadlead)
+
+/area/infantry/ftl
+	name = "\improper Infantry - FTL Prep"
+	icon_state = "security"
+	req_access = list(access_ftlead)
+
+/area/infantry/comtech
+	name = "\improper Infantry - Combat Technician Prep"
+	icon_state = "Warden"
+	req_access = list(access_comtech)
+
+/area/infantry/brief
+	name = "\improper Infantry - Briefing Room"
+	icon_state = "Warden"
+	req_access = list()
 
 // Shuttles
 /area/shuttle/administration/centcom

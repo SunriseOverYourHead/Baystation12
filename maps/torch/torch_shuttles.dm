@@ -49,7 +49,7 @@ TORCH_ESCAPE_POD(15)
 TORCH_ESCAPE_POD(16)
 TORCH_ESCAPE_POD(17)
 
-//Petrov
+/* //Petrov
 
 /datum/shuttle/autodock/ferry/petrov
 	name = "Petrov"
@@ -72,7 +72,7 @@ TORCH_ESCAPE_POD(17)
 
 /obj/shuttle_landmark/petrov/out
 	name = "Space near the ship"
-	landmark_tag = "nav_petrov_out"
+	landmark_tag = "nav_petrov_out" */
 
 //Ninja Shuttle.
 /datum/shuttle/autodock/multi/antag/ninja

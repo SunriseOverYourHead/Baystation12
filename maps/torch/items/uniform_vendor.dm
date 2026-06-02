@@ -25,77 +25,81 @@
 		icon_state = "[initial(icon_state)]-off"
 
 /obj/machinery/uniform_vendor/interface_interact(mob/user)
-	interact(user)
+	ui_interact(user)
 	return TRUE
 
-/obj/machinery/uniform_vendor/interact(mob/user)
-	var/dat = list()
-	dat += "User ID: <a href='byond://?src=\ref[src];ID=1'>[ID ? "[ID.registered_name], [ID.military_rank], [ID.military_branch]" : "--------"]</a>"
-	dat += "<hr>"
-	if(!ID)
-		dat += "Insert your ID card to proceed."
-	else
-		var/datum/job/job = SSjobs.get_by_path(ID.job_access_type)
-		if(job)
-			uniforms = find_uniforms(ID.military_rank, ID.military_branch, job.department_flag)
-		for(var/T in uniforms)
-			dat += "<b>[T]</b> <a href='byond://?src=\ref[src];get_all=[T]'>Select All</a>"
-			var/list/uniform = uniforms[T]
-			for(var/piece in uniform)
-				if(piece)
-					var/obj/item/clothing/C = piece
-					if(piece in selected_outfit)
-						dat += "[SPAN_CLASS("linkOn", "[sanitize(initial(C.name))]")]<a href='byond://?src=\ref[src];rem=\ref[piece]'>X</a>"
-					else if (can_issue(C))
-						dat += "<a href='byond://?src=\ref[src];add=\ref[piece]'>[sanitize(initial(C.name))]</a>"
-					else
-						dat += "[sanitize(initial(C.name))] (ISSUED)"
-			dat += "<hr>"
-		dat += "<a href='byond://?src=\ref[src];vend=[1]'>Dispense</a>"
-	dat = jointext(dat,"<br>")
-	var/datum/browser/popup = new(user, "Uniform Dispenser","Uniform Dispenser", 300, 700, src)
-	popup.set_content(dat)
-	popup.open()
+/obj/machinery/uniform_vendor/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "UniformVendor", "Uniform Vendor", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-/obj/machinery/uniform_vendor/OnTopic(mob/user, href_list)
-	if(href_list["ID"])
-		if(ID)
-			if(!issilicon(user))
-				user.put_in_hands(ID)
+/obj/machinery/uniform_vendor/ui_data(mob/user)
+	var/list/cats = list()
+	if (ID)
+		var/datum/job/job = SSjobs.get_by_path(ID.job_access_type)
+		if (job)
+			uniforms = find_uniforms(ID.military_rank, ID.military_branch, job.department_flag)
+		for (var/T in uniforms)
+			var/list/items = list()
+			for (var/piece in uniforms[T])
+				if (!piece)
+					continue
+				var/obj/item/clothing/C = piece
+				items += list(list(
+					"name" = sanitize(initial(C.name)),
+					"path" = "[piece]",
+					"selected" = (piece in selected_outfit),
+					"can_issue" = can_issue(piece)
+				))
+			cats += list(list("name" = T, "items" = items))
+	return list(
+		"has_id" = !!ID,
+		"id_info" = ID ? "[ID.registered_name], [ID.military_rank], [ID.military_branch]" : null,
+		"categories" = cats,
+		"selected_count" = length(selected_outfit)
+	)
+
+/obj/machinery/uniform_vendor/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	var/mob/M = usr
+	switch(action)
+		if("toggle_id")
+			if (ID)
+				if (!issilicon(M))
+					M.put_in_hands(ID)
+				else
+					ID.dropInto(loc)
+				ID = null
+				selected_outfit.Cut()
 			else
-				ID.dropInto(loc)
-			ID = null
+				var/obj/item/card/id/I = M.get_active_hand()
+				if (istype(I) && M.unEquip(I, src))
+					ID = I
+			. = TRUE
+		if("select_category")
+			var/cat_name = params["name"]
+			if (cat_name in uniforms)
+				var/list/addition = uniforms[cat_name]
+				for (var/G in addition)
+					if (can_issue(G))
+						selected_outfit |= addition
+			. = TRUE
+		if("toggle_item")
+			var/path = text2path(params["path"])
+			if (!ispath(path))
+				return
+			if (params["add"])
+				selected_outfit |= path
+			else
+				selected_outfit -= path
+			. = TRUE
+		if("vend")
+			flick("uniform-vend", src)
+			spawn_uniform(selected_outfit)
 			selected_outfit.Cut()
-		else
-			var/obj/item/card/id/I = user.get_active_hand()
-			if(istype(I) && user.unEquip(I, src))
-				ID = I
-		. = TOPIC_REFRESH
-	if(href_list["get_all"])
-		if(!(href_list["get_all"] in uniforms))
-			return TOPIC_NOACTION
-		var/list/addition = uniforms[href_list["get_all"]]
-		for(var/G in addition)
-			if(can_issue(G))
-				selected_outfit |= addition
-		. = TOPIC_REFRESH
-	if(href_list["add"])
-		var/uniform_path = locate(href_list["add"])
-		if(ispath(uniform_path))
-			selected_outfit |= uniform_path
-			. = TOPIC_REFRESH
-		else
-			. = TOPIC_NOACTION
-	if(href_list["rem"])
-		selected_outfit -= locate(href_list["rem"])
-		. = TOPIC_REFRESH
-	if(href_list["vend"])
-		flick("uniform-vend", src)
-		spawn_uniform(selected_outfit)
-		selected_outfit.Cut()
-		. = TOPIC_REFRESH
-	if(.)
-		attack_hand(user)
+			. = TRUE
 
 /obj/machinery/uniform_vendor/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(istype(W, /obj/item/clothingbag))

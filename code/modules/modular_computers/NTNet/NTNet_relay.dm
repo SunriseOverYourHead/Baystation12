@@ -94,45 +94,40 @@
 	update_icon()
 
 
-/obj/machinery/ntnet_relay/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/topic_state/state = GLOB.default_state)
-	var/list/data = list()
-	data["enabled"] = enabled
-	data["dos_capacity"] = dos_capacity
-	data["dos_overload"] = dos_overload
-	data["dos_crashed"] = dos_failure
-	data["portable_drive"] = !!get_component_of_type(/obj/item/stock_parts/computer/hard_drive/portable)
+/obj/machinery/ntnet_relay/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "NtnetRelay", "NTNet Quantum Relay", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "ntnet_relay.tmpl", "NTNet Quantum Relay", 500, 300, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/ntnet_relay/ui_data(mob/user)
+	return list(
+		"enabled" = enabled,
+		"dos_capacity" = dos_capacity,
+		"dos_overload" = dos_overload,
+		"dos_crashed" = dos_failure
+	)
 
+/obj/machinery/ntnet_relay/ui_state(mob/user)
+	return GLOB.default_state
 
 /obj/machinery/ntnet_relay/interface_interact(mob/living/user)
 	ui_interact(user)
 	return TRUE
 
-
-/obj/machinery/ntnet_relay/Topic(href, href_list)
-	if (..())
-		return TOPIC_HANDLED
-	if (href_list["restart"])
-		dos_overload = 0
-		dos_failure = FALSE
-		update_icon()
-		ntnet_global.add_log("Quantum relay ([relay_id]) manually restarted from overload recovery mode to normal operation mode.")
-		return TOPIC_HANDLED
-	else if (href_list["toggle"])
-		enabled = !enabled
-		ntnet_global.add_log("Quantum relay ([relay_id]) manually [enabled ? "enabled" : "disabled"].")
-		update_icon()
-		return TOPIC_HANDLED
-	else if (href_list["purge"])
-		ntnet_global.banned_nids.Cut()
-		ntnet_global.add_log("Override: Network blacklist manually cleared from Quantum relay ([relay_id]).")
-		return TOPIC_HANDLED
-	else if (href_list["eject_drive"] && uninstall_component(/obj/item/stock_parts/computer/hard_drive/portable))
-		visible_message("[icon2html(src, viewers(get_turf(src)))] [src] beeps and ejects its portable disk.")
-		return TOPIC_HANDLED
+/obj/machinery/ntnet_relay/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("toggle")
+			enabled = !enabled
+			ntnet_global.add_log("Quantum relay ([relay_id]) manually [enabled ? "enabled" : "disabled"].")
+			update_icon()
+			return TRUE
+		if("restart")
+			dos_overload = 0
+			dos_failure = FALSE
+			update_icon()
+			ntnet_global.add_log("Quantum relay ([relay_id]) manually restarted from overload recovery mode to normal operation mode.")
+			return TRUE
+	return FALSE

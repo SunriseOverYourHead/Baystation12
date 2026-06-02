@@ -99,48 +99,59 @@
 			break
 
 
-/obj/machinery/computer/ship/sensors/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	if (!linked)
+/obj/machinery/computer/ship/sensors/ui_interact(mob/user, datum/tgui/ui)
+	if(!linked)
 		display_reconnect_dialog(user, "sensors")
 		return
+	ui = tgui_interact(user, src, "ShipSensors", "Sensors Control", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	var/data = list()
+/obj/machinery/computer/ship/sensors/ui_close(mob/user)
+	unlook(user)
+
+/obj/machinery/computer/ship/sensors/ui_data(mob/user)
+	if(!linked)
+		return list()
 
 	var/obj/machinery/shipsensors/sensors = get_sensors()
-	data["viewing"] = viewing_overmap(user)
-	data["muted"] = muted
-	data["sound_off"] = sound_off
 	var/mob/living/silicon/silicon = user
-	data["viewing_silicon"] = ismachinerestricted(silicon)
-	if (sensors)
+	var/list/data = list(
+		"viewing" = viewing_overmap(user),
+		"muted" = muted,
+		"sound_off" = sound_off,
+		"viewing_silicon" = ismachinerestricted(silicon),
+	)
+
+	if(sensors)
 		data["on"] = sensors.use_power
 		data["range"] = sensors.range
 		data["health"] = sensors.get_current_health()
 		data["max_health"] = sensors.get_max_health()
 		data["heat"] = sensors.heat
 		data["critical_heat"] = sensors.critical_heat
-		if (sensors.health_dead())
+		if(sensors.health_dead())
 			data["status"] = "DESTROYED"
-		else if (!sensors.powered())
+		else if(!sensors.powered())
 			data["status"] = "NO POWER"
-		else if (!sensors.in_vacuum())
+		else if(!sensors.in_vacuum())
 			data["status"] = "VACUUM SEAL BROKEN"
 		else
 			data["status"] = "OK"
+
 		var/list/known_contacts = list()
 		var/list/unknown_contacts = list()
-
 		var/list/potential_contacts = list()
 
-		if (sensors?.use_power)
-			for (var/obj/overmap/nearby in view(round(sensors.range,1), linked))
-				if (nearby.requires_contact) // Some ships require.
+		if(sensors?.use_power)
+			for(var/obj/overmap/nearby in view(round(sensors.range, 1), linked))
+				if(nearby.requires_contact)
 					continue
 				potential_contacts |= nearby
 
-		for (var/obj/overmap/visitable/contact in sensors.objects_in_view)
+		for(var/obj/overmap/visitable/contact in sensors.objects_in_view)
 			if(contact.scannable)
-				if (contact in sensors.contact_datums)
+				if(contact in sensors.contact_datums)
 					potential_contacts |= contact
 				else
 					var/bearing_variability = round(300/sensors.sensor_strength, 5)
@@ -148,98 +159,87 @@
 						"name" = contact.unknown_id,
 						"bearing" = inaccurate_bearing(get_bearing(linked, contact), bearing_variability),
 						"variability" = bearing_variability,
-						"progress" = sensors.objects_in_view[contact]
+						"progress" = sensors.objects_in_view[contact],
 					)))
 
-		for (var/obj/overmap/contact in potential_contacts)
-			if (linked == contact)
+		for(var/obj/overmap/contact in potential_contacts)
+			if(linked == contact)
 				continue
 			known_contacts.Add(list(list(
 				"name" = contact.name,
 				"color" = contact.get_color(),
 				"ref" = "\ref[contact]",
-				"bearing" = get_bearing(linked, contact)
+				"bearing" = get_bearing(linked, contact),
 			)))
 
-		if (length(unknown_contacts))
+		if(length(unknown_contacts))
 			data["unknown_contacts"] = unknown_contacts
-
-		if (length(known_contacts))
+		if(length(known_contacts))
 			data["known_contacts"] = known_contacts
-
 		data["last_scan"] = last_scan
 	else
 		data["status"] = "MISSING"
 		data["range"] = "N/A"
 		data["on"] = 0
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "shipsensors.tmpl", "[linked.name] Sensors Control", 420, 530, src)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+	return data
 
+/obj/machinery/computer/ship/sensors/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
 
-/obj/machinery/computer/ship/sensors/OnTopic(mob/user, list/href_list, state)
-	if (..())
-		return TOPIC_HANDLED
+	if(!linked)
+		return TRUE
 
-	if (!linked)
-		return TOPIC_NOACTION
+	var/mob/user = ui.user
 
-	if (href_list["viewing"])
-		if (user)
+	switch(action)
+		if("viewing")
 			viewing_overmap(user) ? unlook(user) : look(user)
-		return TOPIC_REFRESH
 
-	if (href_list["link"])
-		find_sensors()
-		return TOPIC_REFRESH
+		if("link")
+			find_sensors()
 
-	if (href_list["mute"])
-		muted = !muted
-		return TOPIC_REFRESH
+		if("mute")
+			muted = !muted
 
-	if (href_list["sound_off"])
-		sound_off = !sound_off
-		return TOPIC_REFRESH
+		if("sound_off")
+			sound_off = !sound_off
 
-	var/obj/machinery/shipsensors/sensors = get_sensors()
-	if (sensors)
-		if (href_list["range"])
-			var/nrange = input("Set new sensors range", "Sensor range", sensors.range) as num|null
-			if (!CanInteract(user,state))
-				return TOPIC_NOACTION
-			if (nrange)
-				sensors.set_range(clamp(round(nrange), 1, world.view))
-			return TOPIC_REFRESH
-		if (href_list["toggle"])
-			sensors.toggle()
-			return TOPIC_REFRESH
+		if("toggle")
+			var/obj/machinery/shipsensors/sensors = get_sensors()
+			if(sensors)
+				sensors.toggle()
 
-	if (href_list["scan"])
-		var/obj/overmap/O = locate(href_list["scan"])
-		if (istype(O) && !QDELETED(O))
-			if ((O in view(7,linked))|| (O in sensors.contact_datums))
-				playsound(loc, "sound/effects/ping.ogg", 50, 1)
-				LAZYSET(last_scan, "data", O.get_scan_data(user))
-				LAZYSET(last_scan, "location", "[O.x],[O.y]")
-				LAZYSET(last_scan, "name", "[O]")
-				state_visible("Successfully scanned \the [O].")
-				return TOPIC_HANDLED
+		if("range")
+			var/obj/machinery/shipsensors/sensors = get_sensors()
+			if(sensors)
+				var/nrange = input("Set new sensors range", "Sensor range", sensors.range) as num|null
+				if(nrange)
+					sensors.set_range(clamp(round(nrange), 1, world.view))
 
-		state_visible(SPAN_WARNING("Could not get a scan from \the [O]!"))
-		return TOPIC_HANDLED
+		if("scan")
+			var/obj/machinery/shipsensors/sensors = get_sensors()
+			var/obj/overmap/O = locate(params["scan"])
+			if(istype(O) && !QDELETED(O))
+				if((O in view(7, linked)) || (sensors && O in sensors.contact_datums))
+					playsound(loc, "sound/effects/ping.ogg", 50, 1)
+					LAZYSET(last_scan, "data", O.get_scan_data(user))
+					LAZYSET(last_scan, "location", "[O.x],[O.y]")
+					LAZYSET(last_scan, "name", "[O]")
+					state_visible("Successfully scanned \the [O].")
+					return TRUE
+			state_visible(SPAN_WARNING("Could not get a scan from \the [O]!"))
 
-	if (href_list["print"])
-		playsound(loc, "sound/machines/dotprinter.ogg", 30, 1)
-		var/scan_data = ""
-		for (var/scan in last_scan["data"])
-			scan_data += scan + "\n\n"
+		if("print")
+			playsound(loc, "sound/machines/dotprinter.ogg", 30, 1)
+			var/scan_data = ""
+			for(var/scan in last_scan["data"])
+				scan_data += scan + "\n\n"
+			new /obj/item/paper(get_turf(src), scan_data, "paper (Sensor Scan - [last_scan["name"]])", null, print_language)
 
-		new /obj/item/paper (get_turf(src), scan_data, "paper (Sensor Scan - [last_scan["name"]])", null, print_language)
-		return TOPIC_HANDLED
+	return TRUE
 
 
 /obj/machinery/shipsensors

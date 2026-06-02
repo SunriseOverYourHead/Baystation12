@@ -105,124 +105,102 @@
 	ui_interact(user)
 	return TRUE
 
- /**
-  * The ui_interact proc is used to open and update Nano UIs
-  * If ui_interact is not used then the UI will not update correctly
-  * ui_interact is currently defined for /atom/movable (which is inherited by /obj and /mob)
-  *
-  * @param user /mob The mob who is interacting with this ui
-  * @param ui_key string A string key to use for this ui. Allows for multiple unique uis on one obj/mob (defaut value "main")
-  * @param ui /datum/nanoui This parameter is passed by the nanoui process() proc when updating an open ui
-  *
-  * @return nothing
-  */
-/obj/machinery/atmospherics/unary/cryo_cell/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/machinery/atmospherics/unary/cryo_cell/ui_interact(mob/user, datum/tgui/ui)
 	if(user == occupant || user.stat)
 		return
+	ui = tgui_interact(user, src, "CryoCell", "Cryo Cell Control System", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	// this is the data which will be sent to the ui
-	var/data = list()
+/obj/machinery/atmospherics/unary/cryo_cell/ui_data(mob/user)
+	var/list/data = list()
 	data["isOperating"] = on
-	data["hasOccupant"] = occupant ? 1 : 0
-
-	if (occupant)
-		var/cloneloss = "none"
-		var/amount = occupant.getCloneLoss()
-		if(amount > 50)
-			cloneloss = "severe"
-		else if(amount > 25)
-			cloneloss = "significant"
-		else if(amount > 10)
-			cloneloss = "moderate"
-		else if(amount)
-			cloneloss = "minor"
-		var/scan = medical_scan_results(occupant)
-		scan += "<br><br>Genetic degradation: [cloneloss]"
-		scan = replacetext(scan,"'scan_notice'","'white'")
-		scan = replacetext(scan,"'scan_warning'","'average'")
-		scan = replacetext(scan,"'scan_danger'","'bad'")
-		scan += "<br>Cryostasis factor: [occupant.stasis_value]x"
-		data["occupant"] = scan
-
 	data["cellTemperature"] = round(air_contents.temperature)
-	data["cellTemperatureStatus"] = "good"
-	if(air_contents.temperature >= temperature_danger_threshhold) // if greater than 273.15 kelvin (0 celsius)
-		data["cellTemperatureStatus"] = "bad"
-	else if(air_contents.temperature >= temperature_warning_threshhold)
-		data["cellTemperatureStatus"] = "average"
 
-	data["isBeakerLoaded"] = beaker ? 1 : 0
+	if(occupant)
+		var/stat_string
+		if(occupant.stat == DEAD)
+			stat_string = "Dead"
+		else if(occupant.stat == UNCONSCIOUS)
+			stat_string = "Unconscious"
+		else
+			stat_string = "Conscious"
+		data["occupant"] = list(
+			"name" = occupant.name,
+			"stat" = stat_string,
+			"bodyTemperature" = occupant.bodytemperature,
+			"health" = occupant.health,
+			"maxHealth" = occupant.maxHealth,
+			"bruteLoss" = occupant.getBruteLoss(),
+			"oxyLoss" = occupant.getOxyLoss(),
+			"toxLoss" = occupant.getToxLoss(),
+			"fireLoss" = occupant.getFireLoss()
+		)
 
-	data["beakerLabel"] = null
-	data["beakerVolume"] = 0
 	if(beaker)
-		data["beakerLabel"] = beaker.name
-		data["beakerVolume"] = beaker.reagents.total_volume
+		var/list/contents = list()
+		for(var/datum/reagent/R in beaker.reagents.reagent_list)
+			contents.Add(list(list(
+				"name" = R.name,
+				"volume" = round(R.volume, 1)
+			)))
+		data["beaker"] = list(
+			"label" = beaker.name,
+			"currentVolume" = round(beaker.reagents.total_volume, 1),
+			"maxVolume" = beaker.reagents.maximum_volume,
+			"contents" = contents
+		)
 
-	data["fast_stasis_mult"] = fast_stasis_mult
-	data["slow_stasis_mult"] = slow_stasis_mult
-	data["current_stasis_mult"] = current_stasis_mult
+	if(current_stasis_mult == fast_stasis_mult)
+		data["stasisMode"] = "fast"
+	else if(current_stasis_mult == slow_stasis_mult)
+		data["stasisMode"] = "slow"
+	else
+		data["stasisMode"] = "normal"
+	data["fastStasisMult"] = fast_stasis_mult
+	data["slowStasisMult"] = slow_stasis_mult
 
-	// update the ui if it exists, returns null if no ui is passed/found
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		// the ui does not exist, so we'll create a new() one
-		// for a list of parameters and their descriptions see the code docs in \code\modules\nano\nanoui.dm
-		ui = new(user, src, ui_key, "cryo.tmpl", "Cryo Cell Control System", 520, 410)
-		// when the ui is first opened this is the data it will use
-		ui.set_initial_data(data)
-		// open the new ui window
-		ui.open()
-		// auto update every Master Controller tick
-		ui.set_auto_update(1)
+	return data
 
-/obj/machinery/atmospherics/unary/cryo_cell/OnTopic(user, href_list)
-	if(user == occupant)
-		return STATUS_CLOSE
+/obj/machinery/atmospherics/unary/cryo_cell/ui_state(mob/user)
+	return GLOB.default_state
+
+/obj/machinery/atmospherics/unary/cryo_cell/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
-
-/obj/machinery/atmospherics/unary/cryo_cell/OnTopic(user, href_list)
-	if(href_list["switchOn"])
-		on = 1
-		update_icon()
-		return TOPIC_REFRESH
-
-	if(href_list["switchOff"])
-		on = 0
-		update_icon()
-		return TOPIC_REFRESH
-
-	if(href_list["ejectBeaker"])
-		if(beaker)
-			beaker.forceMove(get_step(loc, SOUTH))
-			beaker = null
-		return TOPIC_REFRESH
-
-	if(href_list["ejectOccupant"])
-		if(!occupant || isslime(user) || ispAI(user))
-			return TOPIC_HANDLED // don't update UIs attached to this object
-		go_out()
-		return TOPIC_REFRESH
-
-	if(href_list["goFast"])
-		current_stasis_mult = fast_stasis_mult
-		update_icon()
-		return TOPIC_REFRESH
-
-	if(href_list["goRegular"])
-		current_stasis_mult = 1
-		update_icon()
-		return TOPIC_REFRESH
-
-	if(href_list["goSlow"])
-		current_stasis_mult = slow_stasis_mult
-		update_icon()
-		return TOPIC_REFRESH
+	if(.)
+		return
+	var/mob/user = ui.user
+	if(user == occupant || user.stat)
+		return
+	switch(action)
+		if("power")
+			on = !on
+			update_icon()
+			return TRUE
+		if("eject_beaker")
+			if(beaker)
+				beaker.forceMove(get_step(loc, SOUTH))
+				beaker = null
+			return TRUE
+		if("eject_occupant")
+			if(!occupant || isslime(user) || ispAI(user))
+				return TRUE
+			go_out()
+			return TRUE
+		if("set_stasis")
+			switch(params["mode"])
+				if("fast")
+					current_stasis_mult = fast_stasis_mult
+				if("slow")
+					current_stasis_mult = slow_stasis_mult
+				if("normal")
+					current_stasis_mult = 1
+			update_icon()
+			return TRUE
+	return FALSE
 
 /obj/machinery/atmospherics/unary/cryo_cell/state_transition(singleton/machine_construction/default/new_state)
 	. = ..()
-	if(istype(new_state))
-		updateUsrDialog()
 
 /obj/machinery/atmospherics/unary/cryo_cell/use_tool(obj/item/G, mob/living/user, list/click_params)
 	if (!istype(G, /obj/item/reagent_containers/glass))

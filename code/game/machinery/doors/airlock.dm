@@ -131,6 +131,10 @@
 /obj/machinery/door/airlock/security
 	door_color = COLOR_NT_RED
 
+/obj/machinery/door/airlock/infantry
+	door_color = COLOR_PALE_GREEN_GRAY
+	stripe_color = COLOR_NT_RED
+
 /obj/machinery/door/airlock/engineering
 	name = "Maintenance Hatch"
 	door_color = COLOR_AMBER
@@ -810,30 +814,92 @@ About the new airlock wires panel:
 /obj/machinery/door/airlock/attack_ghost(mob/user)
 	ui_interact(user)
 
-/obj/machinery/door/airlock/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/topic_state/state = GLOB.default_state)
-	var/list/data = list()
+/obj/machinery/door/airlock/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "DoorControl", "Door Controls", ui)
 
-	data["main_power_loss"]		= round(main_power_lost_until 	> 0 ? max(main_power_lost_until - world.time,	0) / 10 : main_power_lost_until,	1)
-	data["backup_power_loss"]	= round(backup_power_lost_until	> 0 ? max(backup_power_lost_until - world.time,	0) / 10 : backup_power_lost_until,	1)
-	data["electrified"] 		= round(electrified_until		> 0 ? max(electrified_until - world.time, 	0) / 10 	: electrified_until,		1)
-	data["open"] = !density
-
+/obj/machinery/door/airlock/ui_data(mob/user)
 	var/list/commands = list()
-	commands[LIST_PRE_INC(commands)] = list("name" = "IdScan",					"command"= "idscan",				"active" = !aiDisabledIdScanner,	"enabled" = "Enabled",	"disabled" = "Disable",		"danger" = 0, "act" = 1)
-	commands[LIST_PRE_INC(commands)] = list("name" = "Bolts",					"command"= "bolts",					"active" = !locked,					"enabled" = "Raised ",	"disabled" = "Dropped",		"danger" = 0, "act" = 0)
-	commands[LIST_PRE_INC(commands)] = list("name" = "Lights",					"command"= "lights",				"active" = lights,					"enabled" = "Enabled",	"disabled" = "Disable",		"danger" = 0, "act" = 1)
-	commands[LIST_PRE_INC(commands)] = list("name" = "Safeties",				"command"= "safeties",				"active" = safe,					"enabled" = "Nominal",	"disabled" = "Overridden",	"danger" = 1, "act" = 0)
-	commands[LIST_PRE_INC(commands)] = list("name" = "Timing",					"command"= "timing",				"active" = normalspeed,				"enabled" = "Nominal",	"disabled" = "Overridden",	"danger" = 1, "act" = 0)
-	commands[LIST_PRE_INC(commands)] = list("name" = "Door State",				"command"= "open",					"active" = density,					"enabled" = "Closed",	"disabled" = "Opened", 		"danger" = 0, "act" = 0)
+	commands += list(list("name" = "IdScan",    "command" = "idscan",    "active" = !aiDisabledIdScanner, "enabled" = "Enabled",   "disabled" = "Disable",    "danger" = FALSE, "act" = TRUE))
+	commands += list(list("name" = "Bolts",     "command" = "bolts",     "active" = !locked,              "enabled" = "Raised",    "disabled" = "Dropped",    "danger" = FALSE, "act" = FALSE))
+	commands += list(list("name" = "Lights",    "command" = "lights",    "active" = lights,               "enabled" = "Enabled",   "disabled" = "Disable",    "danger" = FALSE, "act" = TRUE))
+	commands += list(list("name" = "Safeties",  "command" = "safeties",  "active" = safe,                 "enabled" = "Nominal",   "disabled" = "Overridden", "danger" = TRUE,  "act" = FALSE))
+	commands += list(list("name" = "Timing",    "command" = "timing",    "active" = normalspeed,          "enabled" = "Nominal",   "disabled" = "Overridden", "danger" = TRUE,  "act" = FALSE))
+	commands += list(list("name" = "Door State","command" = "open",      "active" = density,              "enabled" = "Closed",    "disabled" = "Opened",     "danger" = FALSE, "act" = FALSE))
 
-	data["commands"] = commands
+	return list(
+		"main_power_loss"   = round(main_power_lost_until  > 0 ? max(main_power_lost_until  - world.time, 0) / 10 : main_power_lost_until,  1),
+		"backup_power_loss" = round(backup_power_lost_until > 0 ? max(backup_power_lost_until - world.time, 0) / 10 : backup_power_lost_until, 1),
+		"electrified"       = round(electrified_until       > 0 ? max(electrified_until       - world.time, 0) / 10 : electrified_until,       1),
+		"open"              = !density,
+		"commands"          = commands,
+	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "door_control.tmpl", "Door Controls", 450, 350, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/door/airlock/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	var/activate = text2num(params["activate"])
+	switch(action)
+		if("idscan")
+			set_idscan(activate, TRUE)
+		if("main_power")
+			if(!main_power_lost_until)
+				loseMainPower()
+		if("backup_power")
+			if(!backup_power_lost_until)
+				loseBackupPower()
+		if("bolts")
+			if(isWireCut(AIRLOCK_WIRE_DOOR_BOLTS))
+				to_chat(usr, "The door bolt control wire is cut - Door bolts permanently dropped.")
+			else if(activate && lock())
+				to_chat(usr, "The door bolts have been dropped.")
+			else if(!activate && unlock())
+				to_chat(usr, "The door bolts have been raised.")
+		if("electrify_temporary")
+			electrify(30 * activate, TRUE)
+		if("electrify_permanently")
+			electrify(-1 * activate, TRUE)
+		if("open")
+			if(welded)
+				to_chat(usr, "The airlock has been welded shut!")
+			else if(locked)
+				to_chat(usr, "The door bolts are down!")
+			else if(activate && density)
+				open()
+			else if(!activate && !density)
+				close()
+		if("safeties")
+			set_safeties(!activate, TRUE)
+		if("timing")
+			if(isWireCut(AIRLOCK_WIRE_SPEED))
+				to_chat(usr, "The timing wire is cut - Cannot alter timing.")
+			else if(activate && normalspeed)
+				normalspeed = FALSE
+			else if(!activate && !normalspeed)
+				normalspeed = TRUE
+		if("lights")
+			if(isWireCut(AIRLOCK_WIRE_LIGHT))
+				to_chat(usr, "The lights wire is cut - The door lights are permanently disabled.")
+			else if(!activate && lights)
+				lights = FALSE
+				to_chat(usr, "The door lights have been disabled.")
+			else if(activate && !lights)
+				lights = TRUE
+				to_chat(usr, "The door lights have been enabled.")
+		else
+			return FALSE
+	update_icon()
+	return TRUE
+
+/obj/machinery/door/airlock/ui_state(mob/user)
+	return GLOB.tgui_default_state
+
+/obj/machinery/door/airlock/ui_status(mob/user, datum/ui_state/state)
+	if(operating == DOOR_OPERATING_BROKEN)
+		return UI_CLOSE
+	if(issilicon(user) && !canAIControl())
+		return UI_CLOSE
+	return ..()
 
 /obj/machinery/door/airlock/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	if (src.isElectrified())
@@ -861,76 +927,6 @@ About the new airlock wires panel:
 			if(src.shock(user, 100))
 				return TRUE
 
-/obj/machinery/door/airlock/CanUseTopic(mob/user)
-	if (operating == DOOR_OPERATING_BROKEN) //emagged
-		to_chat(user, SPAN_WARNING("Unable to interface: Internal error."))
-		return STATUS_CLOSE
-	if(issilicon(user) && !src.canAIControl())
-		if (src.isAllPowerLoss()) //don't really like how this gets checked a second time, but not sure how else to do it.
-			to_chat(user, SPAN_WARNING("Unable to interface: Connection timed out."))
-		else
-			to_chat(user, SPAN_WARNING("Unable to interface: Connection refused."))
-		return STATUS_CLOSE
-
-	return ..()
-
-/obj/machinery/door/airlock/Topic(href, href_list)
-	if(..())
-		return 1
-
-	var/activate = text2num(href_list["activate"])
-	switch (href_list["command"])
-		if("idscan")
-			set_idscan(activate, 1)
-		if("main_power")
-			if(!main_power_lost_until)
-				src.loseMainPower()
-		if("backup_power")
-			if(!backup_power_lost_until)
-				src.loseBackupPower()
-		if("bolts")
-			if(src.isWireCut(AIRLOCK_WIRE_DOOR_BOLTS))
-				to_chat(usr, "The door bolt control wire is cut - Door bolts permanently dropped.")
-			else if(activate && src.lock())
-				to_chat(usr, "The door bolts have been dropped.")
-			else if(!activate && src.unlock())
-				to_chat(usr, "The door bolts have been raised.")
-		if("electrify_temporary")
-			electrify(30 * activate, 1)
-		if("electrify_permanently")
-			electrify(-1 * activate, 1)
-		if("open")
-			if(src.welded)
-				to_chat(usr, "The airlock has been welded shut!")
-			else if(src.locked)
-				to_chat(usr, "The door bolts are down!")
-			else if(activate && density)
-				open()
-			else if(!activate && !density)
-				close()
-		if("safeties")
-			set_safeties(!activate, 1)
-		if("timing")
-			// Door speed control
-			if(src.isWireCut(AIRLOCK_WIRE_SPEED))
-				to_chat(usr, "The timing wire is cut - Cannot alter timing.")
-			else if (activate && src.normalspeed)
-				normalspeed = FALSE
-			else if (!activate && !src.normalspeed)
-				normalspeed = TRUE
-		if("lights")
-			// Lights
-			if(src.isWireCut(AIRLOCK_WIRE_LIGHT))
-				to_chat(usr, "The lights wire is cut - The door lights are permanently disabled.")
-			else if (!activate && src.lights)
-				lights = FALSE
-				to_chat(usr, "The door lights have been disabled.")
-			else if (activate && !src.lights)
-				lights = TRUE
-				to_chat(usr, "The door lights have been enabled.")
-
-	update_icon()
-	return 1
 
 //returns 1 on success, 0 on failure
 /obj/machinery/door/airlock/proc/cut_bolts(obj/item/item, mob/user)

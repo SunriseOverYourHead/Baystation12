@@ -300,7 +300,7 @@
 		panel_open = !panel_open
 		user.visible_message("[user] [panel_open ? "opens" : "closes"] the maintenance panel of \the [src].", "You [panel_open ? "open" : "close"] the maintenance panel of \the [src].")
 		update_icon()
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		return TRUE
 
 	if(isMultitool(O) || isWirecutter(O))
@@ -359,7 +359,7 @@
 /obj/machinery/smartfridge/proc/stock(datum/stored_items/I, obj/item/O)
 	if(!I.add_product(O))
 		return FALSE
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
 	return TRUE
 
 /obj/machinery/smartfridge/interface_interact(mob/user)
@@ -370,59 +370,53 @@
 *   SmartFridge Menu
 ********************/
 
-/obj/machinery/smartfridge/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	user.set_machine(src)
+/obj/machinery/smartfridge/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "SmartFridge", src.name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	var/data = list()
-	data["contents"] = null
-	data["electrified"] = seconds_electrified > 0
-	data["shoot_inventory"] = shoot_inventory
-	data["locked"] = locked
-	data["secure"] = is_secure
-
+/obj/machinery/smartfridge/ui_data(mob/user)
 	var/list/items = list()
-	for (var/i=1 to length(item_records))
+	for(var/i = 1 to length(item_records))
 		var/datum/stored_items/I = item_records[i]
 		var/count = I.get_amount()
 		if(count > 0)
-			items.Add(list(list("display_name" = html_encode(capitalize(I.item_name)), "vend" = i, "quantity" = count)))
+			items += list(list("display_name" = html_encode(capitalize(I.item_name)), "vend" = i, "quantity" = count))
+	return list(
+		"contents" = length(items) ? items : null,
+		"electrified" = seconds_electrified > 0,
+		"shoot_inventory" = shoot_inventory,
+		"locked" = locked,
+		"secure" = is_secure,
+	)
 
-	if(length(items) > 0)
-		data["contents"] = items
+/obj/machinery/smartfridge/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("vend")
+			var/index = text2num(params["vend"])
+			var/amount = text2num(params["amount"])
+			if(!isnum(index) || !isnum(amount))
+				return
+			var/datum/stored_items/I = item_records[index]
+			if(!I)
+				return
+			var/count = I.get_amount()
+			if(count > 0)
+				if((count - amount) < 0)
+					amount = count
+				for(var/i = 1 to amount)
+					I.get_product(get_turf(src))
+					update_icon()
+			. = TRUE
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "smartfridge.tmpl", src.name, 400, 500)
-		ui.set_initial_data(data)
-		ui.open()
-
-/obj/machinery/smartfridge/Topic(href, href_list)
-	if(..()) return 0
-
-	var/mob/user = usr
-	var/datum/nanoui/ui = SSnano.get_open_ui(user, src, "main")
-
-	if(href_list["close"])
-		user.unset_machine()
-		ui.close()
-		return 0
-
-	if(href_list["vend"])
-		var/index = text2num(href_list["vend"])
-		var/amount = text2num(href_list["amount"])
-		var/datum/stored_items/I = item_records[index]
-		var/count = I.get_amount()
-
-		// Sanity check, there are probably ways to press the button when it shouldn't be possible.
-		if(count > 0)
-			if((count - amount) < 0)
-				amount = count
-			for(var/i = 1 to amount)
-				I.get_product(get_turf(src))
-				update_icon()
-
-		return 1
-	return 0
+/obj/machinery/smartfridge/secure/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	if(action == "vend" && !allowed(usr) && !emagged && locked != -1 && scan_id)
+		to_chat(usr, SPAN_WARNING("Access denied."))
+		return TRUE
+	return ..(action, params, ui, state)
 
 /obj/machinery/smartfridge/proc/throw_item()
 	var/obj/throw_item = null

@@ -130,20 +130,11 @@
 
 	return 1
 
-/obj/machinery/atmospherics/omni/mixer/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	usr.set_machine(src)
+/obj/machinery/atmospherics/omni/mixer/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "OmniMixer", "Omni Mixer Control", ui)
 
-	var/list/data = new()
-
-	data = build_uidata()
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-
-	if (!ui)
-		ui = new(user, src, ui_key, "omni_mixer.tmpl", "Omni Mixer Control", 360, 330)
-		ui.set_initial_data(data)
-
-		ui.open()
+/obj/machinery/atmospherics/omni/mixer/ui_data(mob/user)
+	return build_uidata()
 
 /obj/machinery/atmospherics/omni/mixer/proc/build_uidata()
 	var/list/data = list()
@@ -178,36 +169,47 @@
 
 	return data
 
-/obj/machinery/atmospherics/omni/mixer/Topic(href, href_list)
-	if(..()) return 1
-
-	switch(href_list["command"])
+/obj/machinery/atmospherics/omni/mixer/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
 		if("power")
 			if(!configuring)
 				update_use_power(!use_power)
 			else
 				update_use_power(POWER_USE_OFF)
+			update_icon()
+			return TRUE
 		if("configure")
 			configuring = !configuring
 			if(configuring)
 				update_use_power(POWER_USE_OFF)
-
-	//only allows config changes when in configuring mode ~otherwise you'll get weird pressure stuff going on
+			update_icon()
+			return TRUE
 	if(configuring && !use_power)
-		switch(href_list["command"])
+		switch(action)
 			if("set_flow_rate")
-				var/new_flow_rate = input(usr,"Enter new flow rate limit (0-[max_flow_rate]L/s)","Flow Rate Control",set_flow_rate) as num
+				var/new_flow_rate = input(usr, "Enter new flow rate limit (0-[max_flow_rate]L/s)", "Flow Rate Control", set_flow_rate) as num
 				set_flow_rate = clamp(new_flow_rate, 0, max_flow_rate)
+				update_icon()
+				return TRUE
 			if("switch_mode")
-				switch_mode(dir_flag(href_list["dir"]), href_list["mode"])
+				switch_mode(dir_flag(params["dir"]), params["mode"])
+				update_icon()
+				return TRUE
 			if("switch_con")
-				change_concentration(dir_flag(href_list["dir"]))
+				change_concentration(dir_flag(params["dir"]))
+				update_icon()
+				return TRUE
 			if("switch_conlock")
-				con_lock(dir_flag(href_list["dir"]))
+				con_lock(dir_flag(params["dir"]))
+				update_icon()
+				return TRUE
+	return FALSE
 
-	update_icon()
-	SSnano.update_uis(src)
-	return
+/obj/machinery/atmospherics/omni/mixer/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 /obj/machinery/atmospherics/omni/mixer/proc/switch_mode(port = NORTH, mode = ATM_NONE)
 	if(mode != ATM_INPUT && mode != ATM_OUTPUT)

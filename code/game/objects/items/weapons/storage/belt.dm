@@ -293,6 +293,10 @@
 		/obj/item/material/knife
 		)
 
+/obj/item/storage/belt/security/infantry
+	name = "infantry belt"
+	desc = "Can hold ammo and small items."
+
 /obj/item/storage/belt/holster/security/tactical
 	name = "combat belt"
 	desc = "Can hold security gear like handcuffs and flashes, with more pouches for more storage."

@@ -13,96 +13,81 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/computer/robotics/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
-	data["robots"] = get_cyborgs(user)
-	data["is_ai"] = issilicon(user)
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "robot_control.tmpl", "Robotic Control Console", 400, 500)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/computer/robotics/CanUseTopic(user)
+/obj/machinery/computer/robotics/ui_interact(mob/user, datum/tgui/ui)
 	if(!allowed(user))
 		to_chat(user, SPAN_WARNING("Access Denied"))
-		return STATUS_CLOSE
-	return ..()
+		return
+	ui = tgui_interact(user, src, "RobotControl", "Robotic Control Console", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-/obj/machinery/computer/robotics/OnTopic(mob/user, href_list)
-	// Locks or unlocks the cyborg
-	if (href_list["lockdown"])
-		var/mob/living/silicon/robot/target = get_cyborg_by_name(href_list["lockdown"])
-		if(!target || !istype(target))
-			return TOPIC_HANDLED
+/obj/machinery/computer/robotics/ui_data(mob/user)
+	return list(
+		"robots" = get_cyborgs(user),
+		"is_ai" = issilicon(user)
+	)
 
-		if(isAI(user) && (target.connected_ai != user))
-			to_chat(user, SPAN_WARNING("Access Denied. This robot is not linked to you."))
-			return TOPIC_HANDLED
+/obj/machinery/computer/robotics/ui_state(mob/user)
+	return GLOB.default_state
 
-		if(isrobot(user))
-			to_chat(user, SPAN_WARNING("Access Denied."))
-			return TOPIC_HANDLED
-
-		var/choice = input("Really [target.lockcharge ? "unlock" : "lockdown"] [target.name] ?") in list ("Yes", "No")
-		if(choice != "Yes")
-			return TOPIC_HANDLED
-
-		if(!target || !istype(target))
-			return TOPIC_HANDLED
-
-		if(target.SetLockdown(!target.lockcharge))
-			log_and_message_admins("[target.lockcharge ? "locked down" : "released"] [target.name]!", user)
-			if(target.lockcharge)
-				to_chat(target, SPAN_DANGER("You have been locked down!"))
+/obj/machinery/computer/robotics/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	var/mob/user = ui.user
+	if(!allowed(user))
+		to_chat(user, SPAN_WARNING("Access Denied"))
+		return TRUE
+	var/mob/living/silicon/robot/target = get_cyborg_by_name(params["name"])
+	if(!target || !istype(target))
+		return TRUE
+	switch(action)
+		if("lockdown")
+			if(isrobot(user))
+				to_chat(user, SPAN_WARNING("Access Denied."))
+				return TRUE
+			if(isAI(user) && (target.connected_ai != user))
+				to_chat(user, SPAN_WARNING("Access Denied. This robot is not linked to you."))
+				return TRUE
+			var/choice = input("Really [target.lockcharge ? "unlock" : "lockdown"] [target.name] ?") in list("Yes", "No")
+			if(choice != "Yes")
+				return TRUE
+			if(!target || !istype(target))
+				return TRUE
+			if(target.SetLockdown(!target.lockcharge))
+				log_and_message_admins("[target.lockcharge ? "locked down" : "released"] [target.name]!", user)
+				if(target.lockcharge)
+					to_chat(target, SPAN_DANGER("You have been locked down!"))
+				else
+					to_chat(target, SPAN_NOTICE("Your lockdown has been lifted!"))
 			else
-				to_chat(target, SPAN_NOTICE("Your lockdown has been lifted!"))
-		else
-			to_chat(user, SPAN_WARNING("ERROR: Lockdown attempt failed."))
-		. = TOPIC_REFRESH
-
-	// Remotely hacks the cyborg. Only antag AIs can do this and only to linked cyborgs.
-	else if (href_list["hack"])
-		var/mob/living/silicon/robot/target = get_cyborg_by_name(href_list["hack"])
-		if(!target || !istype(target))
-			return TOPIC_HANDLED
-
-		// Antag AI checks
-		if(!istype(user, /mob/living/silicon/ai) || !(user.mind.special_role && user.mind.original == user))
-			to_chat(user, SPAN_WARNING("Access Denied"))
-			return TOPIC_HANDLED
-
-		if(target.emagged)
-			to_chat(user, "Robot is already hacked.")
-			return TOPIC_HANDLED
-
-		var/choice = input("Really hack [target.name]? This cannot be undone.") in list("Yes", "No")
-		if(choice != "Yes")
-			return TOPIC_HANDLED
-
-		if(!target || !istype(target))
-			return TOPIC_HANDLED
-
-		log_and_message_admins("emagged [target.name] using robotic console!", user)
-		target.emagged = TRUE
-		to_chat(target, SPAN_NOTICE("Failsafe protocols overriden. New tools available."))
-		. = TOPIC_REFRESH
-
-	else if (href_list["message"])
-		var/mob/living/silicon/robot/target = get_cyborg_by_name(href_list["message"])
-		if(!target || !istype(target))
-			return
-
-		var/message = sanitize(input("Enter message to transmit to the synthetic.") as null|text)
-		if(!message || !istype(target))
-			return
-
-		log_and_message_admins("sent message '[message]' to [target.name] using robotics control console!", user)
-		to_chat(target, SPAN_NOTICE("New remote message received using R-SSH protocol:"))
-		to_chat(target, message)
-		. = TOPIC_REFRESH
+				to_chat(user, SPAN_WARNING("ERROR: Lockdown attempt failed."))
+			return TRUE
+		if("hack")
+			if(!istype(user, /mob/living/silicon/ai) || !(user.mind.special_role && user.mind.original == user))
+				to_chat(user, SPAN_WARNING("Access Denied"))
+				return TRUE
+			if(target.emagged)
+				to_chat(user, "Robot is already hacked.")
+				return TRUE
+			var/choice = input("Really hack [target.name]? This cannot be undone.") in list("Yes", "No")
+			if(choice != "Yes")
+				return TRUE
+			if(!target || !istype(target))
+				return TRUE
+			log_and_message_admins("emagged [target.name] using robotic console!", user)
+			target.emagged = TRUE
+			to_chat(target, SPAN_NOTICE("Failsafe protocols overriden. New tools available."))
+			return TRUE
+		if("message")
+			var/message = sanitize(input("Enter message to transmit to the synthetic.") as null|text)
+			if(!message || !istype(target))
+				return TRUE
+			log_and_message_admins("sent message '[message]' to [target.name] using robotics control console!", user)
+			to_chat(target, SPAN_NOTICE("New remote message received using R-SSH protocol:"))
+			to_chat(target, message)
+			return TRUE
+	return FALSE
 
 // Proc: get_cyborgs()
 // Parameters: 1 (operator - mob which is operating the console.)

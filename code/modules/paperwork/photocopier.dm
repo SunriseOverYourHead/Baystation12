@@ -16,90 +16,81 @@
 	var/maxcopies = 10	//how many copies can be copied at once- idea shamelessly stolen from bs12's copier!
 
 /obj/machinery/photocopier/interface_interact(mob/user)
-	interact(user)
+	ui_interact(user)
 	return TRUE
 
-/obj/machinery/photocopier/interact(mob/user)
-	user.set_machine(src)
+/obj/machinery/photocopier/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "Photocopier", src.name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	var/dat = "Photocopier<BR><BR>"
-	if(copyitem)
-		dat += "<a href='byond://?src=\ref[src];remove=1'>Remove Item</a><BR>"
-		if(toner)
-			dat += "<a href='byond://?src=\ref[src];copy=1'>Copy</a><BR>"
-			dat += "Printing: [copies] copies."
-			dat += "<a href='byond://?src=\ref[src];min=1'>-</a> "
-			dat += "<a href='byond://?src=\ref[src];add=1'>+</a><BR><BR>"
-	else if(toner)
-		dat += "Please insert something to copy.<BR><BR>"
-	if(istype(user,/mob/living/silicon))
-		dat += "<a href='byond://?src=\ref[src];aipic=1'>Print photo from database</a><BR><BR>"
-	dat += "Current toner level: [toner]"
-	if(!toner)
-		dat +="<BR>Please insert a new toner cartridge!"
-	show_browser(user, dat, "window=copier")
-	onclose(user, "copier")
-	return
+/obj/machinery/photocopier/ui_data(mob/user)
+	return list(
+		"copyitem" = copyitem ? html_encode(copyitem.name) : null,
+		"copies" = copies,
+		"toner" = toner,
+		"maxcopies" = maxcopies,
+		"is_silicon" = istype(user, /mob/living/silicon),
+	)
 
-/obj/machinery/photocopier/OnTopic(user, href_list, state)
-	if(href_list["copy"])
-		for(var/i = 0, i < copies, i++)
-			if(toner <= 0)
-				break
-			if (istype(copyitem, /obj/item/paper))
-				copy(copyitem, 1)
-				sleep(15)
-			else if (istype(copyitem, /obj/item/photo))
-				photocopy(copyitem)
-				sleep(15)
-			else if (istype(copyitem, /obj/item/paper_bundle))
-				var/obj/item/paper_bundle/B = bundlecopy(copyitem)
-				sleep(15*length(B.pages))
-			else if (istype(copyitem, /obj/item/sample/print))
-				fpcopy(copyitem)
-				sleep(15)
-			else
-				to_chat(user, SPAN_WARNING("\The [copyitem] can't be copied by \the [src]."))
-				break
-
-			use_power_oneoff(active_power_usage)
-		return TOPIC_REFRESH
-
-	if(href_list["remove"])
-		OnRemove(user)
-		return TOPIC_REFRESH
-
-	if(href_list["min"])
-		if(copies > 1)
-			copies--
-		return TOPIC_REFRESH
-
-	else if(href_list["add"])
-		if(copies < maxcopies)
-			copies++
-		return TOPIC_REFRESH
-
-	if(href_list["aipic"])
-		if(!istype(user,/mob/living/silicon)) return
-
-		if(toner >= 5)
+/obj/machinery/photocopier/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	var/mob/user = ui.user
+	switch(action)
+		if("copy")
+			if(!copyitem || !toner)
+				return
+			for(var/i = 0, i < copies, i++)
+				if(toner <= 0)
+					break
+				if(istype(copyitem, /obj/item/paper))
+					copy(copyitem, 1)
+					sleep(15)
+				else if(istype(copyitem, /obj/item/photo))
+					photocopy(copyitem)
+					sleep(15)
+				else if(istype(copyitem, /obj/item/paper_bundle))
+					var/obj/item/paper_bundle/B = bundlecopy(copyitem)
+					sleep(15 * length(B.pages))
+				else if(istype(copyitem, /obj/item/sample/print))
+					fpcopy(copyitem)
+					sleep(15)
+				else
+					to_chat(user, SPAN_WARNING("\The [copyitem] can't be copied by \the [src]."))
+					break
+				use_power_oneoff(active_power_usage)
+			. = TRUE
+		if("remove")
+			OnRemove(user)
+			. = TRUE
+		if("min")
+			if(copies > 1)
+				copies--
+			. = TRUE
+		if("add")
+			if(copies < maxcopies)
+				copies++
+			. = TRUE
+		if("aipic")
+			if(!istype(user, /mob/living/silicon) || toner < 5)
+				return
 			var/mob/living/silicon/tempAI = user
 			var/obj/item/device/camera/siliconcam/camera = tempAI.silicon_camera
-
 			if(!camera)
 				return
 			var/obj/item/photo/selection = camera.selectpicture()
-			if (!selection)
+			if(!selection)
 				return
-
 			var/obj/item/photo/p = photocopy(selection)
-			if (p.desc == "")
+			if(p.desc == "")
 				p.desc += "Copied by [tempAI.name]"
 			else
 				p.desc += " - Copied by [tempAI.name]"
 			toner -= 5
 			sleep(15)
-		return TOPIC_REFRESH
+			. = TRUE
 
 /obj/machinery/photocopier/proc/OnRemove(mob/user)
 	if(copyitem)
@@ -115,7 +106,7 @@
 			copyitem = O
 			to_chat(user, SPAN_NOTICE("You insert \the [O] into \the [src]."))
 			flick(insert_anim, src)
-			updateUsrDialog()
+			SStgui.update_uis(src)
 		else
 			to_chat(user, SPAN_NOTICE("There is already something in \the [src]."))
 		return TRUE
@@ -128,7 +119,7 @@
 			var/obj/item/device/toner/T = O
 			toner += T.toner_amount
 			qdel(O)
-			updateUsrDialog()
+			SStgui.update_uis(src)
 		else
 			to_chat(user, SPAN_NOTICE("This cartridge is not yet ready for replacement! Use up the rest of the toner."))
 		return TRUE

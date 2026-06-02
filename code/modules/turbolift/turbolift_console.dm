@@ -104,46 +104,52 @@
 /obj/structure/lift/panel/interact(mob/user)
 	if(!..())
 		return
+	ui_interact(user)
 
-	var/dat = list()
-	dat += "<html><body><hr><b>Lift panel</b><hr>"
+/obj/structure/lift/panel/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "TurboliftPanel", src.name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	//the floors list stores levels in order of increasing Z
-	//therefore, to display upper levels at the top of the menu and
-	//lower levels at the bottom, we need to go through the list in reverse
-	for(var/i in length(lift.floors) to 1 step -1)
+/obj/structure/lift/panel/ui_data(mob/user)
+	var/list/floor_list = list()
+	// floors stored low-to-high; display high-to-low so upper floors appear at top
+	for(var/i = length(lift.floors) to 1 step -1)
 		var/datum/turbolift_floor/floor = lift.floors[i]
-		var/label = floor.label? floor.label : "Level #[i]"
-		dat += "[SPAN_COLOR((floor in lift.queued_floors) ? COLOR_YELLOW : COLOR_WHITE, "<a href='byond://?src=\ref[src];move_to_floor=["\ref[floor]"]'>[label]</a>: [floor.name]")]<br>"
+		floor_list += list(list(
+			"index" = i,
+			"label" = floor.label ? floor.label : "Level #[i]",
+			"name" = floor.name ? floor.name : "",
+			"queued" = (floor in lift.queued_floors),
+			"current" = (floor == lift.current_floor),
+		))
+	return list(
+		"floors" = floor_list,
+		"doors_open" = lift.doors_are_open(),
+	)
 
-	dat += "<hr>"
-	if(lift.doors_are_open())
-		dat += "<a href='byond://?src=\ref[src];close_doors=1'>Close Doors</a><br>"
-	else
-		dat += "<a href='byond://?src=\ref[src];open_doors=1'>Open Doors</a><br>"
-	dat += "<a href='byond://?src=\ref[src];emergency_stop=1'>Emergency Stop</a>"
-	dat += "<hr></body></html>"
-
-	var/datum/browser/popup = new(user, "turbolift_panel", "Lift Panel", 230, 260)
-	popup.set_content(jointext(dat, null))
-	popup.open()
-	return
-
-/obj/structure/lift/panel/OnTopic(user, href_list)
-	if(href_list["move_to_floor"])
-		lift.queue_move_to(locate(href_list["move_to_floor"]))
-		. = TOPIC_REFRESH
-	if(href_list["open_doors"])
-		lift.open_doors()
-		. = TOPIC_REFRESH
-	if(href_list["close_doors"])
-		lift.close_doors()
-		. = TOPIC_REFRESH
-	if(href_list["emergency_stop"])
-		lift.emergency_stop()
-		. = TOPIC_REFRESH
-
-	if(. == TOPIC_REFRESH)
-		pressed(user)
+/obj/structure/lift/panel/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	if(!lift.is_functional())
+		return
+	switch(action)
+		if("move_to_floor")
+			var/idx = text2num(params["index"])
+			if(!isnum(idx) || idx < 1 || idx > length(lift.floors))
+				return
+			lift.queue_move_to(lift.floors[idx])
+			pressed(ui.user)
+			. = TRUE
+		if("open_doors")
+			lift.open_doors()
+			. = TRUE
+		if("close_doors")
+			lift.close_doors()
+			. = TRUE
+		if("emergency_stop")
+			lift.emergency_stop()
+			. = TRUE
 
 // End panel.

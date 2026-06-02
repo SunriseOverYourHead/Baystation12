@@ -43,15 +43,15 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/computer/air_control/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
+/obj/machinery/computer/air_control/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "AtmosConsole", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/machinery/computer/air_control/ui_data(mob/user)
 	data["systemname"] = name
 	get_console_data()
-	if(!ui)
-		ui = new(user, src, ui_key, "atmosconsole.tmpl", data["systemname"], 800, 800)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+	return data
 
 /obj/machinery/computer/air_control/proc/get_console_data()
 	if(sensor_info)
@@ -87,6 +87,7 @@
 	data["input_tag"] = input_tag
 	data["output_tag"] = output_tag
 	data["sensor_tag"] = sensor_tag
+	data["sensor_name"] = sensor_name
 
 	if(input_info)
 		data["input_present"] = TRUE
@@ -133,131 +134,137 @@
 	frequency = new_frequency
 	radio_connection = radio_controller.add_object(src, frequency, RADIO_ATMOSIA)
 
-/obj/machinery/computer/air_control/OnTopic(mob/user, href_list, datum/topic_state/state)
-	if(..())
-		return TOPIC_HANDLED
+/obj/machinery/computer/air_control/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
 
 	var/datum/signal/signal = new
 	signal.transmission_method = 1 //radio signal
 	signal.source = src
+	var/send_signal = FALSE
 
-	if(href_list["in_refresh_status"])
-		input_info = null
-		refreshing_input = TRUE
-		signal.data = list ("tag" = input_tag, "status" = 1)
-		. = 1
+	switch(action)
+		if("set_screen")
+			data["screen"] = text2num(params["set_screen"])
+			return TRUE
 
-	if(href_list["in_toggle_injector"])
-		input_info = null
-		refreshing_input = TRUE
-		signal.data = list ("tag" = input_tag, "power_toggle" = 1)
-		. = 1
+		if("toggle_pressure_mode")
+			out_pressure_mode = !out_pressure_mode
+			return TRUE
 
-	if(href_list["in_set_flowrate"])
-		input_info = null
-		refreshing_input = TRUE
-		input_flow_setting = input("What would you like to set the rate limit to?", "Set Volume", input_flow_setting) as num|null
-		input_flow_setting = clamp(input_flow_setting, 0, ATMOS_DEFAULT_VOLUME_PUMP+500)
-		signal.data = list ("tag" = input_tag, "set_volume_rate" = "[input_flow_setting]")
-		. = 1
+		if("set_frequency")
+			var/F = input("What frequency would you like to set this to? (Decimal is added automatically)", "Adjust Frequency", frequency) as num|null
+			if(F)
+				frequency = F
+				set_frequency(F)
+			return TRUE
 
-	if(href_list["in_set_max"])
-		input_info = null
-		refreshing_input = TRUE
-		input_flow_setting = ATMOS_DEFAULT_VOLUME_PUMP+500
-		signal.data = list ("tag" = input_tag, "set_volume_rate" = "[input_flow_setting]")
-		. = 1
+		if("set_input_tag")
+			var/t = sanitizeSafe(input(usr, "Enter the input ID tag.", src.name, src.input_tag), MAX_NAME_LEN)
+			t = sanitizeSafe(t, MAX_NAME_LEN)
+			if(t)
+				src.input_tag = t
+			return TRUE
 
-	if(href_list["out_refresh_status"])
-		output_info = null
-		refreshing_output = TRUE
-		signal.data = list ("tag" = output_tag, "status" = 1)
-		. = 1
+		if("set_output_tag")
+			var/t = sanitizeSafe(input(usr, "Enter the output ID tag.", src.name, src.output_tag), MAX_NAME_LEN)
+			t = sanitizeSafe(t, MAX_NAME_LEN)
+			if(t)
+				src.output_tag = t
+			return TRUE
 
-	if(href_list["out_toggle_power"])
-		output_info = null
-		refreshing_output = TRUE
-		signal.data = list ("tag" = output_tag, "power_toggle" = 1, "status" = 1)
-		. = 1
+		if("set_sensor_tag")
+			var/t = sanitizeSafe(input(usr, "Enter the sensor ID tag.", src.name, src.sensor_tag))
+			t = sanitizeSafe(t, MAX_NAME_LEN)
+			if(t)
+				src.sensor_tag = t
+			return TRUE
 
-	if(href_list["out_set_pressure"])
-		output_info = null
-		refreshing_output = TRUE
-		pressure_setting = input("How much pressure would you like to output?", "Set Pressure", pressure_setting) as num|null
-		pressure_setting = clamp(pressure_setting, 0, MAX_PUMP_PRESSURE)
-		signal.data = list ("tag" = output_tag, "set_internal_pressure" = pressure_setting, "status" = 1)
-		. = 1
+		if("set_sensor_name")
+			var/t = sanitizeSafe(input(usr, "Enter the sensor name.", src.name, src.sensor_name))
+			t = sanitizeSafe(t, MAX_NAME_LEN)
+			if(t)
+				src.sensor_name = t
+			return TRUE
 
-	if(href_list["s_out_set_pressure"])
-		output_info = null
-		refreshing_output = TRUE
-		pressure_setting = input("How much pressure would you like to maintain inside the core?", "Set Core Pressure", pressure_setting) as num|null
-		pressure_setting = clamp(pressure_setting, 0, MAX_PUMP_PRESSURE)
-		signal.data = list ("tag" = output_tag, "set_external_pressure" = pressure_setting, "checks" = 1, "status" = 1)
-		. = 1
+		if("in_refresh_status")
+			input_info = null
+			refreshing_input = TRUE
+			signal.data = list("tag" = input_tag, "status" = 1)
+			send_signal = TRUE
 
-	if(href_list["s_set_default"])
-		output_info = null
-		refreshing_output = TRUE
-		signal.data = list("tag" = output_tag, "set_external_pressure" = pressure_setting, "checks" = 1, "status" = 1)
-		. = 1
+		if("in_toggle_injector")
+			input_info = null
+			refreshing_input = TRUE
+			signal.data = list("tag" = input_tag, "power_toggle" = 1)
+			send_signal = TRUE
 
-	if(href_list["out_set_max"])
-		output_info = null
-		refreshing_output = TRUE
-		pressure_setting = MAX_PUMP_PRESSURE
-		signal.data = list ("tag" = output_tag, "set_internal_pressure" = pressure_setting, "status" = 1)
-		. = 1
+		if("in_set_flowrate")
+			input_info = null
+			refreshing_input = TRUE
+			input_flow_setting = input("What would you like to set the rate limit to?", "Set Volume", input_flow_setting) as num|null
+			input_flow_setting = clamp(input_flow_setting, 0, ATMOS_DEFAULT_VOLUME_PUMP+500)
+			signal.data = list("tag" = input_tag, "set_volume_rate" = "[input_flow_setting]")
+			send_signal = TRUE
 
-	if(href_list["set_frequency"])
-		var/F = input("What frequency would you like to set this to? (Decimal is added automatically)", "Adjust Frequency", frequency) as num|null
-		if(F)
-			frequency = F
-			set_frequency(F)
-		return TOPIC_REFRESH
+		if("in_set_max")
+			input_info = null
+			refreshing_input = TRUE
+			input_flow_setting = ATMOS_DEFAULT_VOLUME_PUMP+500
+			signal.data = list("tag" = input_tag, "set_volume_rate" = "[input_flow_setting]")
+			send_signal = TRUE
 
-	if(href_list["set_input_tag"])
-		var/t = sanitizeSafe(input(usr, "Enter the input ID tag.", src.name, src.input_tag), MAX_NAME_LEN)
-		t = sanitizeSafe(t, MAX_NAME_LEN)
-		if (t)
-			src.input_tag = t
-		return TOPIC_REFRESH
+		if("out_refresh_status")
+			output_info = null
+			refreshing_output = TRUE
+			signal.data = list("tag" = output_tag, "status" = 1)
+			send_signal = TRUE
 
-	if(href_list["set_output_tag"])
-		var/t = sanitizeSafe(input(usr, "Enter the output ID tag.", src.name, src.output_tag), MAX_NAME_LEN)
-		t = sanitizeSafe(t, MAX_NAME_LEN)
-		if (t)
-			src.output_tag = t
-		return TOPIC_REFRESH
+		if("out_toggle_power")
+			output_info = null
+			refreshing_output = TRUE
+			signal.data = list("tag" = output_tag, "power_toggle" = 1, "status" = 1)
+			send_signal = TRUE
 
-	if(href_list["set_sensor_tag"])
-		var/t = sanitizeSafe(input(usr, "Enter the sensor ID tag.", src.name, src.sensor_tag))
-		t = sanitizeSafe(t, MAX_NAME_LEN)
-		if(t)
-			src.sensor_tag = t
-		return TOPIC_REFRESH
+		if("out_set_pressure")
+			output_info = null
+			refreshing_output = TRUE
+			pressure_setting = input("How much pressure would you like to output?", "Set Pressure", pressure_setting) as num|null
+			pressure_setting = clamp(pressure_setting, 0, MAX_PUMP_PRESSURE)
+			signal.data = list("tag" = output_tag, "set_internal_pressure" = pressure_setting, "status" = 1)
+			send_signal = TRUE
 
-	if(href_list["set_sensor_name"])
-		var/t = sanitizeSafe(input(usr, "Enter the sensor name.", src.name, src.sensor_name))
-		t = sanitizeSafe(t, MAX_NAME_LEN)
-		if(t)
-			src.sensor_name = t
-		return TOPIC_REFRESH
+		if("s_out_set_pressure")
+			output_info = null
+			refreshing_output = TRUE
+			pressure_setting = input("How much pressure would you like to maintain inside the core?", "Set Core Pressure", pressure_setting) as num|null
+			pressure_setting = clamp(pressure_setting, 0, MAX_PUMP_PRESSURE)
+			signal.data = list("tag" = output_tag, "set_external_pressure" = pressure_setting, "checks" = 1, "status" = 1)
+			send_signal = TRUE
 
-	if(href_list["toggle_pressure_mode"])
-		out_pressure_mode = !out_pressure_mode
-		return TOPIC_REFRESH
+		if("s_set_default")
+			output_info = null
+			refreshing_output = TRUE
+			signal.data = list("tag" = output_tag, "set_external_pressure" = pressure_setting, "checks" = 1, "status" = 1)
+			send_signal = TRUE
 
-	if(href_list["set_screen"])
-		data["screen"] = text2num(href_list["set_screen"])
-		return TOPIC_REFRESH
+		if("out_set_max")
+			output_info = null
+			refreshing_output = TRUE
+			pressure_setting = MAX_PUMP_PRESSURE
+			signal.data = list("tag" = output_tag, "set_internal_pressure" = pressure_setting, "status" = 1)
+			send_signal = TRUE
 
-	if(!radio_connection)
-		return TOPIC_HANDLED
+	if(!send_signal)
+		return
 
-	signal.data["sigtype"] = "command"
-	signal.data["status"] = TRUE
-	radio_connection.post_signal(src, signal, radio_filter = RADIO_ATMOSIA)
+	if(radio_connection)
+		signal.data["sigtype"] = "command"
+		signal.data["status"] = TRUE
+		radio_connection.post_signal(src, signal, radio_filter = RADIO_ATMOSIA)
+
+	return TRUE
 
 /obj/machinery/computer/air_control/fuel_injection
 	icon = 'icons/obj/machines/computer.dmi'
@@ -283,22 +290,26 @@
 	else
 		..(signal)
 
-/obj/machinery/computer/air_control/fuel_injection/Topic(href, href_list)
-	if((. = ..()))
+/obj/machinery/computer/air_control/fuel_injection/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
 		return
 
-	if(href_list["toggle_automation"])
+	if(action == "toggle_automation")
 		automation = !automation
 
-		var/datum/signal/signal = new
-		signal.transmission_method = 1 //radio signal
-		signal.source = src
-		signal.data = list(
-			"tag" = device_tag,
-			"power_toggle" = 1,
-			"sigtype" = "command"
-		)
-		..()
+		if(radio_connection)
+			var/datum/signal/signal = new
+			signal.transmission_method = 1 //radio signal
+			signal.source = src
+			signal.data = list(
+				"tag" = device_tag,
+				"power_toggle" = 1,
+				"sigtype" = "command"
+			)
+			radio_connection.post_signal(src, signal, radio_filter = RADIO_ATMOSIA)
+
+	return TRUE
 
 /obj/machinery/computer/air_control/fuel_injection/Process()
 	if(automation)

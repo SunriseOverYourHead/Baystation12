@@ -38,12 +38,5 @@
 	data["name"] = name
 	. = data
 
-/obj/machinery/computer/fusion/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	if(ui_template)
-		var/list/data = build_ui_data()
-		ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-		if (!ui)
-			ui = new(user, src, ui_key, ui_template, name, 400, 600)
-			ui.set_initial_data(data)
-			ui.open()
-			ui.set_auto_update(1)
+/obj/machinery/computer/fusion/ui_data(mob/user)
+	return build_ui_data()

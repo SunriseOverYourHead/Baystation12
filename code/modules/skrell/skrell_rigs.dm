@@ -117,7 +117,7 @@
 /obj/item/rig/skrell/sec
 	name = "skrellian combat hardsuit"
 	desc = "A powerful combat hardsuit with integrated power supply and atmosphere. It's impressive design perfectly tailors to the user's body."
-	icon_state = "skrell_standard_rig"
+	icon_state = "skrell_combat_rig"
 	armor = list(
 		melee = ARMOR_MELEE_MAJOR,
 		bullet = ARMOR_BALLISTIC_III,
@@ -191,6 +191,7 @@
 //Skrell Oxygen Generator
 /obj/item/tank/skrell
 	name = "skrellian gas reactor"
+	icon_state = "skrelltank"
 	desc = "A skrellian gas processing plant that continuously synthesises oxygen."
 	distribute_pressure = ONE_ATMOSPHERE*O2STANDARD
 	var/charge_cost = 0.01
@@ -278,6 +279,7 @@
 /obj/item/cell/skrell
 	name = "skrellian microfusion cell"
 	desc = "An impossibly tiny fusion power engine of Skrell design."
+	icon_state = "skrellcell"
 	maxcharge = 1500
 	w_class = ITEM_SIZE_NORMAL
 	var/recharge_amount = 12

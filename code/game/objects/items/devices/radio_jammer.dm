@@ -88,42 +88,11 @@ GLOBAL_LIST_EMPTY(radio_jammers)
 	if(signal?.encryption == code)
 		toggle()
 
-/obj/item/device/radio_jammer/OnTopic(mob/user, list/href_list, state)
-	if (href_list["enable_jammer"])
-		toggle()
-		return TOPIC_REFRESH
-	if (href_list["disable_jammer"])
-		toggle()
-		return TOPIC_REFRESH
-	if(href_list["increase_range"])
-		range = min(range + 1, 10)
-		square_radius = range ** 2
-		return TOPIC_REFRESH
-	if(href_list["decrease_range"])
-		range = max(range - 1, 0)
-		square_radius = range ** 2
-		return TOPIC_REFRESH
-	if(href_list["set_code"])
-		var/adj = text2num(href_list["code"])
-		if(!adj)
-			code = input("Set radio activation code","Radio activation") as num
-		if (QDELETED(src) || CanUseTopic(user, state, href_list) == STATUS_INTERACTIVE)
-			return TOPIC_HANDLED
-		else
-			code += adj
-		code = clamp(code,1,100)
-		return TOPIC_REFRESH
-	if (href_list["set_frequency"])
-		var/adj = text2num(href_list["frequency"])
-		if(!adj)
-			var/temp = input("Set a four digit radio frequency without decimals","Radio activation") as num
-			set_frequency(sanitize_frequency(temp, RADIO_LOW_FREQ, RADIO_HIGH_FREQ))
-		if (QDELETED(src) || CanUseTopic(user, state, href_list) == STATUS_INTERACTIVE)
-			return TOPIC_HANDLED
-		return TOPIC_REFRESH
+/obj/item/device/radio_jammer/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "RadioJammer", "Portable Radio Jammer", ui)
 
-/obj/item/device/radio_jammer/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/list/data = list(
+/obj/item/device/radio_jammer/ui_data(mob/user)
+	return list(
 		"active" = is_active,
 		"current_charge" = bcell ? round(bcell.charge, 1) : 0,
 		"max_charge" = bcell ? bcell.maxcharge : 0,
@@ -133,12 +102,50 @@ GLOBAL_LIST_EMPTY(radio_jammers)
 		"code" = code,
 		"total_cost" = "[ceil(JAMMER_POWER_CONSUMPTION(10))]"
 	)
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "radio_jammer.tmpl", "Portable Radio Jammer", 300, 640)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(TRUE)
+
+/obj/item/device/radio_jammer/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("enable_jammer")
+			if(!is_active)
+				toggle(usr)
+			return TRUE
+		if("disable_jammer")
+			if(is_active)
+				toggle(usr)
+			return TRUE
+		if("increase_range")
+			range = min(range + 1, 10)
+			square_radius = range ** 2
+			return TRUE
+		if("decrease_range")
+			range = max(range - 1, 0)
+			square_radius = range ** 2
+			return TRUE
+		if("set_code")
+			var/adj = text2num(params["code"])
+			if(!adj)
+				code = input(usr, "Set radio activation code", "Radio activation") as num
+				if(QDELETED(src))
+					return TRUE
+			else
+				code += adj
+			code = clamp(code, 1, 100)
+			return TRUE
+		if("set_frequency")
+			var/adj = text2num(params["frequency"])
+			if(!adj)
+				var/temp = input(usr, "Set a four digit radio frequency without decimals", "Radio activation") as num
+				if(QDELETED(src))
+					return TRUE
+				set_frequency(sanitize_frequency(temp, RADIO_LOW_FREQ, RADIO_HIGH_FREQ))
+			return TRUE
+	return FALSE
+
+/obj/item/device/radio_jammer/ui_state(mob/user)
+	return GLOB.tgui_physical_state
 
 /obj/item/device/radio_jammer/use_tool(obj/item/tool, mob/living/user, list/click_params)
 	if (isCrowbar(tool))

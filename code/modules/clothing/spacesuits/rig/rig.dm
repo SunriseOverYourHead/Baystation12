@@ -520,28 +520,31 @@
 	cell.use(cost * CELLRATE)
 	return 1
 
-/obj/item/rig/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, nano_state = GLOB.inventory_state)
-	if(!user)
-		return
+/obj/item/rig/ui_state(mob/user)
+	if(src.contains(user))
+		return GLOB.contained_state
+	return GLOB.inventory_state
 
+/obj/item/rig/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "RigSuit", interface_title, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/item/rig/ui_data(mob/user)
 	var/list/data = list()
 
-	if(selected_module)
-		data["primarysystem"] = "[selected_module.interface_name]"
+	data["primarysystem"] = selected_module ? selected_module.interface_name : null
+	data["ai"] = (src.loc != user) ? 1 : 0
 
-	if(src.loc != user)
-		data["ai"] = 1
+	data["seals"] =     src.canremove
+	data["sealing"] =   src.sealing ? 1 : 0
+	data["helmet"] =    helmet ? helmet.name : "None."
+	data["gauntlets"] = gloves ? gloves.name : "None."
+	data["boots"] =     boots  ? boots.name  : "None."
+	data["chest"] =     chest  ? chest.name  : "None."
 
-	data["seals"] =     "[src.canremove]"
-	data["sealing"] =   "[src.sealing]"
-	data["helmet"] =    (helmet ? "[helmet.name]" : "None.")
-	data["gauntlets"] = (gloves ? "[gloves.name]" : "None.")
-	data["boots"] =     (boots ?  "[boots.name]" :  "None.")
-	data["chest"] =     (chest ?  "[chest.name]" :  "None.")
-
-	data["charge"] =       cell ? round(cell.charge,1) : 0
-	data["maxcharge"] =    cell ? cell.maxcharge : 0
-	data["chargestatus"] = cell ? floor(cell.percent()/2) : 0
+	data["charge"] =    cell ? round(cell.charge, 1) : 0
+	data["maxcharge"] = cell ? cell.maxcharge : 0
 
 	data["emagged"] =       subverted
 	data["coverlock"] =     locked
@@ -551,64 +554,60 @@
 	data["securitycheck"] = security_check_enabled
 	data["malf"] =          malfunction_delay
 
-	if(wearer) //Internals below!!!
-		data["valveOpen"] = (wearer.internal == air_supply)
-
-		if(!wearer.internal || wearer.internal == air_supply)	// if they have no active internals or if tank is current internal
-			if(wearer.wear_mask && (wearer.wear_mask.item_flags & ITEM_FLAG_AIRTIGHT))// mask
+	if(wearer)
+		data["valveOpen"] = (wearer.internal == air_supply) ? 1 : 0
+		if(!wearer.internal || wearer.internal == air_supply)
+			if(wearer.wear_mask && (wearer.wear_mask.item_flags & ITEM_FLAG_AIRTIGHT))
 				data["maskConnected"] = 1
-			else if(wearer.head && (wearer.head.item_flags & ITEM_FLAG_AIRTIGHT)) // Make sure they have a helmet and its airtight
+			else if(wearer.head && (wearer.head.item_flags & ITEM_FLAG_AIRTIGHT))
 				data["maskConnected"] = 1
 			else
 				data["maskConnected"] = 0
+		else
+			data["maskConnected"] = 0
+	else
+		data["valveOpen"] = 0
+		data["maskConnected"] = 0
 
-	data["tankPressure"] = round(air_supply && air_supply.air_contents && air_supply.air_contents.return_pressure() ? air_supply.air_contents.return_pressure() : 0)
-	data["releasePressure"] = round(air_supply && air_supply.distribute_pressure ? air_supply.distribute_pressure : 0)
+	data["tankPressure"] =        round(air_supply && air_supply.air_contents ? air_supply.air_contents.return_pressure() : 0)
+	data["releasePressure"] =     round(air_supply && air_supply.distribute_pressure ? air_supply.distribute_pressure : 0)
 	data["defaultReleasePressure"] = air_supply ? round(initial(air_supply.distribute_pressure)) : 0
-	data["maxReleasePressure"] = air_supply ? round(TANK_MAX_RELEASE_PRESSURE) : 0
-	data["tank"] = air_supply ? 1 : 0
+	data["maxReleasePressure"] =  air_supply ? round(TANK_MAX_RELEASE_PRESSURE) : 0
+	data["tank"] =                air_supply ? 1 : 0
 
 	var/list/module_list = list()
 	var/i = 1
 	for(var/obj/item/rig_module/module in installed_modules)
 		var/list/module_data = list(
-			"index" =             i,
-			"name" =              "[module.interface_name]",
-			"desc" =              "[module.interface_desc]",
-			"can_use" =           "[module.usable]",
-			"can_select" =        "[module.selectable]",
-			"can_toggle" =        "[module.toggleable]",
-			"is_active" =         "[module.active]",
-			"engagecost" =        module.use_power_cost*10,
-			"activecost" =        module.active_power_cost*10,
-			"passivecost" =       module.passive_power_cost*10,
-			"engagestring" =      module.engage_string,
-			"activatestring" =    module.activate_string,
-			"deactivatestring" =  module.deactivate_string,
-			"damage" =            module.damage
+			"index" =            i,
+			"name" =             module.interface_name,
+			"desc" =             module.interface_desc,
+			"can_use" =          module.usable,
+			"can_select" =       module.selectable,
+			"can_toggle" =       module.toggleable,
+			"is_active" =        module.active,
+			"engagecost" =       module.use_power_cost * 10,
+			"activecost" =       module.active_power_cost * 10,
+			"passivecost" =      module.passive_power_cost * 10,
+			"engagestring" =     module.engage_string,
+			"activatestring" =   module.activate_string,
+			"deactivatestring" = module.deactivate_string,
+			"damage" =           module.damage
 			)
 
 		if(module.charges && length(module.charges))
-
-			module_data["charges"] = list()
 			module_data["chargetype"] = module.charge_selected
-
+			var/list/charge_list = list()
 			for(var/chargetype in module.charges)
-				var/datum/rig_charge/charge = module.charges[chargetype]
-				module_data["charges"] += list(list("caption" = "[chargetype] ([charge.charges])", "index" = "[chargetype]"))
+				var/datum/rig_charge/charge_datum = module.charges[chargetype]
+				charge_list += list(list("caption" = "[chargetype] ([charge_datum.charges])", "index" = chargetype))
+			module_data["charges"] = charge_list
 
 		module_list += list(module_data)
 		i++
 
-	if(length(module_list))
-		data["modules"] = module_list
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, ((src.loc != user) ? ai_interface_path : interface_path), interface_title, 480, 550, state = nano_state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+	data["modules"] = module_list
+	return data
 
 /obj/item/rig/on_update_icon(update_mob_icon)
 
@@ -677,24 +676,25 @@
 
 	return 1
 
-//TODO: Fix Topic vulnerabilities for malfunction and AI override.
-/obj/item/rig/Topic(href,href_list)
+/obj/item/rig/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
 	if(!check_suit_access(usr))
-		return 0
-
-	if(href_list["toggle_piece"])
-		toggle_piece(href_list["toggle_piece"], usr)
-		return 1
-	if(href_list["toggle_seals"])
-		toggle_seals(usr)
-		return 1
-	if(href_list["interact_module"])
-
-		var/module_index = text2num(href_list["interact_module"])
-
-		if(module_index > 0 && module_index <= length(installed_modules))
+		return
+	switch(action)
+		if("toggle_piece")
+			toggle_piece(params["piece"], usr)
+			. = TRUE
+		if("toggle_seals")
+			toggle_seals(usr)
+			. = TRUE
+		if("interact_module")
+			var/module_index = text2num(params["index"])
+			if(module_index < 1 || module_index > length(installed_modules))
+				return
 			var/obj/item/rig_module/module = installed_modules[module_index]
-			switch(href_list["module_mode"])
+			switch(params["mode"])
 				if("activate")
 					module.activate()
 				if("deactivate")
@@ -707,18 +707,32 @@
 					else
 						module.select()
 				if("select_charge_type")
-					module.charge_selected = href_list["charge_type"]
-		return 1
-	if(href_list["toggle_ai_control"])
-		ai_override_enabled = !ai_override_enabled
-		notify_ai("Synthetic suit control has been [ai_override_enabled ? "enabled" : "disabled"].")
-		return 1
-	if(href_list["toggle_suit_lock"])
-		locked = !locked
-		return 1
-	if(href_list["air_supply"])
-		air_supply.OnTopic(wearer,href_list)
-		return 1
+					module.charge_selected = params["charge_type"]
+			. = TRUE
+		if("toggle_ai_control")
+			ai_override_enabled = !ai_override_enabled
+			notify_ai("Synthetic suit control has been [ai_override_enabled ? "enabled" : "disabled"].")
+			. = TRUE
+		if("toggle_suit_lock")
+			locked = !locked
+			. = TRUE
+		if("adjust_pressure")
+			if(!air_supply)
+				return
+			var/dist_p = params["dist_p"]
+			if(dist_p == "reset")
+				air_supply.distribute_pressure = initial(air_supply.distribute_pressure)
+			else if(dist_p == "max")
+				air_supply.distribute_pressure = TANK_MAX_RELEASE_PRESSURE
+			else
+				air_supply.distribute_pressure += text2num(dist_p)
+			air_supply.distribute_pressure = min(max(round(air_supply.distribute_pressure), 0), TANK_MAX_RELEASE_PRESSURE)
+			. = TRUE
+		if("toggle_valve")
+			if(!air_supply)
+				return
+			air_supply.toggle_valve(usr)
+			. = TRUE
 
 /obj/item/rig/proc/notify_ai(message)
 	for(var/obj/item/rig_module/ai_container/module in installed_modules)

@@ -173,8 +173,11 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/atmospherics/binary/oxyregenerator/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
+/obj/machinery/atmospherics/binary/oxyregenerator/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "OxyRegenerator", "Oxygen Regeneration System", ui)
+
+/obj/machinery/atmospherics/binary/oxyregenerator/ui_data(mob/user)
+	var/list/data = list()
 	data["on"] = use_power ? 1 : 0
 	data["powerSetting"] = power_setting
 	data["gasProcessed"] = last_flow_rate
@@ -183,27 +186,27 @@
 	data["tankPressure"] = round(inner_tank.return_pressure())
 	data["targetPressure"] = round(target_pressure)
 	data["phase"] = phase
-	if (inner_tank.total_moles > 0)
-		data["co2"] = round(100 * inner_tank.gas[GAS_CO2]/inner_tank.total_moles)
-		data["o2"] = round(100 * inner_tank.gas[GAS_OXYGEN]/inner_tank.total_moles)
+	if(inner_tank.total_moles > 0)
+		data["co2"] = round(100 * inner_tank.gas[GAS_CO2] / inner_tank.total_moles)
+		data["o2"] = round(100 * inner_tank.gas[GAS_OXYGEN] / inner_tank.total_moles)
 	else
 		data["co2"] = 0
 		data["o2"] = 0
-		// update the ui if it exists, returns null if no ui is passed/found
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "oxyregenerator.tmpl", "Oxygen Regeneration System", 440, 300)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+	return data
 
-/obj/machinery/atmospherics/binary/oxyregenerator/Topic(href, href_list)
-	if(..())
-		return 1
-	if(href_list["toggleStatus"])
-		update_use_power(!use_power)
-		update_icon()
-		return 1
-	if(href_list["setPower"]) //setting power to 0 is redundant anyways
-		power_setting = clamp(text2num(href_list["setPower"]), 1, 5)
-		return 1
+/obj/machinery/atmospherics/binary/oxyregenerator/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("toggleStatus")
+			update_use_power(!use_power)
+			update_icon()
+			return TRUE
+		if("setPower")
+			power_setting = clamp(text2num(params["value"]), 1, 5)
+			return TRUE
+	return FALSE
+
+/obj/machinery/atmospherics/binary/oxyregenerator/ui_state(mob/user)
+	return GLOB.tgui_default_state

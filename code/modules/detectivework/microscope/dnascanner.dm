@@ -38,54 +38,51 @@
 		to_chat(user, SPAN_WARNING("\The [src] only accepts used swabs."))
 		return TRUE
 
-/obj/machinery/dnaforensics/ui_interact(mob/user, ui_key = "main",datum/nanoui/ui = null)
-	if(!is_powered()) return
-	if(user.stat || user.restrained()) return
-	var/list/data = list()
-	data["scan_progress"] = round(scanner_progress)
-	data["scanning"] = scanning
-	data["bloodsamp"] = (bloodsamp ? bloodsamp.name : "")
-	data["bloodsamp_desc"] = (bloodsamp ? (bloodsamp.desc ? bloodsamp.desc : "No information on record.") : "")
-	data["lidstate"] = closed
+/obj/machinery/dnaforensics/ui_interact(mob/user, datum/tgui/ui)
+	if (!is_powered() || user.stat || user.restrained())
+		return
+	ui = tgui_interact(user, src, "DnaForensics", "QuikScan DNA Analyzer", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data)
-	if (!ui)
-		ui = new(user, src, ui_key, "dnaforensics.tmpl", "QuikScan DNA Analyzer", 540, 326)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/dnaforensics/ui_data(mob/user)
+	return list(
+		"scan_progress" = round(scanner_progress),
+		"scanning" = scanning,
+		"bloodsamp" = bloodsamp ? bloodsamp.name : "",
+		"bloodsamp_desc" = bloodsamp ? (bloodsamp.desc ? bloodsamp.desc : "No information on record.") : "",
+		"lidstate" = closed
+	)
 
-/obj/machinery/dnaforensics/Topic(href, href_list)
-
-	if(..()) return 1
-
-	if(!is_powered())
-		return 0 // don't update UIs attached to this object
-
-	if(href_list["scanItem"])
-		if(scanning)
+/obj/machinery/dnaforensics/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	if (!is_powered())
+		return
+	if (action == "scanItem")
+		if (scanning)
 			scanning = 0
-		else
-			if(bloodsamp)
-				if(closed == 1)
-					scanner_progress = 0
-					scanning = 1
-					to_chat(usr, SPAN_NOTICE("Scan initiated."))
-					update_icon()
-				else
-					to_chat(usr, SPAN_NOTICE("Please close sample lid before initiating scan."))
+			update_icon()
+		else if (bloodsamp)
+			if (closed == 1)
+				scanner_progress = 0
+				scanning = 1
+				to_chat(usr, SPAN_NOTICE("Scan initiated."))
+				update_icon()
 			else
-				to_chat(usr, SPAN_WARNING("Insert an item to scan."))
-
-	if(href_list["ejectItem"])
-		if(bloodsamp)
+				to_chat(usr, SPAN_NOTICE("Please close sample lid before initiating scan."))
+		else
+			to_chat(usr, SPAN_WARNING("Insert an item to scan."))
+		. = TRUE
+	else if (action == "ejectItem")
+		if (bloodsamp)
 			bloodsamp.forceMove(src.loc)
 			bloodsamp = null
-
-	if(href_list["toggleLid"])
+		. = TRUE
+	else if (action == "toggleLid")
 		toggle_lid()
-
-	return 1
+		. = TRUE
 
 /obj/machinery/dnaforensics/Process()
 	if(scanning)

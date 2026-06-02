@@ -9,7 +9,7 @@
 	minimal_player_age = 1
 	economic_power = 10
 	minimum_character_age = list(SPECIES_HUMAN = 25)
-	ideal_character_age = 35
+	ideal_character_age = 22
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/infantry/squadlead
 	allowed_branches = list(/datum/mil_branch/marine_corps)
 	allowed_ranks = list(
@@ -31,12 +31,8 @@
 	                    SKILL_WEAPONS     = SKILL_EXPERIENCED)
 
 	access = list(
-		access_pathfinder, access_explorer, access_eva, access_maint_tunnels, access_bridge, access_emergency_storage,
-		access_guppy_helm, access_solgov_crew, access_expedition_shuttle, access_expedition_shuttle_helm,
-		access_guppy, access_hangar, access_petrov, access_petrov_helm, access_petrov_analysis, access_petrov_phoron,
-		access_petrov_toxins, access_petrov_chemistry, access_petrov_maint, access_tox, access_tox_storage, access_research,
-		access_xenobiology, access_xenoarch, access_torch_fax, access_radio_comm,
-		access_radio_exp, access_radio_sci, access_research_storage, access_radio_sup
+		access_radio_inf, access_rifleman, access_comtech, access_squadlead, access_ftlead,
+		access_solgov_crew, access_expedition_shuttle, access_guppy, access_hangar
 	)
 
 	software_on_spawn = list(/datum/computer_file/program/deck_management,
@@ -49,14 +45,14 @@
 	title = "Fireteam Leader"
 	department = "Infantry"
 	department_flag = INF
-	total_positions = 1
-	spawn_positions = 1
+	total_positions = 2
+	spawn_positions = 2
 	supervisors = "the Squad Leader"
 	selection_color = "#509429"
 	minimal_player_age = 1
 	economic_power = 10
 	minimum_character_age = list(SPECIES_HUMAN = 25)
-	ideal_character_age = 35
+	ideal_character_age = 20
 	outfit_type = /singleton/hierarchy/outfit/job/torch/crew/infantry/firelead
 	allowed_branches = list(/datum/mil_branch/marine_corps)
 	allowed_ranks = list(
@@ -78,19 +74,12 @@
 	                    SKILL_WEAPONS     = SKILL_EXPERIENCED)
 
 	access = list(
-		access_pathfinder, access_explorer, access_eva, access_maint_tunnels, access_bridge, access_emergency_storage,
-		access_guppy_helm, access_solgov_crew, access_expedition_shuttle, access_expedition_shuttle_helm,
-		access_guppy, access_hangar, access_petrov, access_petrov_helm, access_petrov_analysis, access_petrov_phoron,
-		access_petrov_toxins, access_petrov_chemistry, access_petrov_maint, access_tox, access_tox_storage, access_research,
-		access_xenobiology, access_xenoarch, access_torch_fax, access_radio_comm,
-		access_radio_exp, access_radio_sci, access_research_storage, access_radio_sup
+		access_radio_inf, access_rifleman, access_comtech, access_ftlead,
+		access_solgov_crew, access_expedition_shuttle, access_guppy, access_hangar
 	)
 
-	software_on_spawn = list(/datum/computer_file/program/deck_management,
-							 /datum/computer_file/program/reports)
-
 /datum/job/firelead/get_description_blurb()
-	return "You are the Squad Leader. You are the Platoon Officer's right-hand man: Their eyes and ears in the A-O. Coordinate the marine complement onboard to accomplish your objectives. Ensure that SOP and regulations are being followed. Above all, ensure that all operations outside are carried out with utmost efficiency. Semper fi, Marine."
+	return "You are a Fireteam Leader. You take orders directly from the Squad Lead and help manage a smaller group of marines on the field. Coordinate with your SL, relay orders, broadcast information, lead your Riflemen to victory."
 
 
 /datum/job/nt_pilot
@@ -115,10 +104,9 @@
 	)
 
 	access = list(
-		access_mining_office, access_petrov, access_petrov_helm, access_petrov_maint, access_mining_station,
-		access_expedition_shuttle, access_expedition_shuttle_helm, access_guppy, access_hangar, access_guppy_helm,
-		access_mining, access_pilot, access_solgov_crew, access_eva, access_explorer, access_research,
-		access_radio_exp, access_radio_sci, access_radio_sup, access_maint_tunnels, access_emergency_storage
+		access_expedition_shuttle, access_expedition_shuttle_helm, access_guppy, access_hangar,
+		access_pilot, access_solgov_crew, access_eva,
+		access_radio_inf, access_radio_sup, access_maint_tunnels, access_emergency_storage
 	)
 	min_skill = list( // 5 points
 		SKILL_EVA = SKILL_BASIC, // 1 point
@@ -133,15 +121,12 @@
 /datum/job/nt_pilot/get_description_blurb()
 	return "You are the Dropship Pilot. Your job is to navigate the shuttles onboard the ship to provide safe and reliable transport for the marine complement. You take orders from the Platoon Officer, but the Deck Chief has positional authority over you."
 
-/datum/job/corpsman/get_description_blurb()
-	return "You are a Rifleman. Semper Fidelis."
-
 /datum/job/comtech
 	title = "Combat Technician"
 	department = "Infantry"
 	department_flag = INF
-	total_positions = 30
-	spawn_positions = 30
+	total_positions = 4
+	spawn_positions = 4
 	supervisors = "the Fireteam leader, the Squad leader"
 	selection_color = "#509429"
 	minimum_character_age = list(SPECIES_HUMAN = 18)
@@ -164,22 +149,18 @@
 	                    SKILL_WEAPONS     = SKILL_EXPERIENCED)
 
 	access = list(
-		access_explorer, access_maint_tunnels, access_eva, access_emergency_storage,
-		access_guppy_helm, access_solgov_crew, access_expedition_shuttle, access_guppy, access_hangar,
-		access_petrov, access_petrov_maint, access_research, access_radio_exp
+		access_radio_inf, access_rifleman, access_comtech, access_solgov_crew, access_expedition_shuttle, access_guppy, access_hangar
 	)
 
-	software_on_spawn = list(/datum/computer_file/program/deck_management)
-
 /datum/job/comtech/get_description_blurb()
-	return "You are a Rifleman. Semper Fidelis."
+	return "You are a Combat Technician. Your job is to clear up debris and open up new paths for marines to take advantage of. You can also do a limited amount of repairwork. You are not an Engineer."
 
 /datum/job/rifleman
 	title = "Rifleman"
 	department = "Infantry"
 	department_flag = INF
-	total_positions = 30
-	spawn_positions = 30
+	total_positions = 100
+	spawn_positions = 100
 	supervisors = "the Fireteam leader, the Squad leader"
 	selection_color = "#509429"
 	minimum_character_age = list(SPECIES_HUMAN = 18)
@@ -202,12 +183,8 @@
 	                    SKILL_WEAPONS     = SKILL_EXPERIENCED)
 
 	access = list(
-		access_explorer, access_maint_tunnels, access_eva, access_emergency_storage,
-		access_guppy_helm, access_solgov_crew, access_expedition_shuttle, access_guppy, access_hangar,
-		access_petrov, access_petrov_maint, access_research, access_radio_exp
+		access_radio_inf, access_rifleman, access_solgov_crew, access_expedition_shuttle, access_guppy, access_hangar
 	)
-
-	software_on_spawn = list(/datum/computer_file/program/deck_management)
 
 /datum/job/rifleman/get_description_blurb()
 	return "You are a Rifleman. Semper Fidelis."

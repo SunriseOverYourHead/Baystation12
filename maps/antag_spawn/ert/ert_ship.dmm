@@ -6515,11 +6515,11 @@
 /obj/structure/window/reinforced{
 	dir = 4
 	},
-/obj/item/clothing/accessory/armor_plate/merc,
-/obj/item/clothing/accessory/armor_plate/merc,
-/obj/item/clothing/accessory/armor_plate/merc,
-/obj/item/clothing/accessory/armor_plate/merc,
-/obj/item/clothing/accessory/armor_plate/merc,
+/obj/item/clothing/accessory/armor_plate/IV,
+/obj/item/clothing/accessory/armor_plate/IV,
+/obj/item/clothing/accessory/armor_plate/IV,
+/obj/item/clothing/accessory/armor_plate/IV,
+/obj/item/clothing/accessory/armor_plate/IV,
 /obj/item/clothing/accessory/storage/pouches/large/navy,
 /obj/item/clothing/accessory/storage/pouches/large/navy,
 /obj/item/clothing/accessory/storage/pouches/large/navy,
@@ -6956,11 +6956,11 @@
 /obj/structure/window/reinforced{
 	dir = 4
 	},
-/obj/item/clothing/accessory/armor_plate/medium,
-/obj/item/clothing/accessory/armor_plate/medium,
-/obj/item/clothing/accessory/armor_plate/medium,
-/obj/item/clothing/accessory/armor_plate/medium,
-/obj/item/clothing/accessory/armor_plate/medium,
+/obj/item/clothing/accessory/armor_plate/III,
+/obj/item/clothing/accessory/armor_plate/III,
+/obj/item/clothing/accessory/armor_plate/III,
+/obj/item/clothing/accessory/armor_plate/III,
+/obj/item/clothing/accessory/armor_plate/III,
 /obj/item/clothing/accessory/storage/pouches,
 /obj/item/clothing/accessory/storage/pouches,
 /obj/item/clothing/accessory/storage/pouches,

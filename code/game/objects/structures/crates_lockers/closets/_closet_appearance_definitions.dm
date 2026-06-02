@@ -730,3 +730,42 @@
 	decals = list(
 		"biohazard" = COLOR_RED_GRAY
 	)
+
+/singleton/closet_appearance/secure_closet/infantry
+	color = COLOR_PALE_GREEN_GRAY
+	decals = list(
+		"lower_holes"
+	)
+	extra_decals = list(
+		"stripe_vertical_mid_full" = COLOR_RED_GRAY,
+		"security" = COLOR_RED_GRAY
+	)
+
+/singleton/closet_appearance/secure_closet/infantry/comtech
+	extra_decals = list(
+		"stripe_vertical_left_full" = COLOR_RED_GRAY,
+		"stripe_vertical_right_full" = COLOR_RED_GRAY,
+		"security" = COLOR_RED_GRAY
+	)
+
+/singleton/closet_appearance/secure_closet/infantry/ftl
+	extra_decals = list(
+		"stripe_vertical_left_full" = COLOR_RED_GRAY,
+		"stripe_vertical_right_full" = COLOR_RED_GRAY,
+		"security" = COLOR_RED_GRAY
+	)
+
+/singleton/closet_appearance/secure_closet/infantry/squadlead
+	extra_decals = list(
+		"stripe_vertical_left_full" = COLOR_RED_GRAY,
+		"stripe_vertical_right_full" = COLOR_RED_GRAY,
+		"security" = COLOR_RED_GRAY
+	)
+
+/singleton/closet_appearance/secure_closet/infantry/platoon
+	extra_decals = list(
+		"stripe_vertical_left_full" =  COLOR_RED_GRAY,
+		"stripe_vertical_right_full" = COLOR_RED_GRAY,
+		"stripe_vertical_mid_full" =  COLOR_CLOSET_GOLD,
+		"security" = COLOR_CLOSET_GOLD
+	)

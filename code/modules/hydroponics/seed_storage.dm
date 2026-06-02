@@ -154,9 +154,12 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/seed_storage/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = TRUE)
-	user.set_machine(src)
+/obj/machinery/seed_storage/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "SeedStorage", "Seed Storage", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
+/obj/machinery/seed_storage/ui_data(mob/user)
 	var/list/data = list()
 	var/list/seeds = list()
 
@@ -205,60 +208,60 @@
 			else
 				traits["water_consumption"] = "None"
 
-		var/binary_traits = ""
+		var/list/binary_traits = list()
 
 		switch(seed.get_trait(TRAIT_CARNIVOROUS))
 			if(1)
-				binary_traits += "<span>Carnivorous</span>"
+				binary_traits += "Carnivorous"
 			if(2)
-				binary_traits += SPAN_WARNING("Carnivorous!")
+				binary_traits += "Carnivorous!"
 		switch(seed.get_trait(TRAIT_SPREAD))
 			if(1)
-				binary_traits += "<span>Vine</span>"
+				binary_traits += "Vine"
 			if(2)
-				binary_traits += SPAN_WARNING("Vine!")
+				binary_traits += "Vine!"
 
 		if ("pressure" in scanner)
 			if(seed.get_trait(TRAIT_LOWKPA_TOLERANCE) < 20)
-				binary_traits += "<span>Low pressure tolerant</span>"
+				binary_traits += "Low pressure tolerant"
 			if(seed.get_trait(TRAIT_HIGHKPA_TOLERANCE) > 220)
-				binary_traits += "<span>High pressure tolerant</span>"
+				binary_traits += "High pressure tolerant"
 		if ("temperature" in scanner)
 			if(seed.get_trait(TRAIT_HEAT_TOLERANCE) > 30)
-				binary_traits += "<span>Temperature tolerant</span>"
+				binary_traits += "Temperature tolerant"
 			else if(seed.get_trait(TRAIT_HEAT_TOLERANCE) < 10)
-				binary_traits += "<span>Temperature sensitive</span>"
+				binary_traits += "Temperature sensitive"
 
 		if ("light" in scanner)
 			if(seed.get_trait(TRAIT_LIGHT_TOLERANCE) > 10)
-				binary_traits += "<span>Light tolerant</span>"
+				binary_traits += "Light tolerant"
 			else if(seed.get_trait(TRAIT_LIGHT_TOLERANCE) < 3)
-				binary_traits += "<span>Light sensitive</span>"
+				binary_traits += "Light sensitive"
 
 		if(seed.get_trait(TRAIT_TOXINS_TOLERANCE) < 3)
-			binary_traits += "<span>Toxin sensitive</span>"
+			binary_traits += "Toxin sensitive"
 		else if(seed.get_trait(TRAIT_TOXINS_TOLERANCE) > 6)
-			binary_traits += "<span>Toxin tolerant</span>"
+			binary_traits += "Toxin tolerant"
 
 		if(seed.get_trait(TRAIT_PEST_TOLERANCE) < 3)
-			binary_traits += "<span>Pest sensitive</span>"
+			binary_traits += "Pest sensitive"
 		else if(seed.get_trait(TRAIT_PEST_TOLERANCE) > 6)
-			binary_traits += "<span>Pest tolerant</span>"
+			binary_traits += "Pest tolerant"
 
 		if(seed.get_trait(TRAIT_WEED_TOLERANCE) < 3)
-			binary_traits += "<span>Weed sensitive</span>"
+			binary_traits += "Weed sensitive"
 		else if(seed.get_trait(TRAIT_WEED_TOLERANCE) > 6)
-			binary_traits += "<span>Weed tolerant</span>"
+			binary_traits += "Weed tolerant"
 		if(seed.get_trait(TRAIT_PARASITE))
-			binary_traits += "<span>Parasitic</span>"
+			binary_traits += "Parasitic"
 
 		if ("temperature" in scanner)
 			if(seed.get_trait(TRAIT_ALTER_TEMP) > 0)
-				binary_traits += "<span>Warming</span>"
+				binary_traits += "Warming"
 			if(seed.get_trait(TRAIT_ALTER_TEMP) < 0)
-				binary_traits += "<span>Cooling</span>"
+				binary_traits += "Cooling"
 		if(seed.get_trait(TRAIT_BIOLUM))
-			binary_traits += "<span>Bioluminescent</span>"
+			binary_traits += "Bioluminescent"
 
 		seed_data["traits"] = traits
 		seed_data["binary_traits"] = binary_traits
@@ -268,43 +271,45 @@
 		seeds.Add(list(seed_data))
 
 	data["seeds"] = seeds
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (isnull(ui))
-		ui = new(user, src, ui_key, "seed_storage.tmpl", "Seed Storage", 900, 500)
-		ui.set_initial_data(data)
-		ui.open()
-
-/obj/machinery/seed_storage/OnTopic(mob/user, href_list, datum/topic_state/state)
+/obj/machinery/seed_storage/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	var/id = text2num(params["id"])
 	for (var/datum/seed_pile/N in piles)
-		if (href_list["vend"] && text2num(href_list["vend"]) == N.ID)
-			var/obj/O = pick(N.seeds)
-			if (O)
-				--N.amount
-				N.seeds -= O
-				if (N.amount <= 0 || length(N.seeds) <= 0)
+		if (N.ID != id)
+			continue
+		switch(action)
+			if("vend")
+				var/obj/O = pick(N.seeds)
+				if (O)
+					--N.amount
+					N.seeds -= O
+					if (N.amount <= 0 || length(N.seeds) <= 0)
+						piles -= N
+						qdel(N)
+					flick("[initial(icon_state)]-vend", src)
+					O.dropInto(loc)
+				else
 					piles -= N
 					qdel(N)
-				flick("[initial(icon_state)]-vend", src)
-				O.dropInto(loc)
-			else
+				. = TRUE
+			if("purge")
+				for (var/obj/O in N.seeds)
+					qdel(O)
 				piles -= N
 				qdel(N)
-			return TOPIC_REFRESH
-		else if (href_list["purge"] && text2num(href_list["purge"]) == N.ID && (alert("Are you sure you want to purge all of \the [N.seed_type?.seed_name] seeds?", "Are you sure?", "No", "Yes") == "Yes"))
-			for (var/obj/O in N.seeds)
-				qdel(O)
-				piles -= N
-				qdel(N)
-			return TOPIC_REFRESH
-	return TOPIC_HANDLED
+				. = TRUE
+		break
 
 /obj/machinery/seed_storage/use_tool(obj/item/O, mob/living/user, list/click_params)
 	if (istype(O, /obj/item/seeds))
 		add(O)
 		sort_piles()
 		user.visible_message("[user] puts \the [O.name] into \the [src].", "You put \the [O] into \the [src].")
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		return TRUE
 
 	if (istype(O, /obj/item/storage/plants))
@@ -320,7 +325,7 @@
 			user.visible_message("[user] puts the seeds from \the [O.name] into \the [src].", "You put the seeds from \the [O.name] into \the [src].")
 		else
 			to_chat(user, SPAN_NOTICE("There are no seeds in \the [O.name]."))
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		return TRUE
 	return ..()
 

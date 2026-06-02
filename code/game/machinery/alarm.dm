@@ -500,32 +500,35 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/alarm/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, master_ui = null, datum/topic_state/state = GLOB.default_state)
-	var/data = list()
-	var/remote_connection = 0
-	var/remote_access = 0
-	if(state)
-		var/list/href = state.href_list(user)
-		remote_connection = href["remote_connection"]	// Remote connection means we're non-adjacent/connecting from another computer
-		remote_access = href["remote_access"]			// Remote access means we also have the privilege to alter the air alarm.
+/obj/machinery/alarm/proc/reset_alarm()
+	if(alarm_area && alarm_area.atmosalert(0, src))
+		apply_danger_level(0)
+	update_icon()
 
+/obj/machinery/alarm/ui_interact(mob/user, datum/tgui/ui)
+	if(buildstage != 2)
+		return
+	if(aidisabled && issilicon(user))
+		to_chat(user, SPAN_WARNING("AI control for \the [src] interface has been disabled."))
+		return
+	ui = tgui_interact(user, src, "AirAlarm", src.name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/machinery/alarm/ui_data(mob/user)
+	var/list/data = list()
 	data["locked"] = locked && !issilicon(user)
-	data["remote_connection"] = remote_connection
-	data["remote_access"] = remote_access
+	data["remote_connection"] = FALSE
+	data["remote_access"] = FALSE
 	data["rcon"] = rcon_setting
 	data["screen"] = screen
 
 	populate_status(data)
 
-	if(!(locked && !remote_connection) || remote_access || issilicon(user))
+	if(!locked || issilicon(user))
 		populate_controls(data)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "air_alarm.tmpl", src.name, 325, 625, master_ui = master_ui, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+	return data
 
 /obj/machinery/alarm/proc/populate_status(data)
 	var/turf/location = get_turf(src)
@@ -621,8 +624,8 @@
 			data["breach_data"] = breach_data
 
 			var/list/gas_names = list(
-				GAS_OXYGEN         = "O<sub>2</sub>",
-				GAS_CO2 = "CO<sub>2</sub>",
+				GAS_OXYGEN         = "O2",
+				GAS_CO2 = "CO2",
 				"other"          = "Other")
 			for (var/g in gas_names)
 				thresholds[LIST_PRE_INC(thresholds)] = list("name" = gas_names[g], "settings" = list())
@@ -643,173 +646,155 @@
 
 			data["thresholds"] = thresholds
 
-/obj/machinery/alarm/CanUseTopic(mob/user, datum/topic_state/state, href_list = list())
-	if(buildstage != 2)
-		return STATUS_CLOSE
+/obj/machinery/alarm/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
 
-	if(aidisabled && issilicon(user))
-		to_chat(user, SPAN_WARNING("AI control for \the [src] interface has been disabled."))
-		return STATUS_CLOSE
+	if(buildstage != 2 || shorted)
+		return TRUE
 
-	. = shorted ? STATUS_DISABLED : STATUS_INTERACTIVE
+	var/access_locked = locked && !issilicon(usr)
 
-	if(. == STATUS_INTERACTIVE)
-		var/extra_href = state.href_list(user)
-		// Prevent remote users from altering RCON settings unless they already have access
-		if(href_list["rcon"] && extra_href["remote_connection"] && !extra_href["remote_access"])
-			. = STATUS_UPDATE
+	switch(action)
+		if("rcon")
+			var/attempted = text2num(params["rcon"])
+			switch(attempted)
+				if(RCON_NO)
+					rcon_setting = RCON_NO
+				if(RCON_AUTO)
+					rcon_setting = RCON_AUTO
+				if(RCON_YES)
+					rcon_setting = RCON_YES
+			return TRUE
 
-	return min(..(), .)
+		if("temperature")
+			if(access_locked)
+				return TRUE
+			var/list/selected = TLV["temperature"]
+			var/max_temperature = min(selected[3] - T0C, MAX_TEMPERATURE)
+			var/min_temperature = max(selected[2] - T0C, MIN_TEMPERATURE)
+			var/input_temperature = input(usr, "What temperature would you like the system to maintain? (Capped between [min_temperature] and [max_temperature]C)", "Thermostat Controls", target_temperature - T0C) as num|null
+			if(isnum(input_temperature))
+				if(input_temperature > max_temperature || input_temperature < min_temperature)
+					to_chat(usr, "Temperature must be between [min_temperature]C and [max_temperature]C")
+				else
+					target_temperature = input_temperature + T0C
+			return TRUE
 
-/obj/machinery/alarm/OnTopic(user, href_list, datum/topic_state/state)
-	// hrefs that can always be called -walter0o
-	if(href_list["rcon"])
-		var/attempted_rcon_setting = text2num(href_list["rcon"])
-
-		switch(attempted_rcon_setting)
-			if(RCON_NO)
-				rcon_setting = RCON_NO
-			if(RCON_AUTO)
-				rcon_setting = RCON_AUTO
-			if(RCON_YES)
-				rcon_setting = RCON_YES
-		return TOPIC_REFRESH
-
-	if(href_list["temperature"])
-		var/list/selected = TLV["temperature"]
-		var/max_temperature = min(selected[3] - T0C, MAX_TEMPERATURE)
-		var/min_temperature = max(selected[2] - T0C, MIN_TEMPERATURE)
-		var/input_temperature = input(user, "What temperature would you like the system to maintain? (Capped between [min_temperature] and [max_temperature]C)", "Thermostat Controls", target_temperature - T0C) as num|null
-		if(isnum(input_temperature) && CanUseTopic(user, state))
-			if(input_temperature > max_temperature || input_temperature < min_temperature)
-				to_chat(user, "Temperature must be between [min_temperature]C and [max_temperature]C")
-			else
-				target_temperature = input_temperature + T0C
-		return TOPIC_REFRESH
-
-	// hrefs that need the AA unlocked -walter0o
-	var/extra_href = state.href_list(user)
-	if(!(locked && !extra_href["remote_connection"]) || extra_href["remote_access"] || issilicon(user))
-		if(href_list["command"])
-			var/device_id = href_list["id_tag"]
-			switch(href_list["command"])
+		if("command")
+			if(access_locked)
+				return TRUE
+			var/device_id = params["id_tag"]
+			switch(params["command"])
 				if("set_external_pressure")
-					var/input_pressure = input(user, "What pressure you like the system to mantain?", "Pressure Controls") as num|null
-					if(isnum(input_pressure) && CanUseTopic(user, state))
-						send_signal(device_id, list(href_list["command"] = input_pressure))
-					return TOPIC_REFRESH
+					var/input_pressure = input(usr, "What pressure you like the system to maintain?", "Pressure Controls") as num|null
+					if(isnum(input_pressure))
+						send_signal(device_id, list(params["command"] = input_pressure))
 
 				if("reset_external_pressure")
-					send_signal(device_id, list(href_list["command"] = ONE_ATMOSPHERE))
-					return TOPIC_REFRESH
+					send_signal(device_id, list(params["command"] = ONE_ATMOSPHERE))
 
-				if( "set_power",
-					"set_checks",
-					"panic_siphon")
-
-					send_signal(device_id, list(href_list["command"] = text2num(href_list["val"]) ) )
-					return TOPIC_REFRESH
+				if("set_power", "set_checks", "panic_siphon")
+					send_signal(device_id, list(params["command"] = text2num(params["val"])))
 
 				if("set_scrubbing")
-					send_signal(device_id, list(href_list["command"] = href_list["scrub_mode"]) )
-					return TOPIC_REFRESH
+					send_signal(device_id, list(params["command"] = params["scrub_mode"]))
 
 				if("set_scrub_gas")
 					var/singleton/environment_data/env_info = GET_SINGLETON(environment_type)
-					if(env_info && (href_list["gas_id"] in env_info.filter_gasses))
-						send_signal(device_id, list(href_list["command"] = list(href_list["gas_id"] = text2num(href_list["val"]))) )
-					return TOPIC_REFRESH
+					if(env_info && (params["gas_id"] in env_info.filter_gasses))
+						send_signal(device_id, list(params["command"] = list(params["gas_id"] = text2num(params["val"]))))
 
 				if("set_breach")
-					var/newval = input(user, "Enter minimum pressure for breach detection, preasures lower then this will cause vents to stop.", breach_pressure) as null|num
-					if (isnull(newval) || !CanUseTopic(user, state))
-						return TOPIC_HANDLED
-					if (newval<0)
-						breach_pressure = -1.0
-					else if (newval > 50*ONE_ATMOSPHERE)
-						breach_pressure = 50*ONE_ATMOSPHERE
-					else
-						breach_pressure = round(newval,0.01)
+					var/newval = input(usr, "Enter minimum pressure for breach detection; pressures lower than this will cause vents to stop.", breach_pressure) as null|num
+					if(!isnull(newval))
+						if(newval < 0)
+							breach_pressure = -1.0
+						else if(newval > 50 * ONE_ATMOSPHERE)
+							breach_pressure = 50 * ONE_ATMOSPHERE
+						else
+							breach_pressure = round(newval, 0.01)
 
 				if("set_threshold")
-					var/env = href_list["env"]
-					var/threshold = text2num(href_list["var"])
+					var/env = params["env"]
+					var/threshold = text2num(params["var"])
 					var/list/selected = TLV[env]
 					var/list/thresholds = list("lower bound", "low warning", "high warning", "upper bound")
-					var/newval = input(user, "Enter [thresholds[threshold]] for [env]", "Alarm triggers", selected[threshold]) as null|num
-					if (isnull(newval) || !CanUseTopic(user, state))
-						return TOPIC_HANDLED
-					if (newval<0)
-						selected[threshold] = -1.0
-					else if (env=="temperature" && newval>5000)
-						selected[threshold] = 5000
-					else if (env=="pressure" && newval>50*ONE_ATMOSPHERE)
-						selected[threshold] = 50*ONE_ATMOSPHERE
-					else if (env!="temperature" && env!="pressure" && newval>200)
-						selected[threshold] = 200
-					else
-						newval = round(newval,0.01)
-						selected[threshold] = newval
-					if(threshold == 1)
-						if(selected[1] > selected[2])
-							selected[2] = selected[1]
-						if(selected[1] > selected[3])
-							selected[3] = selected[1]
-						if(selected[1] > selected[4])
-							selected[4] = selected[1]
-					if(threshold == 2)
-						if(selected[1] > selected[2])
-							selected[1] = selected[2]
-						if(selected[2] > selected[3])
-							selected[3] = selected[2]
-						if(selected[2] > selected[4])
-							selected[4] = selected[2]
-					if(threshold == 3)
-						if(selected[1] > selected[3])
-							selected[1] = selected[3]
-						if(selected[2] > selected[3])
-							selected[2] = selected[3]
-						if(selected[3] > selected[4])
-							selected[4] = selected[3]
-					if(threshold == 4)
-						if(selected[1] > selected[4])
-							selected[1] = selected[4]
-						if(selected[2] > selected[4])
-							selected[2] = selected[4]
-						if(selected[3] > selected[4])
-							selected[3] = selected[4]
+					var/newval = input(usr, "Enter [thresholds[threshold]] for [env]", "Alarm triggers", selected[threshold]) as null|num
+					if(!isnull(newval))
+						if(newval < 0)
+							selected[threshold] = -1.0
+						else if(env == "temperature" && newval > 5000)
+							selected[threshold] = 5000
+						else if(env == "pressure" && newval > 50 * ONE_ATMOSPHERE)
+							selected[threshold] = 50 * ONE_ATMOSPHERE
+						else if(env != "temperature" && env != "pressure" && newval > 200)
+							selected[threshold] = 200
+						else
+							newval = round(newval, 0.01)
+							selected[threshold] = newval
+						if(threshold == 1)
+							if(selected[1] > selected[2])
+								selected[2] = selected[1]
+							if(selected[1] > selected[3])
+								selected[3] = selected[1]
+							if(selected[1] > selected[4])
+								selected[4] = selected[1]
+						if(threshold == 2)
+							if(selected[1] > selected[2])
+								selected[1] = selected[2]
+							if(selected[2] > selected[3])
+								selected[3] = selected[2]
+							if(selected[2] > selected[4])
+								selected[4] = selected[2]
+						if(threshold == 3)
+							if(selected[1] > selected[3])
+								selected[1] = selected[3]
+							if(selected[2] > selected[3])
+								selected[2] = selected[3]
+							if(selected[3] > selected[4])
+								selected[4] = selected[3]
+						if(threshold == 4)
+							if(selected[1] > selected[4])
+								selected[1] = selected[4]
+							if(selected[2] > selected[4])
+								selected[2] = selected[4]
+							if(selected[3] > selected[4])
+								selected[3] = selected[4]
+						apply_mode()
+			return TRUE
 
-					apply_mode()
-					return TOPIC_REFRESH
+		if("screen")
+			if(access_locked)
+				return TRUE
+			screen = text2num(params["screen"])
+			return TRUE
 
-		if(href_list["screen"])
-			screen = text2num(href_list["screen"])
-			return TOPIC_REFRESH
-
-		if(href_list["atmos_unlock"])
-			switch(href_list["atmos_unlock"])
-				if("0")
-					alarm_area.air_doors_close()
-				if("1")
-					alarm_area.air_doors_open()
-			return TOPIC_REFRESH
-
-		if(href_list["atmos_alarm"])
-			if (alarm_area.atmosalert(2, src))
+		if("atmos_alarm")
+			if(access_locked)
+				return TRUE
+			if(alarm_area.atmosalert(2, src))
 				apply_danger_level(2)
 			update_icon()
-			return TOPIC_REFRESH
+			return TRUE
 
-		if(href_list["atmos_reset"])
-			if (alarm_area.atmosalert(0, src))
+		if("atmos_reset")
+			if(access_locked)
+				return TRUE
+			if(alarm_area.atmosalert(0, src))
 				apply_danger_level(0)
 			update_icon()
-			return TOPIC_REFRESH
+			return TRUE
 
-		if(href_list["mode"])
-			mode = text2num(href_list["mode"])
+		if("mode")
+			if(access_locked)
+				return TRUE
+			mode = text2num(params["mode"])
 			apply_mode()
-			return TOPIC_REFRESH
+			return TRUE
+
+	return TRUE
 
 /obj/machinery/alarm/use_tool(obj/item/W, mob/living/user, list/click_params)
 	switch(buildstage)
@@ -1080,79 +1065,59 @@ FIRE ALARM
 			src.time = 0
 			src.timing = 0
 			STOP_PROCESSING_MACHINE(src, MACHINERY_PROCESS_SELF)
-		src.updateDialog()
+		SStgui.update_uis(src)
 	last_process = world.timeofday
 
 	if(locate(/obj/hotspot) in loc)
 		alarm()
 
 /obj/machinery/firealarm/interface_interact(mob/user)
-	interact(user)
+	ui_interact(user)
 	return TRUE
 
-/obj/machinery/firealarm/interact(mob/user)
-	user.set_machine(src)
-	var/area/A = src.loc
-	var/d1
-	var/d2
-
-	var/datum/browser/popup = new(user, "firealarm", "Fire alarm")
-	var/singleton/security_state/security_state = GET_SINGLETON(GLOB.using_map.security_state)
-	if (istype(user, /mob/living/carbon/human) || istype(user, /mob/living/silicon))
-		A = A.loc
-
-		if (A.fire)
-			d1 = "<A href='byond://?src=\ref[src];reset=1'>Reset - Lockdown</A>"
-		else
-			d1 = "<A href='byond://?src=\ref[src];alarm=1'>Alarm - Lockdown</A>"
-		if (src.timing)
-			d2 = "<A href='byond://?src=\ref[src];time=0'>Stop Time Lock</A>"
-		else
-			d2 = "<A href='byond://?src=\ref[src];time=1'>Initiate Time Lock</A>"
-		var/second = round(src.time) % 60
-		var/minute = (round(src.time) - second) / 60
-		popup.set_content("[d1]\n<HR>The current alert level is <b>[security_state.current_security_level.name]</b><br><br>\nTimer System: [d2]<BR>\nTime Left: [(minute ? "[minute]:" : null)][second] <A href='byond://?src=\ref[src];tp=-30'>-</A> <A href='byond://?src=\ref[src];tp=-1'>-</A> <A href='byond://?src=\ref[src];tp=1'>+</A> <A href='byond://?src=\ref[src];tp=30'>+</A>")
-	else
-		A = A.loc
-		if (A.fire)
-			d1 = "<A href='byond://?src=\ref[src];reset=1'>[stars("Reset - Lockdown")]</A>"
-		else
-			d1 = "<A href='byond://?src=\ref[src];alarm=1'>[stars("Alarm - Lockdown")]</A>"
-		if (src.timing)
-			d2 = "<A href='byond://?src=\ref[src];time=0'>[stars("Stop Time Lock")]</A>"
-		else
-			d2 = "<A href='byond://?src=\ref[src];time=1'>[stars("Initiate Time Lock")]</A>"
-		var/second = round(src.time) % 60
-		var/minute = (round(src.time) - second) / 60
-		popup.set_content("[d1]\n<HR>The current security level is <b>[security_state.current_security_level.name]</b><br><br>\nTimer System: [d2]<BR>\nTime Left: [(minute ? "[minute]:" : null)][second] <A href='byond://?src=\ref[src];tp=-30'>-</A> <A href='byond://?src=\ref[src];tp=-1'>-</A> <A href='byond://?src=\ref[src];tp=1'>+</A> <A href='byond://?src=\ref[src];tp=30'>+</A>\n")
-	popup.open()
-	return
-
-/obj/machinery/firealarm/CanUseTopic(user)
+/obj/machinery/firealarm/ui_interact(mob/user, datum/tgui/ui)
 	if(buildstage != 2)
-		return STATUS_CLOSE
-	return ..()
+		return
+	ui = tgui_interact(user, src, "FireAlarm", "Fire Alarm", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-/obj/machinery/firealarm/OnTopic(user, href_list)
-	if (href_list["reset"])
-		src.reset()
-		. = TOPIC_REFRESH
-	else if (href_list["alarm"])
-		src.alarm()
-		. = TOPIC_REFRESH
-	else if (href_list["time"])
-		src.timing = text2num(href_list["time"])
-		last_process = world.timeofday
-		START_PROCESSING_MACHINE(src, MACHINERY_PROCESS_SELF)
-		. = TOPIC_REFRESH
-	else if (href_list["tp"])
-		var/tp = text2num(href_list["tp"])
-		src.time += tp
-		src.time = min(max(round(src.time), 0), 120)
-		. = TOPIC_REFRESH
+/obj/machinery/firealarm/ui_data(mob/user)
+	var/area/area = get_area(src)
+	var/singleton/security_state/security_state = GET_SINGLETON(GLOB.using_map.security_state)
+	return list(
+		"fire" = area?.fire,
+		"timing" = timing,
+		"time" = round(time),
+		"detecting" = detecting,
+		"security_level" = security_state?.current_security_level?.name || "Unknown"
+	)
 
-	if(. == TOPIC_REFRESH)
-		interact(user)
+/obj/machinery/firealarm/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	switch(action)
+		if("reset")
+			reset()
+			. = TRUE
+		if("alarm")
+			alarm()
+			. = TRUE
+		if("toggle_timing")
+			if(timing)
+				timing = 0
+				STOP_PROCESSING_MACHINE(src, MACHINERY_PROCESS_SELF)
+			else
+				timing = 1
+				last_process = world.timeofday
+				START_PROCESSING_MACHINE(src, MACHINERY_PROCESS_SELF)
+			. = TRUE
+		if("adjust_time")
+			var/amount = text2num(params["amount"])
+			if(isfinite(amount))
+				time = clamp(round(time + amount), 0, 120)
+			. = TRUE
 
 /obj/machinery/firealarm/proc/reset()
 	if (!( src.working ))

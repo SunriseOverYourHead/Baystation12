@@ -25,79 +25,105 @@
 	ui_interact(user)
 
 
-/obj/item/airlock_electronics/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/topic_state/state = GLOB.hands_state)
-	var/list/data = ui_data()
+/obj/item/airlock_electronics/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "AirlockElectronics", src.name, ui)
+	ui.open()
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "airlock_electronics.tmpl", src.name, 1000, 500, null, null, state)
-		ui.set_initial_data(data)
-		ui.open()
-
-/obj/item/airlock_electronics/ui_data()
+/obj/item/airlock_electronics/ui_data(mob/user)
 	var/list/data = list()
 	var/list/regions = list()
+	var/list/selected = list()
 
 	for(var/i in ACCESS_REGION_MIN to ACCESS_REGION_MAX) //code/game/jobs/_access_defs.dm
 		var/list/region = list()
-		var/list/accesses = list()
+		var/list/area_accesses = list()
 		for(var/j in get_region_accesses(i))
-			var/list/access = list()
-			access["name"] = get_access_desc(j)
-			access["id"] = j
-			access["req"] = (j in src.conf_access)
-			accesses[LIST_PRE_INC(accesses)] = access
+			area_accesses[LIST_PRE_INC(area_accesses)] = list(
+				"desc" = get_access_desc(j),
+				"ref" = "[j]"
+			)
+			if(j in src.conf_access)
+				selected += "[j]"
 		region["name"] = get_region_accesses_name(i)
-		region["accesses"] = accesses
+		region["accesses"] = area_accesses
 		regions[LIST_PRE_INC(regions)] = region
 	data["regions"] = regions
+	data["accesses"] = selected
 	data["oneAccess"] = one_access
-	data["locked"] = locked
-	data["lockable"] = lockable
-	data["autoset"] = autoset
 
 	return data
 
-/obj/item/airlock_electronics/OnTopic(mob/user, list/href_list, state)
-	if(lockable)
-		if(href_list["unlock"])
-			if(!req_access || istype(user, /mob/living/silicon))
-				locked = FALSE
-				last_configurator = user.name
-			else
-				var/obj/item/card/id/I = user.get_active_hand()
-				I = I ? I.GetIdCard() : null
-				if(!istype(I, /obj/item/card/id))
-					to_chat(user, SPAN_WARNING("[\src] flashes a yellow LED near the ID scanner. Did you remember to scan your ID or PDA?"))
-					return TOPIC_HANDLED
-				if (check_access(I))
+/obj/item/airlock_electronics/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("unlock")
+			if(lockable)
+				if(!req_access || istype(usr, /mob/living/silicon))
 					locked = FALSE
-					last_configurator = I.registered_name
+					last_configurator = usr.name
 				else
-					to_chat(user, SPAN_WARNING("[\src] flashes a red LED near the ID scanner, indicating your access has been denied."))
-					return TOPIC_HANDLED
-			return TOPIC_REFRESH
-		else if(href_list["lock"])
-			locked = TRUE
-			return TOPIC_REFRESH
+					var/obj/item/card/id/I = usr.get_active_hand()
+					I = I ? I.GetIdCard() : null
+					if(!istype(I, /obj/item/card/id))
+						to_chat(usr, SPAN_WARNING("[\src] flashes a yellow LED near the ID scanner. Did you remember to scan your ID or PDA?"))
+						return FALSE
+					if(check_access(I))
+						locked = FALSE
+						last_configurator = I.registered_name
+					else
+						to_chat(usr, SPAN_WARNING("[\src] flashes a red LED near the ID scanner, indicating your access has been denied."))
+						return FALSE
+			return TRUE
+		if("lock")
+			if(lockable)
+				locked = TRUE
+			return TRUE
+		if("one_access")
+			one_access = !one_access
+			return TRUE
+		if("autoset")
+			autoset = !autoset
+			return TRUE
+		if("set")
+			var/access = text2num(params["access"])
+			if(!access)
+				return TRUE
+			if(!(access in conf_access))
+				conf_access += access
+			else
+				conf_access -= access
+			return TRUE
+		if("grant_all")
+			for(var/i in ACCESS_REGION_MIN to ACCESS_REGION_MAX)
+				for(var/j in get_region_accesses(i))
+					conf_access |= j
+			return TRUE
+		if("clear_all")
+			conf_access = list()
+			one_access = FALSE
+			return TRUE
+		if("grant_region")
+			var/region_name = params["region"]
+			for(var/i in ACCESS_REGION_MIN to ACCESS_REGION_MAX)
+				if(get_region_accesses_name(i) == region_name)
+					for(var/j in get_region_accesses(i))
+						conf_access |= j
+					break
+			return TRUE
+		if("deny_region")
+			var/region_name = params["region"]
+			for(var/i in ACCESS_REGION_MIN to ACCESS_REGION_MAX)
+				if(get_region_accesses_name(i) == region_name)
+					for(var/j in get_region_accesses(i))
+						conf_access -= j
+					break
+			return TRUE
+	return FALSE
 
-	if(href_list["clear"])
-		conf_access = list()
-		one_access = FALSE
-		return TOPIC_REFRESH
-	if(href_list["one_access"])
-		one_access = !one_access
-		return TOPIC_REFRESH
-	if(href_list["autoset"])
-		autoset = !autoset
-		return TOPIC_REFRESH
-	if(href_list["access"])
-		var/access = href_list["access"]
-		if (!(access in conf_access))
-			conf_access += access
-		else
-			conf_access -= access
-		return TOPIC_REFRESH
+/obj/item/airlock_electronics/ui_state(mob/user)
+	return GLOB.hands_state
 
 
 /obj/item/airlock_electronics/secure
@@ -112,14 +138,8 @@
 	locked = FALSE
 	lockable = FALSE
 
-/obj/item/airlock_electronics/brace/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/topic_state/state = GLOB.deep_inventory_state)
-	var/list/data = ui_data()
-
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "airlock_electronics.tmpl", src.name, 1000, 500, null, null, state)
-		ui.set_initial_data(data)
-		ui.open()
+/obj/item/airlock_electronics/brace/ui_state(mob/user)
+	return GLOB.deep_inventory_state
 
 /obj/item/airlock_electronics/proc/set_access(obj/object)
 	if(!object.req_access)

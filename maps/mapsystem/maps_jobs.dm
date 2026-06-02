@@ -5,7 +5,7 @@
 	var/job_to_species_whitelist = list()
 	var/job_to_species_blacklist = list()
 
-	var/default_assistant_title = "Assistant"
+	var/default_assistant_title = "Crewman"
 
 	/// List of default access flags provided to all robots on top of their module's flags
 	var/list/synth_access = list(

@@ -164,62 +164,56 @@
 
 
 /obj/structure/noticeboard/attack_ai(mob/user)
-	examinate(user, src)
+	ui_interact(user)
 
 /obj/structure/noticeboard/attack_hand(mob/user)
-	examinate(user, src)
+	ui_interact(user)
 
 /obj/structure/noticeboard/examine(mob/user)
 	. = ..()
-	var/list/dat = list("<table>")
+
+/obj/structure/noticeboard/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "NoticeBoard", src.name, ui)
+	ui.open()
+
+/obj/structure/noticeboard/ui_data(mob/user)
+	var/list/items = list()
 	for(var/thing in notices)
-		LAZYADD(dat, "<tr><td>[thing]</td><td>")
-		if(istype(thing, /obj/item/paper))
-			LAZYADD(dat, "<a href='byond://?src=\ref[src];read=\ref[thing]'>Read</a><a href='byond://?src=\ref[src];write=\ref[thing]'>Write</a>")
-		else if(istype(thing, /obj/item/photo))
-			LAZYADD(dat, "<a href='byond://?src=\ref[src];look=\ref[thing]'>Look</a>")
-		LAZYADD(dat, "<a href='byond://?src=\ref[src];remove=\ref[thing]'>Remove</a></td></tr>")
-	var/datum/browser/popup = new(user, "noticeboard-\ref[src]", "Noticeboard")
-	popup.set_content(jointext(dat, null))
-	popup.open()
+		items[LIST_PRE_INC(items)] = list(
+			"ref" = "\ref[thing]",
+			"name" = "[thing]"
+		)
+	return list(
+		"items" = items,
+		"allowed" = TRUE
+	)
 
-/obj/structure/noticeboard/OnTopic(mob/user, list/href_list)
-
-	if(href_list["read"])
-		var/obj/item/paper/P = locate(href_list["read"])
-		if(P && P.loc == src)
-			P.show_content(user)
-		. = TOPIC_HANDLED
-
-	if(href_list["look"])
-		var/obj/item/photo/P = locate(href_list["look"])
-		if(P && P.loc == src)
-			P.show(user)
-		. = TOPIC_HANDLED
-
-	if(href_list["remove"])
-		var/obj/item/paper = locate(href_list["remove"])
-		if (paper)
-			remove_paper(paper)
-			user.put_in_any_hand_if_possible(paper)
-			paper.add_fingerprint(user)
-			add_fingerprint(user)
-		. = TOPIC_REFRESH
-
-	if(href_list["write"])
-		var/obj/item/P = locate(href_list["write"])
-		if(!P)
-			return
-		var/obj/item/pen/pen = user.IsHolding(/obj/item/pen)
-		if(istype(pen))
-			add_fingerprint(user)
-			P.use_tool(pen, user)
-		else
-			to_chat(user, SPAN_WARNING("You need a pen to write on \the [P]."))
-		. = TOPIC_REFRESH
-
-	if(. == TOPIC_REFRESH)
-		interact(user)
+/obj/structure/noticeboard/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("examine")
+			var/atom/movable/thing = locate(params["ref"]) in notices
+			if(!thing)
+				return TRUE
+			if(istype(thing, /obj/item/paper))
+				var/obj/item/paper/P = thing
+				P.show_content(usr)
+			else if(istype(thing, /obj/item/photo))
+				var/obj/item/photo/P = thing
+				P.show(usr)
+			return TRUE
+		if("remove")
+			var/obj/item/paper = locate(params["ref"]) in notices
+			if(paper)
+				remove_paper(paper)
+				usr.put_in_any_hand_if_possible(paper)
+				paper.add_fingerprint(usr)
+				add_fingerprint(usr)
+				SStgui.update_uis(src)
+			return TRUE
+	return FALSE
 
 /obj/structure/noticeboard/anomaly
 	icon_state = "nboard05"

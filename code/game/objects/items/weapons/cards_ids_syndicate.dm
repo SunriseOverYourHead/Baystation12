@@ -42,33 +42,32 @@
 	else
 		..()
 
-/obj/item/card/id/syndicate/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/list/data = list()
-	var/list/entries = list()
-	entries[LIST_PRE_INC(entries)] = list("name" = "Age", 				"value" = age)
-	entries[LIST_PRE_INC(entries)] = list("name" = "Prefix", 			"value" = formal_name_prefix)
-	entries[LIST_PRE_INC(entries)] = list("name" = "Suffix", 			"value" = formal_name_suffix)
-	entries[LIST_PRE_INC(entries)] = list("name" = "Appearance",		"value" = "Set")
-	entries[LIST_PRE_INC(entries)] = list("name" = "Assignment",		"value" = assignment)
-	if(GLOB.using_map.flags & MAP_HAS_BRANCH)
-		entries[LIST_PRE_INC(entries)] = list("name" = "Branch",		"value" = military_branch ? military_branch.name : "N/A")
-	if(military_branch && (GLOB.using_map.flags & MAP_HAS_RANK))
-		entries[LIST_PRE_INC(entries)] = list("name" = "Rank",			"value" = military_rank ? military_rank.name : "N/A")
-	entries[LIST_PRE_INC(entries)] = list("name" = "Blood Type",		"value" = blood_type)
-	entries[LIST_PRE_INC(entries)] = list("name" = "DNA Hash", 			"value" = dna_hash)
-	entries[LIST_PRE_INC(entries)] = list("name" = "Fingerprint Hash",	"value" = fingerprint_hash)
-	entries[LIST_PRE_INC(entries)] = list("name" = "Name", 				"value" = registered_name)
-	entries[LIST_PRE_INC(entries)] = list("name" = "Photo", 			"value" = "Update")
-	entries[LIST_PRE_INC(entries)] = list("name" = "Sex", 				"value" = sex)
-	entries[LIST_PRE_INC(entries)] = list("name" = "Factory Reset",		"value" = "Use With Care")
-	data["electronic_warfare"] = electronic_warfare
-	data["entries"] = entries
+/obj/item/card/id/syndicate/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "AgentIdCard", "Agent ID Card", ui)
+	ui.open()
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "agent_id_card.tmpl", "Agent id", 600, 400)
-		ui.set_initial_data(data)
-		ui.open()
+/obj/item/card/id/syndicate/ui_data(mob/user)
+	var/list/entries = list()
+	entries[LIST_PRE_INC(entries)] = list("name" = "Age",              "value" = age)
+	entries[LIST_PRE_INC(entries)] = list("name" = "Prefix",           "value" = formal_name_prefix)
+	entries[LIST_PRE_INC(entries)] = list("name" = "Suffix",           "value" = formal_name_suffix)
+	entries[LIST_PRE_INC(entries)] = list("name" = "Appearance",       "value" = "Set")
+	entries[LIST_PRE_INC(entries)] = list("name" = "Assignment",       "value" = assignment)
+	if(GLOB.using_map.flags & MAP_HAS_BRANCH)
+		entries[LIST_PRE_INC(entries)] = list("name" = "Branch",       "value" = military_branch ? military_branch.name : "N/A")
+	if(military_branch && (GLOB.using_map.flags & MAP_HAS_RANK))
+		entries[LIST_PRE_INC(entries)] = list("name" = "Rank",         "value" = military_rank ? military_rank.name : "N/A")
+	entries[LIST_PRE_INC(entries)] = list("name" = "Blood Type",       "value" = blood_type)
+	entries[LIST_PRE_INC(entries)] = list("name" = "DNA Hash",         "value" = dna_hash)
+	entries[LIST_PRE_INC(entries)] = list("name" = "Fingerprint Hash", "value" = fingerprint_hash)
+	entries[LIST_PRE_INC(entries)] = list("name" = "Name",             "value" = registered_name)
+	entries[LIST_PRE_INC(entries)] = list("name" = "Photo",            "value" = "Update")
+	entries[LIST_PRE_INC(entries)] = list("name" = "Sex",              "value" = sex)
+	entries[LIST_PRE_INC(entries)] = list("name" = "Factory Reset",    "value" = "Use With Care")
+	return list(
+		"electronic_warfare" = electronic_warfare,
+		"entries" = entries,
+	)
 
 /obj/item/card/id/syndicate/proc/register_user(mob/user)
 	if(!istype(user) || user == registered_user)
@@ -85,146 +84,129 @@
 	GLOB.destroyed_event.unregister(registered_user, src)
 	registered_user = null
 
-/obj/item/card/id/syndicate/CanUseTopic(mob/user, datum/topic_state/state, href_list)
-	if(!(href_list && href_list["look_at_id"]) && (user != registered_user))
-		return STATUS_CLOSE
-	return ..()
+/obj/item/card/id/syndicate/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
 
-/obj/item/card/id/syndicate/Topic(href, href_list, datum/topic_state/state)
-	if(..())
-		return 1
+	if(usr != registered_user)
+		return TRUE
 
-	var/user = usr
-	if(href_list["electronic_warfare"])
-		electronic_warfare = text2num(href_list["electronic_warfare"])
-		to_chat(user, SPAN_NOTICE("Electronic warfare [electronic_warfare ? "enabled" : "disabled"]."))
-	else if(href_list["set"])
-		switch(href_list["set"])
-			if("Age")
-				var/new_age = input(user,"What age would you like to put on this card?","Agent Card Age", age) as null|num
-				if(!isnull(new_age) && CanUseTopic(user, state))
-					if(new_age < 0)
+	switch(action)
+		if("electronic_warfare")
+			electronic_warfare = text2num(params["electronic_warfare"])
+			to_chat(usr, SPAN_NOTICE("Electronic warfare [electronic_warfare ? "enabled" : "disabled"]."))
+
+		if("set")
+			switch(params["set"])
+				if("Age")
+					var/new_age = input(usr, "What age would you like to put on this card?", "Agent Card Age", age) as null|num
+					if(!isnull(new_age))
+						age = new_age < 0 ? initial(age) : new_age
+						to_chat(usr, SPAN_NOTICE("Age has been set to '[age]'."))
+				if("Prefix")
+					var/new_prefix = sanitizeSafe(input(usr, "What title prefix would you like to put on this card?", "Agent Card Prefix", formal_name_prefix) as text, MAX_NAME_LEN)
+					if(!isnull(new_prefix))
+						formal_name_prefix = new_prefix
+						to_chat(usr, SPAN_NOTICE("Title prefix has been set to '[formal_name_prefix]'."))
+				if("Suffix")
+					var/new_suffix = sanitizeSafe(input(usr, "What title suffix would you like to put on this card?", "Agent Card Suffix", formal_name_suffix) as text, MAX_NAME_LEN)
+					if(!isnull(new_suffix))
+						formal_name_suffix = new_suffix
+						to_chat(usr, SPAN_NOTICE("Title suffix has been set to '[formal_name_suffix]'."))
+				if("Appearance")
+					var/datum/card_state/choice = input(usr, "Select the appearance for this card.", "Agent Card Appearance") as null|anything in id_card_states()
+					if(choice)
+						src.icon_state = choice.icon_state
+						src.item_state = choice.item_state
+						src.color = choice.color
+						src.detail_color = choice.detail_color
+						src.extra_details = choice.extra_details
+						update_icon()
+						to_chat(usr, SPAN_NOTICE("Appearance changed to [choice]."))
+				if("Assignment")
+					var/new_job = sanitize(input(usr, "What assignment would you like to put on this card?\nChanging assignment will not grant or remove any access levels.", "Agent Card Assignment", assignment) as null|text)
+					if(!isnull(new_job))
+						src.assignment = new_job
+						to_chat(usr, SPAN_NOTICE("Occupation changed to '[new_job]'."))
+				if("Blood Type")
+					var/default_bt = blood_type
+					if(default_bt == initial(blood_type) && ishuman(usr))
+						var/mob/living/carbon/human/H = usr
+						if(H.dna)
+							default_bt = H.dna.b_type
+					var/new_blood_type = sanitize(input(usr, "What blood type would you like to be written on this card?", "Agent Card Blood Type", default_bt) as null|text)
+					if(!isnull(new_blood_type))
+						src.blood_type = new_blood_type
+						to_chat(usr, SPAN_NOTICE("Blood type changed to '[new_blood_type]'."))
+				if("DNA Hash")
+					var/default_dna = dna_hash
+					if(default_dna == initial(dna_hash) && ishuman(usr))
+						var/mob/living/carbon/human/H = usr
+						if(H.dna)
+							default_dna = H.dna.unique_enzymes
+					var/new_dna_hash = sanitize(input(usr, "What DNA hash would you like to be written on this card?", "Agent Card DNA Hash", default_dna) as null|text)
+					if(!isnull(new_dna_hash))
+						src.dna_hash = new_dna_hash
+						to_chat(usr, SPAN_NOTICE("DNA hash changed to '[new_dna_hash]'."))
+				if("Fingerprint Hash")
+					var/default_fp = fingerprint_hash
+					if(default_fp == initial(fingerprint_hash) && ishuman(usr))
+						var/mob/living/carbon/human/H = usr
+						if(H.dna)
+							default_fp = md5(H.dna.uni_identity)
+					var/new_fingerprint_hash = sanitize(input(usr, "What fingerprint hash would you like to be written on this card?", "Agent Card Fingerprint Hash", default_fp) as null|text)
+					if(!isnull(new_fingerprint_hash))
+						src.fingerprint_hash = new_fingerprint_hash
+						to_chat(usr, SPAN_NOTICE("Fingerprint hash changed to '[new_fingerprint_hash]'."))
+				if("Name")
+					var/new_name = sanitizeName(input(usr, "What name would you like to put on this card?", "Agent Card Name", registered_name) as null|text, allow_numbers = TRUE)
+					if(!isnull(new_name))
+						src.registered_name = new_name
+						to_chat(usr, SPAN_NOTICE("Name changed to '[new_name]'."))
+				if("Photo")
+					set_id_photo(usr)
+					to_chat(usr, SPAN_NOTICE("Photo changed."))
+				if("Sex")
+					var/new_sex = sanitize(input(usr, "What sex would you like to put on this card?", "Agent Card Sex", sex) as null|text)
+					if(!isnull(new_sex))
+						src.sex = new_sex
+						to_chat(usr, SPAN_NOTICE("Sex changed to '[new_sex]'."))
+				if("Factory Reset")
+					if(alert("This will factory reset the card, including access and owner. Continue?", "Factory Reset", "No", "Yes") == "Yes")
 						age = initial(age)
-					else
-						age = new_age
-					to_chat(user, SPAN_NOTICE("Age has been set to '[age]'."))
-					. = 1
-			if("Prefix")
-				var/new_prefix = sanitizeSafe(input(user,"What title prefix would you like to put on this card?","Agent Card Prefix", age) as text, MAX_NAME_LEN)
-				if(!isnull(new_prefix) && CanUseTopic(user, state))
-					formal_name_prefix = new_prefix
-					to_chat(user, SPAN_NOTICE("Title prefix has been set to '[formal_name_prefix]'."))
-					. = 1
-			if("Suffix")
-				var/new_suffix = sanitizeSafe(input(user,"What title suffix would you like to put on this card?","Agent Card Suffix", age) as text, MAX_NAME_LEN)
-				if(!isnull(new_suffix) && CanUseTopic(user, state))
-					formal_name_suffix = new_suffix
-					to_chat(user, SPAN_NOTICE("Title suffix has been set to '[formal_name_suffix]'."))
-					. = 1
-			if("Appearance")
-				var/datum/card_state/choice = input(user, "Select the appearance for this card.", "Agent Card Appearance") as null|anything in id_card_states()
-				if(choice && CanUseTopic(user, state))
-					src.icon_state = choice.icon_state
-					src.item_state = choice.item_state
-					src.color = choice.color
-					src.detail_color = choice.detail_color
-					src.extra_details = choice.extra_details
-					update_icon()
-					to_chat(usr, SPAN_NOTICE("Appearance changed to [choice]."))
-					. = 1
-			if("Assignment")
-				var/new_job = sanitize(input(user,"What assignment would you like to put on this card?\nChanging assignment will not grant or remove any access levels.","Agent Card Assignment", assignment) as null|text)
-				if(!isnull(new_job) && CanUseTopic(user, state))
-					src.assignment = new_job
-					to_chat(user, SPAN_NOTICE("Occupation changed to '[new_job]'."))
-					. = 1
-			if("Blood Type")
-				var/default = blood_type
-				if(default == initial(blood_type) && ishuman(user))
-					var/mob/living/carbon/human/H = user
-					if(H.dna)
-						default = H.dna.b_type
-				var/new_blood_type = sanitize(input(user,"What blood type would you like to be written on this card?","Agent Card Blood Type",default) as null|text)
-				if(!isnull(new_blood_type) && CanUseTopic(user, state))
-					src.blood_type = new_blood_type
-					to_chat(user, SPAN_NOTICE("Blood type changed to '[new_blood_type]'."))
-					. = 1
-			if("DNA Hash")
-				var/default = dna_hash
-				if(default == initial(dna_hash) && ishuman(user))
-					var/mob/living/carbon/human/H = user
-					if(H.dna)
-						default = H.dna.unique_enzymes
-				var/new_dna_hash = sanitize(input(user,"What DNA hash would you like to be written on this card?","Agent Card DNA Hash",default) as null|text)
-				if(!isnull(new_dna_hash) && CanUseTopic(user, state))
-					src.dna_hash = new_dna_hash
-					to_chat(user, SPAN_NOTICE("DNA hash changed to '[new_dna_hash]'."))
-					. = 1
-			if("Fingerprint Hash")
-				var/default = fingerprint_hash
-				if(default == initial(fingerprint_hash) && ishuman(user))
-					var/mob/living/carbon/human/H = user
-					if(H.dna)
-						default = md5(H.dna.uni_identity)
-				var/new_fingerprint_hash = sanitize(input(user,"What fingerprint hash would you like to be written on this card?","Agent Card Fingerprint Hash",default) as null|text)
-				if(!isnull(new_fingerprint_hash) && CanUseTopic(user, state))
-					src.fingerprint_hash = new_fingerprint_hash
-					to_chat(user, SPAN_NOTICE("Fingerprint hash changed to '[new_fingerprint_hash]'."))
-					. = 1
-			if("Name")
-				var/new_name = sanitizeName(input(user,"What name would you like to put on this card?","Agent Card Name", registered_name) as null|text, allow_numbers=TRUE)
-				if(!isnull(new_name) && CanUseTopic(user, state))
-					src.registered_name = new_name
-					to_chat(user, SPAN_NOTICE("Name changed to '[new_name]'."))
-					. = 1
-			if("Photo")
-				set_id_photo(user)
-				to_chat(user, SPAN_NOTICE("Photo changed."))
-				. = 1
-			if("Sex")
-				var/new_sex = sanitize(input(user,"What sex would you like to put on this card?","Agent Card Sex", sex) as null|text)
-				if(!isnull(new_sex) && CanUseTopic(user, state))
-					src.sex = new_sex
-					to_chat(user, SPAN_NOTICE("Sex changed to '[new_sex]'."))
-					. = 1
-			if("Factory Reset")
-				if(alert("This will factory reset the card, including access and owner. Continue?", "Factory Reset", "No", "Yes") == "Yes" && CanUseTopic(user, state))
-					age = initial(age)
-					formal_name_prefix = initial(formal_name_prefix)
-					formal_name_suffix = initial(formal_name_suffix)
-					access = syndicate_access.Copy()
-					assignment = initial(assignment)
-					blood_type = initial(blood_type)
-					dna_hash = initial(dna_hash)
-					electronic_warfare = initial(electronic_warfare)
-					fingerprint_hash = initial(fingerprint_hash)
-					icon_state = initial(icon_state)
-					color = initial(color)
-					detail_color = initial(detail_color)
-					extra_details = initial(extra_details)
-					SetName(initial(name))
-					registered_name = initial(registered_name)
-					unset_registered_user()
-					sex = initial(sex)
-					military_branch = initial(military_branch)
-					military_rank = initial(military_rank)
-					to_chat(user, SPAN_NOTICE("All information has been deleted from \the [src]."))
-					. = 1
-			if("Branch")
-				var/new_branch = sanitize(input(user,"What branch of service would you like to put on this card?","Agent Card Branch") as null|anything in GLOB.mil_branches.spawn_branches())
-				if(!isnull(new_branch) && CanUseTopic(user, state))
-					src.military_branch =  GLOB.mil_branches.spawn_branches()[new_branch]
-					to_chat(user, SPAN_NOTICE("Branch changed to '[military_branch.name]'."))
-					. = 1
-			if("Rank")
-				var/new_rank = sanitize(input(user,"What rank would you like to put on this card?","Agent Card Rank") as null|anything in GLOB.mil_branches.spawn_ranks(military_branch.name))
-				if(!isnull(new_rank) && CanUseTopic(user, state))
-					src.military_rank = GLOB.mil_branches.spawn_ranks(military_branch.name)[new_rank]
-					to_chat(user, SPAN_NOTICE("Rank changed to '[military_rank.name]'."))
-					. = 1
+						formal_name_prefix = initial(formal_name_prefix)
+						formal_name_suffix = initial(formal_name_suffix)
+						access = syndicate_access.Copy()
+						assignment = initial(assignment)
+						blood_type = initial(blood_type)
+						dna_hash = initial(dna_hash)
+						electronic_warfare = initial(electronic_warfare)
+						fingerprint_hash = initial(fingerprint_hash)
+						icon_state = initial(icon_state)
+						color = initial(color)
+						detail_color = initial(detail_color)
+						extra_details = initial(extra_details)
+						SetName(initial(name))
+						registered_name = initial(registered_name)
+						unset_registered_user()
+						sex = initial(sex)
+						military_branch = initial(military_branch)
+						military_rank = initial(military_rank)
+						to_chat(usr, SPAN_NOTICE("All information has been deleted from \the [src]."))
+				if("Branch")
+					var/new_branch = sanitize(input(usr, "What branch of service would you like to put on this card?", "Agent Card Branch") as null|anything in GLOB.mil_branches.spawn_branches())
+					if(!isnull(new_branch))
+						src.military_branch = GLOB.mil_branches.spawn_branches()[new_branch]
+						to_chat(usr, SPAN_NOTICE("Branch changed to '[military_branch.name]'."))
+				if("Rank")
+					var/new_rank = sanitize(input(usr, "What rank would you like to put on this card?", "Agent Card Rank") as null|anything in GLOB.mil_branches.spawn_ranks(military_branch.name))
+					if(!isnull(new_rank))
+						src.military_rank = GLOB.mil_branches.spawn_ranks(military_branch.name)[new_rank]
+						to_chat(usr, SPAN_NOTICE("Rank changed to '[military_rank.name]'."))
 
-	// Always update the UI, or buttons will spin indefinitely
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
+	return TRUE
 
 var/global/list/id_card_states
 /proc/id_card_states()

@@ -6086,12 +6086,14 @@
 /area/engineering/shieldbay)
 "nP" = (
 /obj/structure/sign/directions/security{
-	pixel_y = -4
+	pixel_y = -7
 	},
 /obj/structure/sign/directions/bridge{
 	dir = 1;
-	pixel_z = 6
+	pixel_z = 6;
+	pixel_y = 1
 	},
+/obj/structure/sign/directions/infantry,
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/seconddeck/center)
 "nQ" = (
@@ -6100,8 +6102,10 @@
 	},
 /obj/structure/sign/directions/bridge{
 	dir = 1;
-	pixel_z = 6
+	pixel_z = 6;
+	pixel_y = 1
 	},
+/obj/structure/sign/directions/infantry,
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/seconddeck/elevator)
 "nS" = (
@@ -8011,6 +8015,9 @@
 /obj/structure/sign/directions/science{
 	dir = 1;
 	pixel_y = 3
+	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
 	},
 /turf/simulated/wall/prepainted,
 /area/engineering/engineering_bay)
@@ -13037,10 +13044,6 @@
 /obj/structure/catwalk,
 /turf/simulated/floor/plating,
 /area/maintenance/seconddeck/aftport)
-"Hb" = (
-/obj/shuttle_landmark/petrov/out,
-/turf/space,
-/area/space)
 "Hc" = (
 /obj/machinery/atmospherics/pipe/simple/visible/green,
 /obj/machinery/atmospherics/pipe/simple/visible/yellow{
@@ -46750,7 +46753,7 @@ aa
 aa
 aa
 aa
-Hb
+aa
 aa
 aa
 aa

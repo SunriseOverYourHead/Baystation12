@@ -75,6 +75,8 @@
 	var/antagrandom = 1
 
 	var/list/product_records = list()
+	/// Cache of base64 icon strings keyed by "[type_path]" to avoid recomputing on every ui_data call.
+	var/list/icon_cache = list()
 	var/product_slogans = "" //String of slogans spoken out loud, separated by semicolons
 	var/antag_slogans = ""
 	var/product_ads = "" //String of small ad messages in the vending screen
@@ -194,7 +196,7 @@
 	for (var/datum/stored_items/vending_products/product as anything in product_records)
 		product.price = 0
 	UpdateShowContraband(TRUE)
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
 	to_chat(user, "You short out the product lock on \the [src].")
 	return 1
 
@@ -218,7 +220,7 @@
 			vend(currently_vending, user)
 			return TRUE
 		else if (handled)
-			SSnano.update_uis(src)
+			SStgui.update_uis(src)
 			return TRUE
 
 	if (id || istype(item, /obj/item/spacecash))
@@ -237,7 +239,7 @@
 		coin = item
 		UpdateShowPremium(TRUE)
 		to_chat(user, SPAN_NOTICE("You insert \the [item] into \the [src]."))
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		return TRUE
 
 	if (istype(item, /obj/item/material/coin/challenge/syndie))
@@ -265,7 +267,7 @@
 	playsound(loc, 'sound/items/metal_clack.ogg', 50)
 	UpdateShowAntag(TRUE)
 	req_access.Cut()
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
 	update_icon()
 	var/obj/item/material/coin/challenge/syndie/antagcoin = item
 	if (antag_slogans)
@@ -296,7 +298,7 @@
 
 /obj/machinery/vending/state_transition(singleton/machine_construction/new_state)
 	. = ..()
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
 
 
 /obj/machinery/vending/physical_attack_hand(mob/living/user)
@@ -310,85 +312,164 @@
 	return TRUE
 
 
-/obj/machinery/vending/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui, force_open = TRUE)
-	user.set_machine(src)
-	var/list/data = list()
-	if (currently_vending)
-		data["mode"] = TRUE
-		data["product"] = currently_vending.item_name
-		data["price"] = currently_vending.price
-		data["message_err"] = FALSE
-		data["message"] = status_message
-		data["message_err"] = status_error
-	else
-		data["mode"] = FALSE
-		var/list/listed_products = list()
-		for (var/key = 1 to length(product_records))
-			var/datum/stored_items/vending_products/product = product_records[key]
-			if (!(product.category & vendor_flags))
-				continue
-			listed_products.Add(list(list(
-				"key" = key,
-				"name" = product.item_name,
-				"price" = product.price,
-				"color" = product.display_color,
-				"amount" = product.get_amount()
-			)))
-		data["products"] = listed_products
-	if (coin)
-		data["coin"] = coin.name
-	if (panel_open)
-		data["panel"] = TRUE
-		data["speaker"] = shut_up ? FALSE : TRUE
-	else
-		data["panel"] = FALSE
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "vending_machine.tmpl", name, 440, 600)
-		ui.set_initial_data(data)
-		ui.open()
+/obj/machinery/vending/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "Vending", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
+/obj/machinery/vending/proc/get_product_icon_base64(datum/stored_items/vending_products/product)
+	var/cache_key = "[product.item_path]"
+	if (icon_cache[cache_key])
+		return icon_cache[cache_key]
+	var/atom/item_type = product.item_path
+	var/icon_file = initial(item_type.icon)
+	var/icon_state_str = initial(item_type.icon_state)
+	if (!icon_file || !icon_state_str)
+		return null
+	var/icon/I = icon(icon_file, icon_state_str)
+	icon_cache[cache_key] = icon2base64(I)
+	return icon_cache[cache_key]
 
-/obj/machinery/vending/OnTopic(mob/user, href_list, datum/topic_state/state)
-	if (href_list["remove_coin"] && !istype(usr, /mob/living/silicon))
-		if (!coin)
-			to_chat(user, "There is no coin in this machine.")
-			return TOPIC_HANDLED
-		coin.dropInto(loc)
-		if (!user.get_active_hand())
-			user.put_in_hands(coin)
-		to_chat(user, SPAN_NOTICE("You remove \the [coin] from \the [src]"))
-		coin = null
-		UpdateShowPremium(FALSE)
-		return TOPIC_HANDLED
-	if (href_list["vend"] && vend_ready && !currently_vending)
-		var/key = text2num(href_list["vend"])
-		if (!is_valid_index(key, product_records))
-			return TOPIC_REFRESH
-		var/datum/stored_items/vending_products/product = product_records[key]
-		if (!istype(product))
-			return TOPIC_REFRESH
+/obj/machinery/vending/ui_data(mob/user)
+	var/list/product_recs = list()
+	var/list/coin_recs = list()
+	var/list/hidden_recs = list()
+	var/list/stock = list()
+
+	for (var/datum/stored_items/vending_products/product in product_records)
 		if (!(product.category & vendor_flags))
-			return TOPIC_REFRESH
-		if (product.price <= 0)
-			vend(product, user)
-		else if (istype(user, /mob/living/silicon))
-			to_chat(user, SPAN_WARNING("Artificial unit recognized. Purchase canceled."))
+			continue
+		var/pref = "\ref[product]"
+		var/atom/item_type = product.item_path
+		var/icon_file = initial(item_type.icon)
+		var/icon_state_str = initial(item_type.icon_state)
+		var/is_premium = (product.category == VENDOR_CATEGORY_COIN)
+		var/is_hidden = (product.category == VENDOR_CATEGORY_HIDDEN) || (product.category == VENDOR_CATEGORY_ANTAG)
+		var/cat_name = is_hidden ? "Contraband" : (is_premium ? "Premium" : "Products")
+
+		var/list/entry = list(
+			"path"        = pref,
+			"ref"         = pref,
+			"name"        = product.item_name,
+			"price"       = max(product.price, 0),
+			"category"    = cat_name,
+			"colorable"   = FALSE,
+			"premium"     = is_premium,
+			"image"       = get_product_icon_base64(product),
+			"icon"        = icon_file,
+			"icon_state"  = icon_state_str,
+		)
+		stock[pref] = list(
+			"amount" = product.get_amount(),
+			"free"   = (emagged || product.price <= 0),
+		)
+		if (is_hidden)
+			hidden_recs += list(entry)
+		else if (is_premium)
+			coin_recs += list(entry)
 		else
-			currently_vending = product
-			if (!vendor_account || vendor_account.suspended)
-				status_message = "This machine is currently unable to process payments due to problems with the associated account."
-				status_error = TRUE
+			product_recs += list(entry)
+
+	// User data from worn ID card
+	var/list/user_data
+	if (ishuman(user))
+		var/mob/living/carbon/human/H = user
+		var/obj/item/card/id/worn_id = H.wear_id
+		if (istype(worn_id, /obj/item/card/id))
+			var/datum/money_account/account = get_account(worn_id.associated_account_number)
+			if (account && !account.suspended)
+				user_data = list(
+					"name"       = worn_id.registered_name,
+					"cash"       = account.money,
+					"job"        = worn_id.assignment,
+					"department" = null,
+				)
+
+	// Category tabs
+	var/list/categories = list()
+	categories["Products"] = list("icon" = "box")
+	if (coin && IsShowingPremium())
+		categories["Premium"] = list("icon" = "coins")
+	if (IsShowingContraband() || IsShowingAntag())
+		categories["Contraband"] = list("icon" = "skull-crossbones")
+
+	// Ad message
+	var/ad
+	if (length(ads_list))
+		ad = pick(ads_list)
+
+	return list(
+		"product_records"        = product_recs,
+		"coin_records"           = coin_recs,
+		"hidden_records"         = hidden_recs,
+		"stock"                  = stock,
+		"user"                   = user_data,
+		"all_products_free"      = emagged,
+		"ad"                     = ad,
+		"department"             = null,
+		"jobDiscount"            = 1.0,
+		"displayed_currency_icon" = "coins",
+		"displayed_currency_name" = "cr",
+		"extended_inventory"     = (IsShowingContraband() || IsShowingAntag()),
+		"access"                 = allowed(user),
+		"categories"             = categories,
+	)
+
+/obj/machinery/vending/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if (.)
+		return
+	var/mob/user = ui.user
+	switch(action)
+		if("vend")
+			if (!vend_ready || currently_vending)
+				return
+			var/datum/stored_items/vending_products/product = locate(params["ref"]) in product_records
+			if (!istype(product) || !(product.category & vendor_flags))
+				return
+			if (product.price <= 0 || emagged)
+				vend(product, user)
+			else if (istype(user, /mob/living/silicon))
+				to_chat(user, SPAN_WARNING("Artificial unit recognized. Purchase canceled."))
+			else if (!ishuman(user))
+				return
 			else
-				status_message = "Please swipe a card or insert cash to pay for the item."
-				status_error = FALSE
-		return TOPIC_REFRESH
-	if (href_list["cancelpurchase"])
-		currently_vending = null
-		return TOPIC_REFRESH
-	if (href_list["togglevoice"] && panel_open)
-		shut_up = !shut_up
-		return TOPIC_HANDLED
+				var/mob/living/carbon/human/H = user
+				var/obj/item/card/id/worn_id = H.wear_id
+				if (!istype(worn_id, /obj/item/card/id))
+					to_chat(user, SPAN_WARNING("No ID card detected. Please wear your ID card to make purchases."))
+					return
+				if (!vendor_account || vendor_account.suspended)
+					to_chat(user, SPAN_WARNING("This machine is currently unable to process payments due to problems with the associated account."))
+					return
+				var/datum/money_account/account = get_account(worn_id.associated_account_number)
+				if (!account || account.suspended)
+					to_chat(user, SPAN_WARNING("Unable to access account."))
+					return
+				if (account.money < product.price)
+					to_chat(user, SPAN_WARNING("Insufficient funds in account."))
+					return
+				account.transfer(vendor_account, product.price, "Purchase of [product.item_name]")
+				vend(product, user)
+			. = TRUE
+		if("remove_coin")
+			if (!coin || istype(user, /mob/living/silicon))
+				return
+			coin.dropInto(loc)
+			if (!user.get_active_hand())
+				user.put_in_hands(coin)
+			to_chat(user, SPAN_NOTICE("You remove \the [coin] from \the [src]"))
+			coin = null
+			UpdateShowPremium(FALSE)
+			. = TRUE
+		if("togglevoice")
+			if (!panel_open)
+				return
+			shut_up = !shut_up
+			. = TRUE
+		if("select_colors")
+			// Color selection not supported
+			. = TRUE
 
 
 /obj/machinery/vending/get_req_access()
@@ -485,7 +566,7 @@
 	vend_ready = FALSE
 	status_message = "Vending..."
 	status_error = FALSE
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
 	update_icon()
 	if (product.category & VENDOR_CATEGORY_COIN)
 		if(!coin)
@@ -523,7 +604,7 @@
 		vend_ready = TRUE
 		update_icon()
 		currently_vending = null
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 
 
 /obj/machinery/vending/proc/stock(obj/item/item, datum/stored_items/vending_products/stored, mob/living/user)
@@ -531,9 +612,9 @@
 		return
 	if (stored.add_product(item))
 		to_chat(user, SPAN_NOTICE("You insert \the [item] into \the [src]."))
-		SSnano.update_uis(src)
+		SStgui.update_uis(src)
 		return TRUE
-	SSnano.update_uis(src)
+	SStgui.update_uis(src)
 
 
 /obj/machinery/vending/proc/speak(message)

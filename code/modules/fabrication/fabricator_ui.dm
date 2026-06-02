@@ -1,36 +1,44 @@
 #define PRINT_MULTIPLIER_DIVISOR 5
 
-/obj/machinery/fabricator/ui_interact(mob/user, ui_key = "rcon", datum/nanoui/ui=null, force_open=1)
+/obj/machinery/fabricator/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "BSFabricator", capitalize(name), ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
+/obj/machinery/fabricator/ui_data(mob/user)
 	var/list/data = list()
-
-	data["category"] =   show_category
+	data["category"] = show_category
 	data["functional"] = is_functioning()
 
-	if(is_functioning())
+	var/list/cat_list = SSfabrication.get_categories(fabricator_class)
+	var/list/categories = list()
+	for(var/cat in cat_list)
+		categories += cat
+	data["categories"] = categories
 
-		var/current_storage =  list()
-		data["material_storage"] =  current_storage
+	if(is_functioning())
+		var/list/current_storage = list()
+		data["material_storage"] = current_storage
 		for(var/material in stored_material)
 			var/list/material_data = list()
 			var/mat_name = capitalize(stored_substances_to_names[material])
-			material_data["name"] =        mat_name
-			material_data["stored"] =      stored_material[material]
-			material_data["max"] =         storage_capacity[material]
+			material_data["name"] = mat_name
+			material_data["stored"] = stored_material[material]
+			material_data["max"] = storage_capacity[material]
 			material_data["eject_key"] = stored_substances_to_names[material]
-			material_data["eject_label"] =   ispath(material, /material) ? "Eject" : "Flush"
+			material_data["eject_label"] = ispath(material, /material) ? "Eject" : "Flush"
 			data["material_storage"] += list(material_data)
 
 		var/list/current_build = list()
 		data["current_build"] = current_build
 		if(currently_building)
-			current_build["name"] =       currently_building.target_recipe.name
+			current_build["name"] = currently_building.target_recipe.name
 			current_build["multiplier"] = currently_building.multiplier
-			current_build["progress"] =   "[100-round((currently_building.remaining_time/currently_building.target_recipe.build_time)*100)]%"
+			current_build["progress"] = "[100-round((currently_building.remaining_time/currently_building.target_recipe.build_time)*100)]%"
 		else
-			current_build["name"] =       "Nothing."
+			current_build["name"] = "Nothing."
 			current_build["multiplier"] = "-"
-			current_build["progress"] =   "-"
+			current_build["progress"] = "-"
 
 		data["build_queue"] = list()
 		if(length(queued_orders))
@@ -44,6 +52,7 @@
 			var/list/order_data = list()
 			order_data["name"] = "Nothing."
 			order_data["multiplier"] = "-"
+			order_data["reference"] = null
 			data["build_queue"] += list(order_data)
 
 		data["build_options"] = list()
@@ -52,9 +61,9 @@
 				continue
 			var/list/build_option = list()
 			var/max_sheets = 0
-			build_option["name"] =      R.name
+			build_option["name"] = R.name
 			build_option["reference"] = "\ref[R]"
-			build_option["illegal"] =   R.hidden
+			build_option["illegal"] = R.hidden
 			if(!length(R.resources))
 				build_option["cost"] = "No resources required."
 				max_sheets = 100
@@ -77,12 +86,7 @@
 					build_option["multipliers"] += list(list("label" = "x[mult]", "multiplier" = mult))
 			data["build_options"] += list(build_option)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "fabricator.tmpl", "[capitalize(name)]", 780, 580, state = GLOB.physical_state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+	return data
 
 /obj/machinery/fabricator/interface_interact(mob/user)
 	ui_interact(user)

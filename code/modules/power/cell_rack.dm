@@ -196,40 +196,60 @@
 		celldiff = min(min(celldiff, most.charge), least.maxcharge - least.charge)
 		least.give(most.use(celldiff))
 
-/obj/machinery/power/smes/batteryrack/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/data = list()
+/obj/machinery/power/smes/batteryrack/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "CellRackPsu", "Cell Rack PSU", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	data["mode"] = mode
-	data["transfer_max"] = max_transfer_rate
-	data["output_load"] = round(output_used)
-	data["input_load"] = round(input_available)
-	data["equalise"] = equalise
-	data["blink_tick"] = ui_tick
-	data["cells_max"] = max_cells
-	data["cells_cur"] = length(internal_cells)
+/obj/machinery/power/smes/batteryrack/ui_data(mob/user)
 	var/list/cells = list()
 	var/cell_index = 1
 	for(var/obj/item/cell/C in internal_cells)
-		var/list/cell = list()
-		cell["slot"] = cell_index
-		cell["used"] = 1
-		cell["percentage"] = round(C.percent(), 0.01)
+		cells += list(list("slot" = cell_index, "used" = TRUE, "percentage" = round(C.percent(), 0.01)))
 		cell_index++
-		cells += list(cell)
 	while(cell_index <= PSU_MAXCELLS)
-		var/list/cell = list()
-		cell["slot"] = cell_index
-		cell["used"] = 0
+		cells += list(list("slot" = cell_index, "used" = FALSE))
 		cell_index++
-		cells += list(cell)
-	data["cells_list"] = cells
+	return list(
+		"mode" = mode,
+		"transfer_max" = max_transfer_rate,
+		"output_load" = round(output_used),
+		"input_load" = round(input_available),
+		"equalise" = equalise,
+		"blink_tick" = ui_tick,
+		"cells_max" = max_cells,
+		"cells_cur" = length(internal_cells),
+		"cells_list" = cells,
+	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "psu.tmpl", "Cell Rack PSU", 500, 430)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/power/smes/batteryrack/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("disable")
+			update_io(0)
+			. = TRUE
+		if("enable")
+			update_io(clamp(text2num(params["enable"]), 1, 3))
+			. = TRUE
+		if("equaliseon")
+			equalise = 1
+			. = TRUE
+		if("equaliseoff")
+			equalise = 0
+			. = TRUE
+		if("ejectcell")
+			var/slot_number = text2num(params["ejectcell"])
+			if(slot_number != clamp(round(slot_number), 1, length(internal_cells)))
+				return
+			var/obj/item/cell/C = internal_cells[slot_number]
+			C.dropInto(loc)
+			internal_cells -= C
+			update_icon()
+			RefreshParts()
+			update_maxcharge()
+			. = TRUE
 
 /obj/machinery/power/smes/batteryrack/dismantle()
 	for(var/obj/item/cell/C in internal_cells)
@@ -258,36 +278,3 @@
 /obj/machinery/power/smes/batteryrack/outputting()
 	return
 
-/obj/machinery/power/smes/batteryrack/Topic(href, href_list)
-	// ..() would respond to those topic calls, but we don't want to use them at all.
-	// Calls to these shouldn't occur anyway, due to usage of different nanoUI, but
-	// it's here in case someone decides to try hrefhacking/modified templates.
-	if(href_list["input"] || href_list["output"])
-		return 1
-
-	if(..())
-		return 1
-	if( href_list["disable"] )
-		update_io(0)
-		return 1
-	else if( href_list["enable"] )
-		update_io(clamp(text2num(href_list["enable"]), 1, 3))
-		return 1
-	else if( href_list["equaliseon"] )
-		equalise = 1
-		return 1
-	else if( href_list["equaliseoff"] )
-		equalise = 0
-		return 1
-	else if( href_list["ejectcell"] )
-		var/slot_number = text2num(href_list["ejectcell"])
-		if(slot_number != clamp(round(slot_number), 1, length(internal_cells)))
-			return 1
-		var/obj/item/cell/C = internal_cells[slot_number]
-
-		C.dropInto(loc)
-		internal_cells -= C
-		update_icon()
-		RefreshParts()
-		update_maxcharge()
-		return 1

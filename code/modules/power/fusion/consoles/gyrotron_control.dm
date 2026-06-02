@@ -3,45 +3,41 @@
 	icon_keyboard = "med_key"
 	icon_screen = "gyrotron_screen"
 	light_color = COLOR_BLUE
-	ui_template = "fusion_gyrotron_control.tmpl"
 
-/obj/machinery/computer/fusion/gyrotron/OnTopic(mob/user, href_list, datum/topic_state/state)
+/obj/machinery/computer/fusion/gyrotron/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "FusionGyrotronControl", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	if(href_list["modifypower"] || href_list["modifyrate"] || href_list["toggle"])
-
-		var/obj/machinery/power/emitter/gyrotron/G = locate(href_list["machine"])
-		if(!istype(G))
-			return TOPIC_NOACTION
-
-		var/datum/local_network/lan = get_local_network()
-		var/list/gyrotrons = lan.get_devices(/obj/machinery/power/emitter/gyrotron)
-		if(!lan || !gyrotrons || !gyrotrons[G])
-			return TOPIC_NOACTION
-
-		if(href_list["modifypower"])
-			var/new_val = input("Enter new emission power level (1 - 50)", "Modifying power level", G.mega_energy) as num
-			if(!istype(G))
-				return TOPIC_NOACTION
-			if(!new_val)
-				to_chat(user, SPAN_WARNING("That's not a valid number."))
-				return TOPIC_NOACTION
-			G.mega_energy = clamp(new_val, 1, 50)
-			G.change_power_consumption(G.mega_energy * 1500, POWER_USE_ACTIVE)
-			return TOPIC_REFRESH
-
-		if(href_list["modifyrate"])
-			var/new_val = input("Enter new emission delay between 2 and 10 seconds.", "Modifying emission rate", G.rate) as num
-			if(!istype(G))
-				return TOPIC_NOACTION
-			if(!new_val)
-				to_chat(user, SPAN_WARNING("That's not a valid number."))
-				return TOPIC_NOACTION
-			G.rate = clamp(new_val, 2, 10)
-			return TOPIC_REFRESH
-
-		if(href_list["toggle"])
-			G.activate(user)
-			return TOPIC_REFRESH
+/obj/machinery/computer/fusion/gyrotron/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if(.)
+		return
+	var/obj/machinery/power/emitter/gyrotron/G = locate(params["machine"])
+	if(!istype(G))
+		return
+	var/datum/local_network/lan = get_local_network()
+	var/list/gyrotrons = lan ? lan.get_devices(/obj/machinery/power/emitter/gyrotron) : null
+	if(!lan || !gyrotrons || !gyrotrons[G])
+		return
+	if(action == "modifypower")
+		var/new_val = text2num(params["value"])
+		if(!new_val)
+			to_chat(usr, SPAN_WARNING("That's not a valid number."))
+			return
+		G.mega_energy = clamp(new_val, 1, 50)
+		G.change_power_consumption(G.mega_energy * 1500, POWER_USE_ACTIVE)
+		. = TRUE
+	else if(action == "modifyrate")
+		var/new_val = text2num(params["value"])
+		if(!new_val)
+			to_chat(usr, SPAN_WARNING("That's not a valid number."))
+			return
+		G.rate = clamp(new_val, 2, 10)
+		. = TRUE
+	else if(action == "toggle")
+		G.activate(usr)
+		. = TRUE
 
 /obj/machinery/computer/fusion/gyrotron/build_ui_data()
 	. = ..()

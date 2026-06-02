@@ -51,7 +51,7 @@
 	department_flag = SUP
 	total_positions = 3
 	spawn_positions = 3
-	supervisors = "the Quartermaster"
+	supervisors = "the Deck Chief"
 	selection_color = "#946629"
 	minimum_character_age = list(SPECIES_HUMAN = 18)
 	ideal_character_age = 24
@@ -64,6 +64,8 @@
 		/datum/mil_rank/fleet/e3,
 		/datum/mil_rank/fleet/e4,
 	)
+	alt_titles = list(
+		"Gunner's Mate")
 	min_skill = list( // 5 points
 		SKILL_BUREAUCRACY = SKILL_BASIC, // 1 point
 		SKILL_FINANCE = SKILL_BASIC, // 1 point

@@ -139,6 +139,13 @@
 
 	tools = list(SWISSKNF_LBLADE, SWISSKNF_CLIFTER, SWISSKNF_COPENER)
 
+/obj/item/material/knife/folding/swiss/infantry
+	name = "infantry's combi-knife"
+	desc = "A small, red, multi-purpose folding knife. This one adds no special tools."
+	color = COLOR_PALE_GREEN_GRAY
+
+	tools = list(SWISSKNF_LBLADE, SWISSKNF_CLIFTER, SWISSKNF_COPENER)
+
 /obj/item/material/knife/folding/swiss/medic
 	name = "medic's combi-knife"
 	desc = "A small, green, multi-purpose folding knife. This one adds a smaller blade in place of the large blade and a glass cutter."

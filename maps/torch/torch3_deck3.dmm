@@ -6937,6 +6937,9 @@
 	dir = 1;
 	pixel_y = 3
 	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
+	},
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/thirddeck/center)
 "pT" = (
@@ -12277,6 +12280,9 @@
 	pixel_y = 3
 	},
 /obj/wallframe_spawn/no_grille,
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
+	},
 /turf/simulated/floor/plating,
 /area/hallway/primary/thirddeck/center)
 "Ep" = (
@@ -20377,6 +20383,9 @@
 	},
 /obj/structure/sign/directions/supply{
 	pixel_y = -4
+	},
+/obj/structure/sign/directions/infantry{
+	pixel_y = 10
 	},
 /turf/simulated/wall/prepainted,
 /area/hallway/primary/thirddeck/fore)

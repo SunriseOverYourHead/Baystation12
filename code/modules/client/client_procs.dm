@@ -42,6 +42,10 @@
 		completed_asset_jobs += job
 		return
 
+	// tgui message routing
+	if(tgui_Topic(href_list))
+		return
+
 	//search the href for script injection
 	if( findtext(href,"<script",1,0) )
 		to_world_log("Attempted use of scripts within a topic call, by [src]")
@@ -175,9 +179,15 @@
 	prefs = SScharacter_setup.preferences_datums[ckey]
 	if(!prefs)
 		prefs = new /datum/preferences(src)
+	else
+		prefs.client = src          // ensure client ref is current on reconnect
+		prefs.tgui_sent_rsc = list() // reset RSC cache so files are re-sent to new connection
 	prefs.last_ip = address				//these are gonna be used for banning
 	prefs.last_id = computer_id			//these are gonna be used for banning
 	fps = prefs.clientfps
+	spawn(0)
+		if(prefs && prefs.client == src)
+			prefs.tgui_prewarm_icons()
 
 	. = ..()	//calls mob.Login()
 

@@ -35,7 +35,7 @@ var/global/const/WIRE_TRANSMIT = 4
 
 		if(WIRE_TRANSMIT)
 			R.broadcasting = !R.broadcasting && !IsIndexCut(WIRE_SIGNAL)
-	SSnano.update_uis(holder)
+	SStgui.update_uis(holder)
 
 /datum/wires/radio/UpdateCut(index, mended)
 	var/obj/item/device/radio/R = holder
@@ -49,4 +49,4 @@ var/global/const/WIRE_TRANSMIT = 4
 
 		if(WIRE_TRANSMIT)
 			R.broadcasting = mended && !IsIndexCut(WIRE_SIGNAL)
-	SSnano.update_uis(holder)
+	SStgui.update_uis(holder)

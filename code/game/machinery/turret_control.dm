@@ -113,66 +113,62 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/turretid/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	var/list/data = list()
-	data["access"] = !isLocked(user)
-	data["locked"] = locked
-	data["enabled"] = enabled
-	data["is_lethal"] = 1
-	data["lethal"] = lethal
+/obj/machinery/turretid/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "TurretControl", "Turret Controls", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	if(data["access"])
+/obj/machinery/turretid/ui_data(mob/user)
+	var/has_access = !isLocked(user)
+	var/list/data = list(
+		"access" = has_access,
+		"locked" = locked,
+		"enabled" = enabled,
+		"lethal" = lethal
+	)
+	if(has_access)
 		var/list/settings = list()
-		settings[LIST_PRE_INC(settings)] = list("category" = "Neutralize All Non-Synthetics", "setting" = "check_synth", "value" = check_synth)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Weapon Authorization", "setting" = "check_weapons", "value" = check_weapons)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Security Records", "setting" = "check_records", "value" = check_records)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Arrest Status", "setting" = "check_arrest", "value" = check_arrest)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check Access Authorization", "setting" = "check_access", "value" = check_access)
-		settings[LIST_PRE_INC(settings)] = list("category" = "Check misc. Lifeforms", "setting" = "check_anomalies", "value" = check_anomalies)
+		settings += list(list("category" = "Neutralize All Non-Synthetics", "setting" = "check_synth", "value" = check_synth))
+		settings += list(list("category" = "Check Weapon Authorization", "setting" = "check_weapons", "value" = check_weapons))
+		settings += list(list("category" = "Check Security Records", "setting" = "check_records", "value" = check_records))
+		settings += list(list("category" = "Check Arrest Status", "setting" = "check_arrest", "value" = check_arrest))
+		settings += list(list("category" = "Check Access Authorization", "setting" = "check_access", "value" = check_access))
+		settings += list(list("category" = "Check misc. Lifeforms", "setting" = "check_anomalies", "value" = check_anomalies))
 		data["settings"] = settings
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "turret_control.tmpl", "Turret Controls", 500, 300)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/turretid/Topic(href, href_list)
-	if(..())
-		return 1
-
-
-	if(href_list["command"] && href_list["value"])
-		var/log_action = null
-
-		var/list/toggle = list("disabled","enabled")
-
-		var/value = text2num(href_list["value"])
-		if(href_list["command"] == "enable")
-			enabled = value
-			log_action = "[toggle[enabled+1]] the turrets"
-		else if(href_list["command"] == "lethal")
-			lethal = value
-			log_action = "[toggle[lethal+1]] the turrets lethal mode."
-		else if(href_list["command"] == "check_synth")
-			check_synth = value
-		else if(href_list["command"] == "check_weapons")
-			check_weapons = value
-		else if(href_list["command"] == "check_records")
-			check_records = value
-		else if(href_list["command"] == "check_arrest")
-			check_arrest = value
-		else if(href_list["command"] == "check_access")
-			check_access = value
-		else if(href_list["command"] == "check_anomalies")
-			check_anomalies = value
-
-		if(!isnull(log_action))
-			log_and_message_admins("has [log_action]", usr, loc)
-
-		updateTurrets()
-		return 1
+/obj/machinery/turretid/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if(.)
+		return
+	if(!isLocked(usr))
+		if(action == "toggle" && params["command"] && !isnull(params["value"]))
+			var/list/toggle = list("disabled", "enabled")
+			var/command = params["command"]
+			var/value = text2num(params["value"])
+			var/log_action = null
+			if(command == "enable")
+				enabled = value
+				log_action = "[toggle[enabled+1]] the turrets"
+			else if(command == "lethal")
+				lethal = value
+				log_action = "[toggle[lethal+1]] turret lethal mode"
+			else if(command == "check_synth")
+				check_synth = value
+			else if(command == "check_weapons")
+				check_weapons = value
+			else if(command == "check_records")
+				check_records = value
+			else if(command == "check_arrest")
+				check_arrest = value
+			else if(command == "check_access")
+				check_access = value
+			else if(command == "check_anomalies")
+				check_anomalies = value
+			if(!isnull(log_action))
+				log_and_message_admins("has [log_action]", usr, loc)
+			updateTurrets()
+			. = TRUE
 
 /obj/machinery/turretid/proc/updateTurrets()
 	var/datum/turret_checks/TC = new

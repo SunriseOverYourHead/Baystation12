@@ -16,21 +16,30 @@
 	cycle_to_external_air = TRUE // Some kind of legacy var needed for proper init
 	scrubber_assist = TRUE
 
-/obj/machinery/embedded_controller/radio/airlock/tin_can/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/nanoui/master_ui = null, datum/topic_state/state = GLOB.default_state)
-	var/list/data = list()
+/obj/machinery/embedded_controller/radio/airlock/tin_can/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "TinCan", name, ui)
+
+/obj/machinery/embedded_controller/radio/airlock/tin_can/ui_data(mob/user)
 	var/datum/computer/file/embedded_program/airlock/tin_can/our_program = program
-	data = list(
+	return list(
 		"chamber_pressure" = round(program.memory["internal_sensor_pressure"]),
-		"door_safety" = our_program.door_safety,
-		"state" = our_program.state
+		"door_safety"      = our_program.door_safety,
+		"state"            = our_program.state,
 	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "tin_can.tmpl", name, 470, 290, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
+/obj/machinery/embedded_controller/radio/airlock/tin_can/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("command")
+			var/datum/computer/file/embedded_program/airlock/tin_can/our_program = program
+			our_program.receive_user_command(params["command"])
+			return TRUE
+	return FALSE
+
+/obj/machinery/embedded_controller/radio/airlock/tin_can/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 // We piggyback off this for the utility procs and data aquisition, mostly
 /datum/computer/file/embedded_program/airlock/tin_can

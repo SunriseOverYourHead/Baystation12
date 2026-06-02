@@ -41,79 +41,51 @@
 	return
 
 /obj/machinery/computer/cryopod/interface_interact(mob/user)
-	interact(user)
+	ui_interact(user)
 	return TRUE
 
-/obj/machinery/computer/cryopod/interact(mob/user)
-	user.set_machine(src)
+/obj/machinery/computer/cryopod/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "CryoControl", storage_name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
 
-	var/dat
+/obj/machinery/computer/cryopod/ui_data(mob/user)
+	var/list/items = list()
+	for (var/obj/item/I in frozen_items)
+		items += list(list("name" = I.name, "ref" = "\ref[I]"))
+	return list(
+		"storage_name" = storage_name,
+		"storage_type" = storage_type,
+		"allow_items" = allow_items,
+		"frozen_crew" = frozen_crew.Copy(),
+		"frozen_items" = items
+	)
 
-	dat += "<hr/><br/><b>[storage_name]</b><br/>"
-	dat += "<i>Welcome, [user.real_name].</i><br/><br/><hr/>"
-	dat += "<a href='byond://?src=\ref[src];log=1'>View storage log</a>.<br>"
-	if(allow_items)
-		dat += "<a href='byond://?src=\ref[src];view=1'>View objects</a>.<br>"
-		dat += "<a href='byond://?src=\ref[src];item=1'>Recover object</a>.<br>"
-		dat += "<a href='byond://?src=\ref[src];allitems=1'>Recover all objects</a>.<br>"
-
-	show_browser(user, dat, "window=cryopod_console")
-	onclose(user, "cryopod_console")
-
-/obj/machinery/computer/cryopod/OnTopic(user, href_list, state)
-	if(href_list["log"])
-		var/dat = "<b>Recently stored [storage_type]</b><br/><hr/><br/>"
-		for(var/person in frozen_crew)
-			dat += "[person]<br/>"
-		dat += "<hr/>"
-		show_browser(user, dat, "window=cryolog")
-		. = TOPIC_REFRESH
-
-	else if(href_list["view"])
-		if(!allow_items) return
-
-		var/dat = "<b>Recently stored objects</b><br/><hr/><br/>"
-		for(var/obj/item/I in frozen_items)
-			dat += "[I.name]<br/>"
-		dat += "<hr/>"
-
-		show_browser(user, dat, "window=cryoitems")
-		. = TOPIC_HANDLED
-
-	else if(href_list["item"])
-		if(!allow_items) return
-
-		if(length(frozen_items) == 0)
-			to_chat(user, SPAN_NOTICE("There is nothing to recover from storage."))
-			return TOPIC_HANDLED
-
-		var/obj/item/I = input(user, "Please choose which object to retrieve.","Object recovery",null) as null|anything in frozen_items
-		if(!I || !CanUseTopic(user, state))
-			return TOPIC_HANDLED
-
-		if(!(I in frozen_items))
-			to_chat(user, SPAN_NOTICE("\The [I] is no longer in storage."))
-			return TOPIC_HANDLED
-
-		visible_message(SPAN_NOTICE("The console beeps happily as it disgorges \the [I]."), range = 3)
-
-		I.dropInto(loc)
-		frozen_items -= I
-		. = TOPIC_REFRESH
-
-	else if(href_list["allitems"])
-		if(!allow_items) return TOPIC_HANDLED
-
-		if(length(frozen_items) == 0)
-			to_chat(user, SPAN_NOTICE("There is nothing to recover from storage."))
-			return TOPIC_HANDLED
-
-		visible_message(SPAN_NOTICE("The console beeps happily as it disgorges the desired objects."), range = 3)
-
-		for(var/obj/item/I in frozen_items)
+/obj/machinery/computer/cryopod/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	switch(action)
+		if("recover_item")
+			if(!allow_items)
+				return
+			var/obj/item/I = locate(params["ref"]) in frozen_items
+			if(!I)
+				return
+			visible_message(SPAN_NOTICE("The console beeps happily as it disgorges \the [I]."), range = 3)
 			I.dropInto(loc)
 			frozen_items -= I
-		. = TOPIC_REFRESH
+			. = TRUE
+		if("recover_all")
+			if(!allow_items)
+				return
+			if(!length(frozen_items))
+				return
+			visible_message(SPAN_NOTICE("The console beeps happily as it disgorges the desired objects."), range = 3)
+			for(var/obj/item/I in frozen_items)
+				I.dropInto(loc)
+				frozen_items -= I
+			. = TRUE
 
 /obj/item/stock_parts/circuitboard/cryopodcontrol
 	name = "circuit board (cryogenic oversight console)"

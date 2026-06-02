@@ -70,90 +70,74 @@
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/body_scanconsole/CanUseTopic(mob/user)
-	if(!connected)
-		return STATUS_CLOSE
-	return ..()
+/obj/machinery/body_scanconsole/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "BodyScanner", "Body Scanner", ui)
 
-/obj/machinery/body_scanconsole/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	if(connected && connected.occupant)
-		data["scanEnabled"] = TRUE
-		if(ishuman(connected.occupant))
-			data["isCompatible"] = TRUE
-		else
-			data["isCompatible"] = FALSE
-	else
-		data["scanEnabled"] = FALSE
+/obj/machinery/body_scanconsole/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
+/obj/machinery/body_scanconsole/ui_data(mob/user)
+	var/list/d = list()
+	d["scanEnabled"] = !!(connected && connected.occupant)
+	d["isCompatible"] = !!(connected && connected.occupant && ishuman(connected.occupant))
+	d["printEnabled"] = !!data["scan"]
+	d["eraseEnabled"] = !!data["scan"]
+	d["pushEnabled"] = !!data["scan"]
 	if(!data["scan"])
-		data["html_scan_header"] = "<center>No scan loaded.</center>"
-		data["html_scan_health"] = "&nbsp;"
-		data["html_scan_body"] = "&nbsp;"
+		d["html_scan_header"] = ""
+		d["html_scan_health"] = ""
+		d["html_scan_body"] = ""
 	else
-		data["html_scan_header"] = display_medical_data_header(data["scan"], user.get_skill_value(SKILL_MEDICAL))
-		data["html_scan_health"] = display_medical_data_health(data["scan"], user.get_skill_value(SKILL_MEDICAL))
-		data["html_scan_body"] = display_medical_data_body(data["scan"], user.get_skill_value(SKILL_MEDICAL))
+		d["html_scan_header"] = display_medical_data_header(data["scan"], user.get_skill_value(SKILL_MEDICAL))
+		d["html_scan_health"] = display_medical_data_health(data["scan"], user.get_skill_value(SKILL_MEDICAL))
+		d["html_scan_body"] = display_medical_data_body(data["scan"], user.get_skill_value(SKILL_MEDICAL))
+	return d
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "body_scanner.tmpl", "Body Scanner", 600, 800)
-		ui.set_initial_data(data)
-		ui.open()
-
-/obj/machinery/body_scanconsole/OnTopic(mob/user, href_list)
-	if(href_list["scan"])
-		if (!connected.occupant)
-			to_chat(user, SPAN_WARNING("[icon2html(src, user)]The body scanner is empty."))
-			return TOPIC_REFRESH
-		if (!istype(connected.occupant))
-			to_chat(user, SPAN_WARNING("[icon2html(src, user)]The body scanner cannot scan that lifeform."))
-			return TOPIC_REFRESH
-		data["printEnabled"] = TRUE
-		data["eraseEnabled"] = TRUE
-		data["pushEnabled"] = TRUE
-		data["scan"] = connected.occupant.get_raw_medical_data(TRUE, connected.scan_for_present_mutations)
-		data["html_scan_header"] = display_medical_data_header(data["scan"], user.get_skill_value(SKILL_MEDICAL))
-		data["html_scan_health"] = display_medical_data_health(data["scan"], user.get_skill_value(SKILL_MEDICAL))
-		data["html_scan_body"] = display_medical_data_body(data["scan"], user.get_skill_value(SKILL_MEDICAL))
-
-		stored_scan_subject = connected.occupant
-		user.visible_message(
-			SPAN_NOTICE("\The [user] performs a scan of \the [connected.occupant] using \the [initial(connected.name)]."),
-			SPAN_NOTICE("You run a full-body diagnostic of \the [connected.occupant] using \the [initial(connected.name)]."),
-			SPAN_ITALIC("You hear a series of beeps, followed by a deep humming sound.")
-		)
-		playsound(connected.loc, 'sound/machines/medbayscanner.ogg', 50)
-		return TOPIC_REFRESH
-
-	if (href_list["print"])
-		if (!data["scan"])
-			to_chat(user, SPAN_WARNING("[icon2html(src, user)]Error: No scan stored."))
-			return TOPIC_REFRESH
-		var/list/scan = data["scan"]
-		new /obj/item/paper/bodyscan(loc, "Printout error.", "Body scan report - [stored_scan_subject]", scan.Copy())
-		return TOPIC_REFRESH
-
-	if(href_list["push"])
-		if(!length(connected_displays) && !FindDisplays())
-			to_chat(user, SPAN_WARNING("[icon2html(src, user)]Error: No configured displays detected."))
-			return TOPIC_REFRESH
-		for(var/obj/machinery/body_scan_display/D in connected_displays)
-			D.add_new_scan(data["scan"])
-		user.visible_message(
-			SPAN_NOTICE("\The [user] keys a command into \the [src]."),
-			SPAN_NOTICE("The console beeps, confirming it has successfully sent the scan to the connected displays."),
-			SPAN_ITALIC("You hear someone typing on a terminal, then a beep.")
-		)
-		return TOPIC_REFRESH
-
-	if(href_list["erase"])
-		data["scan"] = null
-		data["html_scan"] = null
-		stored_scan_subject = null
-		data["eraseEnabled"] = FALSE
-		data["printEnabled"] = FALSE
-		data["pushEnabled"] = FALSE
-		return TOPIC_REFRESH
+/obj/machinery/body_scanconsole/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	switch(action)
+		if("scan")
+			if(!connected || !connected.occupant)
+				to_chat(usr, SPAN_WARNING("[icon2html(src, usr)]The body scanner is empty."))
+				return TRUE
+			if(!ishuman(connected.occupant))
+				to_chat(usr, SPAN_WARNING("[icon2html(src, usr)]The body scanner cannot scan that lifeform."))
+				return TRUE
+			data["scan"] = connected.occupant.get_raw_medical_data(TRUE, connected.scan_for_present_mutations)
+			stored_scan_subject = connected.occupant
+			usr.visible_message(
+				SPAN_NOTICE("\The [usr] performs a scan of \the [connected.occupant] using \the [initial(connected.name)]."),
+				SPAN_NOTICE("You run a full-body diagnostic of \the [connected.occupant] using \the [initial(connected.name)]."),
+				SPAN_ITALIC("You hear a series of beeps, followed by a deep humming sound.")
+			)
+			playsound(connected.loc, 'sound/machines/medbayscanner.ogg', 50)
+			return TRUE
+		if("print")
+			if(!data["scan"])
+				to_chat(usr, SPAN_WARNING("[icon2html(src, usr)]Error: No scan stored."))
+				return TRUE
+			var/list/scan = data["scan"]
+			new /obj/item/paper/bodyscan(loc, "Printout error.", "Body scan report - [stored_scan_subject]", scan.Copy())
+			return TRUE
+		if("push")
+			if(!length(connected_displays) && !FindDisplays())
+				to_chat(usr, SPAN_WARNING("[icon2html(src, usr)]Error: No configured displays detected."))
+				return TRUE
+			for(var/obj/machinery/body_scan_display/D in connected_displays)
+				D.add_new_scan(data["scan"])
+			usr.visible_message(
+				SPAN_NOTICE("\The [usr] keys a command into \the [src]."),
+				SPAN_NOTICE("The console beeps, confirming it has successfully sent the scan to the connected displays."),
+				SPAN_ITALIC("You hear someone typing on a terminal, then a beep.")
+			)
+			return TRUE
+		if("erase")
+			data["scan"] = null
+			stored_scan_subject = null
+			return TRUE
+	return FALSE
 
 /obj/machinery/body_scanconsole/state_transition(singleton/machine_construction/default/new_state)
 	. = ..()

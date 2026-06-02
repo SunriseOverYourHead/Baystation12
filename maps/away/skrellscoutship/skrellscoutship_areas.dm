@@ -33,18 +33,21 @@
 	name = "\improper Maintenance"
 	icon_state = "green"
 
-/area/ship/skrellscoutship/maintenance/power
-	name = "\improper Engineering"
-	icon_state = "engine_smes"
-	ambience = list('sound/ambience/ambigen3.ogg','sound/ambience/ambigen4.ogg','sound/ambience/ambigen5.ogg','sound/ambience/ambigen6.ogg','sound/ambience/ambigen7.ogg','sound/ambience/ambigen8.ogg','sound/ambience/ambigen9.ogg','sound/ambience/ambigen10.ogg','sound/ambience/ambigen11.ogg','sound/ambience/ambieng1.ogg')
-
 /area/ship/skrellscoutship/command/bridge
-	name = "\improper SSV Helm"
+	name = "\improper SSV Command Center"
+	icon_state = "bridge"
+
+/area/ship/skrellscoutship/command/vuxix
+	name = "\improper Vuxix Office"
 	icon_state = "bridge"
 
 /area/ship/skrellscoutship/command/armory
 	name = "\improper Armory"
 	icon_state = "shuttlered"
+
+/area/ship/skrellscoutship/command/brig
+	name = "\improper Security Wing"
+	icon_state = "red"
 
 /area/ship/skrellscoutshuttle
 	name = "\improper SSV Shuttle"
@@ -52,8 +55,6 @@
 	base_turf = /turf/simulated/floor/plating
 	area_flags = AREA_FLAG_RAD_SHIELDED | AREA_FLAG_ION_SHIELDED
 	req_access = list(access_skrellscoutship)
-
-//New Ship Areas
 
 /area/ship/skrellscoutship/wings/port
 	name = "\improper Port Corridor"
@@ -87,7 +88,7 @@
 	name = "\improper Central Corridor"
 	icon_state = "blue"
 
-/area/ship/skrellscoutship/crew/quarters
+/area/ship/skrellscoutship/crew/dormitories
 	name = "\improper Quarters"
 	icon_state = "crew_quarters"
 
@@ -95,9 +96,9 @@
 	name = "\improper Medical Bay"
 	icon_state = "medbay"
 
-/area/ship/skrellscoutship/crew/labs
-	name = "\improper Research Labs"
-	icon_state = "labwing"
+/area/ship/skrellscoutship/crew/kitchen
+	name = "\improper Galley"
+	icon_state = "kitchen"
 
 /area/ship/skrellscoutship/maintenance/power
 	name = "\improper Engineering"
@@ -107,10 +108,6 @@
 /area/ship/skrellscoutship/hangar
 	name = "\improper Shuttle Dock"
 	icon_state = "auxstorage"
-
-/area/ship/skrellscoutship/command/armory
-	name = "\improper Armory"
-	icon_state = "shuttlered"
 
 /area/ship/skrellscoutship/dock
 	name = "\improper Docking Bay 1"

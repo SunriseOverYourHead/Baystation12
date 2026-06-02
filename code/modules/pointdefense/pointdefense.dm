@@ -28,35 +28,33 @@
 			if(length(pointdefense_controllers) > 1)
 				lan.remove_device(src)
 
-/obj/machinery/pointdefense_control/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	if(ui_template)
-		var/list/data = build_ui_data()
-		ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-		if (!ui)
-			ui = new(user, src, ui_key, ui_template, name, 400, 600)
-			ui.set_initial_data(data)
-			ui.open()
-			ui.set_auto_update(1)
+/obj/machinery/pointdefense_control/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "PointDefenseControl", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/machinery/pointdefense_control/ui_data(mob/user)
+	return build_ui_data()
 
 /obj/machinery/pointdefense_control/interface_interact(mob/user)
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/pointdefense_control/OnTopic(mob/user, href_list, datum/topic_state/state)
-
-	if(href_list["toggle_active"])
-		var/obj/machinery/pointdefense/PD = locate(href_list["toggle_active"])
-		if(!istype(PD))
-			return TOPIC_NOACTION
-
+/obj/machinery/pointdefense_control/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	if (action == "toggle_active")
+		var/obj/machinery/pointdefense/PD = locate(params["ref"])
+		if (!istype(PD))
+			return
 		var/datum/extension/local_network_member/pointdefense = get_extension(src, /datum/extension/local_network_member)
 		var/datum/local_network/lan = pointdefense.get_local_network()
-		if(!lan || !lan.is_connected(PD))
-			return TOPIC_NOACTION
-
-		if(!PD.Activate()) //Startup() whilst the device is active will return null.
+		if (!lan || !lan.is_connected(PD))
+			return
+		if (!PD.Activate())
 			PD.Deactivate()
-		return TOPIC_REFRESH
+		. = TRUE
 
 /obj/machinery/pointdefense_control/proc/build_ui_data()
 	var/datum/extension/local_network_member/pointdefense = get_extension(src, /datum/extension/local_network_member)

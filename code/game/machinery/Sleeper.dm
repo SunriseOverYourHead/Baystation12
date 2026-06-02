@@ -89,16 +89,18 @@
 	else
 		icon_state = "sleeper_working"
 
-/obj/machinery/sleeper/DefaultTopicState()
-	return GLOB.outside_state
-
 /obj/machinery/sleeper/interface_interact(mob/user)
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/sleeper/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/topic_state/state = GLOB.outside_state)
-	var/data = list()
+/obj/machinery/sleeper/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "Sleeper", "Sleeper UI", ui)
 
+/obj/machinery/sleeper/ui_state(mob/user)
+	return GLOB.tgui_default_state
+
+/obj/machinery/sleeper/ui_data(mob/user)
+	var/list/data = list()
 	data["power"] = inoperable() ? 0 : 1
 
 	var/list/reagents = list()
@@ -107,65 +109,63 @@
 		reagent["name"] = T
 		if(occupant && occupant.reagents)
 			reagent["amount"] = occupant.reagents.get_reagent_amount(available_chemicals[T])
+		else
+			reagent["amount"] = 0
 		reagents += list(reagent)
-	data["reagents"] = reagents.Copy()
+	data["reagents"] = reagents
 
 	if(istype(occupant))
 		var/scan = user.skill_check(SKILL_MEDICAL, SKILL_TRAINED) ? medical_scan_results(occupant) : SPAN_CLASS("white", "<b>Contains: \the [occupant]</b>")
-		scan = replacetext(scan,"'scan_notice'","'white'")
-		scan = replacetext(scan,"'scan_warning'","'average'")
-		scan = replacetext(scan,"'scan_danger'","'bad'")
-		data["occupant"] =scan
+		scan = replacetext(scan, "'scan_notice'", "'white'")
+		scan = replacetext(scan, "'scan_warning'", "'average'")
+		scan = replacetext(scan, "'scan_danger'", "'bad'")
+		data["occupant"] = scan
 	else
 		data["occupant"] = 0
-	if(beaker)
-		data["beaker"] = beaker.reagents.get_free_space()
-	else
-		data["beaker"] = -1
+	data["beaker"] = beaker ? beaker.reagents.get_free_space() : -1
 	data["filtering"] = filtering
 	data["pump"] = pump
 	data["stasis"] = stasis
 	data["skill_check"] = user.skill_check(SKILL_MEDICAL, SKILL_BASIC)
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if(!ui)
-		ui = new(user, src, ui_key, "sleeper.tmpl", "Sleeper UI", 600, 600, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/sleeper/CanUseTopic(user)
-	if(user == occupant)
-		to_chat(usr, SPAN_WARNING("You can't reach the controls from the inside."))
-		return STATUS_CLOSE
+/obj/machinery/sleeper/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
-
-/obj/machinery/sleeper/OnTopic(user, href_list)
-	if(href_list["eject"])
-		go_out()
-		return TOPIC_REFRESH
-	if(href_list["beaker"])
-		remove_beaker()
-		return TOPIC_REFRESH
-	if(href_list["filter"])
-		if(filtering != text2num(href_list["filter"]))
-			toggle_filter()
-			return TOPIC_REFRESH
-	if(href_list["pump"])
-		if(filtering != text2num(href_list["pump"]))
-			toggle_pump()
-			return TOPIC_REFRESH
-	if(href_list["chemical"] && href_list["amount"])
-		if(occupant && !occupant.is_dead())
-			if(href_list["chemical"] in available_chemicals) // Your hacks are bad and you should feel bad
-				inject_chemical(user, href_list["chemical"], text2num(href_list["amount"]))
-				return TOPIC_REFRESH
-	if(href_list["stasis"])
-		var/nstasis = text2num(href_list["stasis"])
-		if(stasis != nstasis && (nstasis in stasis_settings))
-			stasis = text2num(href_list["stasis"])
-			change_power_consumption(initial(active_power_usage) + stasis_power * (stasis-1), POWER_USE_ACTIVE)
-			return TOPIC_REFRESH
+	if(.)
+		return
+	if(usr == occupant)
+		to_chat(usr, SPAN_WARNING("You can't reach the controls from the inside."))
+		return FALSE
+	switch(action)
+		if("eject")
+			go_out()
+			return TRUE
+		if("beaker")
+			remove_beaker()
+			return TRUE
+		if("filter")
+			var/new_filter = text2num(params["filter"])
+			if(filtering != new_filter)
+				toggle_filter()
+				return TRUE
+		if("pump")
+			var/new_pump = text2num(params["pump"])
+			if(pump != new_pump)
+				toggle_pump()
+				return TRUE
+		if("chemical")
+			var/chemical = params["chemical"]
+			var/amount = text2num(params["amount"])
+			if(occupant && !occupant.is_dead() && (chemical in available_chemicals))
+				inject_chemical(usr, chemical, amount)
+				return TRUE
+		if("stasis")
+			var/nstasis = text2num(params["stasis"])
+			if(stasis != nstasis && (nstasis in stasis_settings))
+				stasis = nstasis
+				change_power_consumption(initial(active_power_usage) + stasis_power * (stasis - 1), POWER_USE_ACTIVE)
+				return TRUE
+	return FALSE
 
 /obj/machinery/sleeper/state_transition(singleton/machine_construction/default/new_state)
 	. = ..()

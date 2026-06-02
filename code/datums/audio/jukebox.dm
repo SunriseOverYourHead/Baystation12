@@ -15,6 +15,7 @@
 	var/ui_width
 	var/ui_height
 	var/playing
+	var/looping = TRUE
 
 
 /datum/jukebox/New(atom/_owner, _template, _ui_title, _ui_width, _ui_height)
@@ -80,6 +81,7 @@
 	playing = FALSE
 	QDEL_NULL(token)
 	owner.queue_icon_update()
+	SStgui.update_uis(src)
 
 
 /datum/jukebox/proc/Play()
@@ -92,6 +94,7 @@
 	token = GLOB.sound_player.PlayLoopingSound(owner, sound_id, track.source,
 		volume, range, falloff, frequency = frequency, prefer_mute = TRUE)
 	owner.queue_icon_update()
+	SStgui.update_uis(src)
 
 
 /datum/jukebox/proc/Volume(_volume)
@@ -108,44 +111,63 @@
 		token.SetVolume(volume)
 
 
-/datum/jukebox/nano_host()
+/datum/jukebox/ui_host()
 	return owner
 
 
-/datum/jukebox/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui, force_open = TRUE, datum/topic_state/state = GLOB.default_state)
-	var/list/data_tracks = list()
-	for (var/i = 1 to length(tracks))
-		var/datum/jukebox_track/track = tracks[i]
-		data_tracks += list(list("track" = track.title, "index" = i))
-	var/datum/jukebox_track/track = tracks[index]
-	var/list/data = list(
-		"track" = track.title,
-		"playing" = playing,
+/datum/jukebox/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "Jukebox", ui_title || "Jukebox", ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+
+/datum/jukebox/ui_data(mob/user)
+	var/list/songs = list()
+	for (var/datum/jukebox_track/track in tracks)
+		songs += list(list("name" = track.title))
+	var/datum/jukebox_track/current = tracks[index]
+	return list(
+		"active" = playing,
+		"looping" = looping,
 		"volume" = volume,
-		"tracks" = data_tracks
+		"track_selected" = current?.title,
+		"songs" = songs
 	)
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new (user, src, ui_key, template, ui_title, ui_width, ui_height, state = state)
-		ui.set_initial_data(data)
-		ui.open()
 
 
-/datum/jukebox/Topic(href, href_list)
-	switch ("[href_list["act"]]")
-		if ("next")
-			Next()
-		if ("last")
-			Last()
-		if ("stop")
-			Stop()
-		if ("play")
-			Play()
-		if ("volume")
-			Volume("[href_list["dat"]]")
-		if ("track")
-			Track("[href_list["dat"]]")
-	return TOPIC_REFRESH
+/datum/jukebox/ui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	. = ..()
+	if (.)
+		return
+	switch(action)
+		if("toggle")
+			if(playing)
+				Stop()
+			else
+				Play()
+			. = TRUE
+		if("loop")
+			looping = params["looping"] ? TRUE : FALSE
+			. = TRUE
+		if("select_track")
+			var/track_name = params["track"]
+			for(var/i = 1 to length(tracks))
+				var/datum/jukebox_track/T = tracks[i]
+				if(T.title == track_name)
+					Track(i)
+					break
+			. = TRUE
+		if("set_volume")
+			var/vol = params["volume"]
+			if(vol == "min")
+				Volume(0)
+			else if(vol == "max")
+				Volume(volume_max)
+			else if(vol == "reset")
+				Volume(20)
+			else
+				Volume("[vol]")
+			. = TRUE
 
 
 

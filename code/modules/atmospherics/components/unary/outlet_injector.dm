@@ -61,55 +61,50 @@
 			else
 				add_underlay(T,, dir)
 
-/obj/machinery/atmospherics/unary/outlet_injector/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
+/obj/machinery/atmospherics/unary/outlet_injector/ui_interact(mob/user, datum/tgui/ui)
 	if(inoperable())
 		return
+	ui = tgui_interact(user, src, "Injector", name, ui)
 
-	var/data = list()
-
-	data = list(
+/obj/machinery/atmospherics/unary/outlet_injector/ui_data(mob/user)
+	return list(
 		"on" = use_power,
 		"id" = id,
 		"frequency" = frequency,
 		"flow_rate" = volume_rate,
-		"last_flow_rate" = round(last_flow_rate*10),
+		"last_flow_rate" = round(last_flow_rate * 10),
 	)
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "injector.tmpl", name, 480, 240)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/machinery/atmospherics/unary/outlet_injector/Topic(href,href_list)
-	if((. = ..())) return
-
-	if(href_list["power"])
-		update_use_power(!use_power)
-		. = 1
-
-	if(href_list["settag"])
-		var/t = sanitizeSafe(input(usr, "Enter the ID tag for [src.name]", src.name, id), MAX_NAME_LEN)
-		id = t
-		. = 1
-
-	if(href_list["setfreq"])
-		var/freq = input(usr, "Enter the Frequency for [src.name]. Decimal will automatically be inserted", src.name, frequency) as num|null
-		set_frequency(freq)
-		. = 1
-
-	switch(href_list["set_flow_rate"])
-		if ("max")
-			volume_rate = air_contents.volume
-			. = 1
-		if ("set")
-			var/new_rate = input(usr,"Enter maximum flow rate (0-[air_contents.volume]L/s)", src.name, src.volume_rate) as num
-			src.volume_rate = clamp(new_rate, 0, air_contents.volume)
-			. = 1
-
+/obj/machinery/atmospherics/unary/outlet_injector/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
 	if(.)
-		src.update_icon()
+		return
+	switch(action)
+		if("power")
+			update_use_power(!use_power)
+			update_icon()
+			return TRUE
+		if("settag")
+			var/t = sanitizeSafe(input(usr, "Enter the ID tag for [src.name]", src.name, id), MAX_NAME_LEN)
+			id = t
+			return TRUE
+		if("setfreq")
+			var/freq = input(usr, "Enter the Frequency for [src.name]. Decimal will automatically be inserted", src.name, frequency) as num|null
+			set_frequency(freq)
+			return TRUE
+		if("set_flow_rate")
+			switch(params["value"])
+				if("max")
+					volume_rate = air_contents.volume
+					return TRUE
+				if("set")
+					var/new_rate = input(usr, "Enter maximum flow rate (0-[air_contents.volume]L/s)", src.name, src.volume_rate) as num
+					src.volume_rate = clamp(new_rate, 0, air_contents.volume)
+					return TRUE
+	return FALSE
+
+/obj/machinery/atmospherics/unary/outlet_injector/ui_state(mob/user)
+	return GLOB.tgui_default_state
 
 /obj/machinery/atmospherics/unary/outlet_injector/interface_interact(mob/user)
 	ui_interact(user)

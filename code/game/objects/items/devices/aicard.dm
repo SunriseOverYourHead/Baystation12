@@ -14,10 +14,17 @@
 
 	ui_interact(user)
 
-/obj/item/aicard/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/topic_state/state = GLOB.inventory_state)
-	var/list/data = list()
-	data["has_ai"] = carded_ai != null
+/obj/item/aicard/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_interact(user, src, "AiCard", name, ui)
+	ui.set_autoupdate(TRUE)
+	ui.open()
+
+/obj/item/aicard/ui_data(mob/user)
+	var/list/data = list("has_ai" = (carded_ai != null))
 	if(carded_ai)
+		var/list/laws = list()
+		for(var/datum/ai_law/AL in carded_ai.laws.all_laws())
+			laws[LIST_PRE_INC(laws)] = list("index" = AL.get_index(), "law" = sanitize(AL.law))
 		data["name"] = carded_ai.name
 		data["hardware_integrity"] = carded_ai.hardware_integrity()
 		data["backup_capacitor"] = carded_ai.backup_capacitor()
@@ -25,49 +32,43 @@
 		data["wireless"] = !carded_ai.control_disabled
 		data["operational"] = !carded_ai.is_dead()
 		data["flushing"] = flush
-
-		var/list/laws = list()
-		for(var/datum/ai_law/AL in carded_ai.laws.all_laws())
-			laws[LIST_PRE_INC(laws)] = list("index" = AL.get_index(), "law" = sanitize(AL.law))
 		data["laws"] = laws
 		data["has_laws"] = length(laws)
+	return data
 
-	ui = SSnano.try_update_ui(user, src, ui_key, ui, data, force_open)
-	if (!ui)
-		ui = new(user, src, ui_key, "aicard.tmpl", "[name]", 600, 400, state = state)
-		ui.set_initial_data(data)
-		ui.open()
-		ui.set_auto_update(1)
-
-/obj/item/aicard/Topic(href, href_list, state)
-	if(..())
-		return 1
+/obj/item/aicard/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
 
 	if(!carded_ai)
-		return 1
+		return TRUE
 
-	var/user = usr
-	if (href_list["wipe"])
-		var/confirm = alert("Are you sure you want to wipe this card's memory? This cannot be undone once started.", "Confirm Wipe", "Yes", "No")
-		if(confirm == "Yes" && (CanUseTopic(user, state) == STATUS_INTERACTIVE))
-			admin_attack_log(user, carded_ai, "Wiped using \the [src.name]", "Was wiped with \the [src.name]", "used \the [src.name] to wipe")
-			flush = 1
-			to_chat(carded_ai, "Your core files are being wiped!")
-			while (carded_ai && !carded_ai.is_real_dead())
-				carded_ai.adjustOxyLoss(2)
-				carded_ai.updatehealth()
-				sleep(10)
-			flush = 0
-	if (href_list["radio"])
-		carded_ai.ai_radio.disabledAi = text2num(href_list["radio"])
-		to_chat(carded_ai, SPAN_WARNING("Your Subspace Transceiver has been [carded_ai.ai_radio.disabledAi ? "disabled" : "enabled"]!"))
-		to_chat(user, SPAN_NOTICE("You [carded_ai.ai_radio.disabledAi ? "disable" : "enable"] the AI's Subspace Transceiver."))
-	if (href_list["wireless"])
-		carded_ai.control_disabled = text2num(href_list["wireless"])
-		to_chat(carded_ai, SPAN_WARNING("Your wireless interface has been [carded_ai.control_disabled ? "disabled" : "enabled"]!"))
-		to_chat(user, SPAN_NOTICE("You [carded_ai.control_disabled ? "disable" : "enable"] the AI's wireless interface."))
-		update_icon()
-	return 1
+	switch(action)
+		if("wipe")
+			var/confirm = alert("Are you sure you want to wipe this card's memory? This cannot be undone once started.", "Confirm Wipe", "Yes", "No")
+			if(confirm == "Yes")
+				admin_attack_log(usr, carded_ai, "Wiped using \the [src.name]", "Was wiped with \the [src.name]", "used \the [src.name] to wipe")
+				flush = 1
+				to_chat(carded_ai, "Your core files are being wiped!")
+				while(carded_ai && !carded_ai.is_real_dead())
+					carded_ai.adjustOxyLoss(2)
+					carded_ai.updatehealth()
+					sleep(10)
+				flush = 0
+
+		if("radio")
+			carded_ai.ai_radio.disabledAi = text2num(params["radio"])
+			to_chat(carded_ai, SPAN_WARNING("Your Subspace Transceiver has been [carded_ai.ai_radio.disabledAi ? "disabled" : "enabled"]!"))
+			to_chat(usr, SPAN_NOTICE("You [carded_ai.ai_radio.disabledAi ? "disable" : "enable"] the AI's Subspace Transceiver."))
+
+		if("wireless")
+			carded_ai.control_disabled = text2num(params["wireless"])
+			to_chat(carded_ai, SPAN_WARNING("Your wireless interface has been [carded_ai.control_disabled ? "disabled" : "enabled"]!"))
+			to_chat(usr, SPAN_NOTICE("You [carded_ai.control_disabled ? "disable" : "enable"] the AI's wireless interface."))
+			update_icon()
+
+	return TRUE
 
 /obj/item/aicard/on_update_icon()
 	ClearOverlays()

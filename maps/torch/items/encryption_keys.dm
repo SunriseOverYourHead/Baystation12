@@ -78,7 +78,13 @@
 	name = "infantry encryption key"
 	desc = "An Encryption key."
 	icon_state = "cap_cypherkey"
-	channels = list("Infantry" = 1, "Exploration" = 1)
+	channels = list("Infantry" = 1,)
+
+/obj/item/device/encryptionkey/infantry/lead // Meant for loudmode, once I port it
+	name = "leadership infantry encryption key"
+	desc = "An Encryption key."
+	icon_state = "cap_cypherkey"
+	channels = list("Infantry" = 1)
 
 /obj/item/device/encryptionkey/infantry/po
 	name = "command infantry encryption key"

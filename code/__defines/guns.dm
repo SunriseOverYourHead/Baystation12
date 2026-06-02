@@ -38,6 +38,7 @@
 #define PROJECTILE_GYROJET			"20mmG"
 #define PROJECTILE_CAPS			"caps"
 #define PROJECTILE_DART			"darts"
+#define CALIBER_SKRELL_SHOTGUN	"skrell_qx2"	// QX-2 miniaturized railgun. Skrell SDTF.
 
 #define HOLD_CASINGS	0 //do not do anything after firing. Manual action, like pump shotguns, or guns that want to define custom behaviour
 #define CLEAR_CASINGS	1 //clear chambered so that the next round will be automatically loaded and fired, but don't drop anything on the floor

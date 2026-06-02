@@ -1,0 +1,76 @@
+#define ASCENT_COLONY_SHIP_NAME "\improper Ascent seedship"
+
+#include "ascent_areas.dm"
+#include "ascent_jobs.dm"
+#include "ascent_shuttles.dm"
+
+/datum/map_template/ruin/away_site/ascent_seedship
+	name = ASCENT_COLONY_SHIP_NAME
+	id = "awaysite_ascent_seedship"
+	description = "A small Ascent colony ship."
+	suffixes = list("ascent/ascent-1.dmm")
+	spawn_cost = 0.5
+	player_cost = 4
+	shuttles_to_initialise = list(
+		/datum/shuttle/autodock/overmap/ascent_seedship,
+		/datum/shuttle/autodock/overmap/ascent
+	)
+	spawn_weight = 0.67
+
+/obj/overmap/visitable/ship/landable/ascent_seedship
+	name = ASCENT_COLONY_SHIP_NAME
+	shuttle = "Ascent Seedship"
+	desc = "Wake signature indicates a small to medium sized vessel of unknown design."
+	multiz = 1
+	icon_state = "ship"
+	color = "#491749"
+	vessel_mass = 2500
+	fore_dir = EAST
+	max_speed = 1/(1 SECOND)
+	hide_from_reports = TRUE
+	vessel_size = SHIP_SIZE_SMALL
+	initial_restricted_waypoints = list(
+		"Amphiesmenoptera" = list("nav_hangar_ascent_one")
+	)
+
+// find_z_levels() creates new empty open-space z-levels for the shuttle system, but the
+// ship's interior content lives on the DMM z-levels where this object was loaded.
+// Register those z-levels too so that get_owning_sector_recursive() can find this ship
+// from consoles in the interior (sync_linked relies on map_sectors[console.z] != null).
+/obj/overmap/visitable/ship/landable/ascent_seedship/register_z_levels()
+	..()
+	for(var/interior_z in GetConnectedZlevels(z))
+		if(!(interior_z in map_z))
+			map_sectors["[interior_z]"] = src
+
+/obj/overmap/visitable/sector/ascent_space
+	name = "Empty Sector"
+	desc = "Slight traces of a cloaking device are present. Unable to determine exact location."
+	icon_state = "event"
+	hide_from_reports = TRUE
+
+/obj/submap_landmark/joinable_submap/ascent_seedship
+	name = ASCENT_COLONY_SHIP_NAME
+	archetype = /singleton/submap_archetype/ascent_seedship
+	submap_datum_type = /datum/submap/ascent
+
+/obj/submap_landmark/joinable_submap/ascent_seedship/Initialize(mapload)
+	var/list/all_elements = list(
+		"Hydrogen",      "Helium",     "Lithium",     "Beryllium",    "Carbon",       "Nitrogen",      "Oxygen",
+		"Fluorine",      "Neon",       "Sodium",      "Magnesium",    "Silicon",      "Phosphorus",    "Sulfur",
+		"Chlorine",      "Argon",      "Potassium",   "Calcium",      "Scandium",     "Titanium",      "Chromium",
+		"Manganese",     "Iron",       "Cobalt",      "Nickel",       "Zinc",         "Gallium",       "Germanium",
+		"Arsenic",       "Selenium",   "Bromine",     "Krypton",      "Rubidium",     "Strontium",     "Zirconium",
+		"Molybdenum",    "Technetium", "Ruthenium",   "Rhodium",      "Palladium",    "Silver",        "Cadmium",
+		"Indium",        "Tin",        "Antimony",    "Tellurium",    "Iodine",       "Xenon",         "Caesium",
+		"Barium",        "Lanthanum",  "Cerium",      "Praseodymium", "Neodymium",    "Promethium",    "Samarium",
+		"Gadolinium",    "Dysprosium", "Holmium",     "Erbium",       "Ytterbium",    "Hafnium",       "Tantalum",
+		"Tungsten",      "Rhenium",    "Osmium",      "Iridium",      "Gold",         "Mercury",       "Lead",
+		"Bismuth",       "Polonium",   "Astatine",    "Radon",        "Francium",     "Radium",        "Actinium",
+		"Thorium",       "Uranium",    "Plutonium",   "Americium",    "Curium",       "Berkelium",     "Californium",
+		"Einsteinium",   "Fermium",    "Mendelevium", "Nobelium",     "Lawrencium",   "Rutherfordium", "Dubnium",
+		"Seaborgium",    "Bohrium",    "Hassium",     "Meitnerium",   "Darmstadtium", "Roentgenium",   "Copernicium",
+		"Nihonium",      "Flerovium",  "Moscovium",   "Livermorium",  "Tennessine",   "Oganesson"
+	)
+	name = "[pick(all_elements)]-[rand(10,99)]-[rand(10,99)]"
+	. = ..()
