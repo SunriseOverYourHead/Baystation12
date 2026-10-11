@@ -190,8 +190,10 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 //Used to dump the languages from the changeling datum into the actual mob.
 /mob/proc/changeling_update_languages(updated_languages)
 	languages = list()
-	for(var/language in updated_languages)
-		languages += language
+	for(var/datum/language/language in updated_languages)
+		// `languages` is assoc language -> proficiency; `+=` would append the key with a null level, leaving the
+		// changeling nominally knowing a language they understand none of. Absorbed knowledge is total, so C2.
+		languages[language] = LANGUAGE_LEVEL_C2
 
 	//This isn't strictly necessary but just to be safe...
 	add_language("Changeling")

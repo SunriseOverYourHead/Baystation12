@@ -1,99 +1,114 @@
-/datum/sprite_accessory/hair/una
-	name = "Demon Horns"
+// Split into independent Horns/Frills/Spines categories (was previously one combined "Horns" pool piggy-backing
+// on the hairstyle slot). Each gets its own base class carrying the shared icon file + species_allowed.
+/datum/sprite_accessory/mutant/horns/una
 	icon = 'icons/mob/human_races/species/unathi/hair.dmi'
-	icon_state = "demon_horn"
-	blend = ICON_MULTIPLY
+	mutant_blend = ICON_MULTIPLY
+	species_allowed = list(SPECIES_UNATHI)
+
+/datum/sprite_accessory/mutant/frills/una
+	icon = 'icons/mob/human_races/species/unathi/hair.dmi'
+	mutant_blend = ICON_MULTIPLY
+	species_allowed = list(SPECIES_UNATHI)
+
+/datum/sprite_accessory/mutant/spines/una
+	icon = 'icons/mob/human_races/species/unathi/hair.dmi'
+	mutant_blend = ICON_MULTIPLY
 	species_allowed = list(SPECIES_UNATHI)
 
 
-/datum/sprite_accessory/hair/una/spines_long
-	name = "Long Unathi Spines"
-	icon_state = "soghun_longspines"
+/datum/sprite_accessory/mutant/horns/una/demon
+	name = "Demon Horns"
+	icon_state = "demon_horn"
 
 
-/datum/sprite_accessory/hair/una/spines_short
-	name = "Short Unathi Spines"
-	icon_state = "soghun_shortspines"
-
-
-/datum/sprite_accessory/hair/una/frills_long
-	name = "Long Unathi Frills"
-	icon_state = "soghun_longfrills"
-
-
-/datum/sprite_accessory/hair/una/frills_medium
-	name = "Unathi Frills"
-	icon_state = "frills"
-
-
-/datum/sprite_accessory/hair/una/frills_water
-	name = "Aquatic Frills"
-	icon_state = "aquatic_frills"
-
-
-/datum/sprite_accessory/hair/una/frills_short
-	name = "Short Unathi Frills"
-	icon_state = "soghun_shortfrills"
-
-
-/datum/sprite_accessory/hair/una/horns
+/datum/sprite_accessory/mutant/horns/una/horns
 	name = "Unathi Horns"
 	icon_state = "soghun_horns"
 
 
-/datum/sprite_accessory/hair/una/swept_horn
+/datum/sprite_accessory/mutant/horns/una/swept_horn
 	name = "Swept Horns"
 	icon_state = "swept_horn"
 
 
-/datum/sprite_accessory/hair/una/ram_horn
+/datum/sprite_accessory/mutant/horns/una/ram_horn
 	name = "Ram Horns"
 	icon_state = "ram_horn"
 
 
-/datum/sprite_accessory/hair/una/fin_hawk
+/datum/sprite_accessory/mutant/horns/una/fin_hawk
 	name = "Fin Hawk"
 	icon_state = "fin_hawk"
 
 
-/datum/sprite_accessory/hair/una/exotic
-	name = "Exotic Frills"
-	icon_state = "big_frills"
-
-
-/datum/sprite_accessory/hair/una/curvedown
+/datum/sprite_accessory/mutant/horns/una/curvedown
 	name = "Downward Curved Horns"
 	icon_state = "curved_down"
 
 
-/datum/sprite_accessory/hair/una/curveup
+/datum/sprite_accessory/mutant/horns/una/curveup
 	name = "Upward Curved Horns"
 	icon_state = "curved_up"
 
 
-/datum/sprite_accessory/hair/una/sam
+/datum/sprite_accessory/mutant/horns/una/sam
 	name = "Inwardly Curved Horns"
 	icon_state = "samurai"
 
 
-/datum/sprite_accessory/hair/una/imp
+/datum/sprite_accessory/mutant/horns/una/imp
 	name = "Regal Horns"
 	icon_state = "imperial"
 
 
-/datum/sprite_accessory/hair/una/spikes_norm
+/datum/sprite_accessory/mutant/horns/una/quad
+	name = "Four Horns"
+	icon_state = "double_horns"
+
+
+/datum/sprite_accessory/mutant/frills/una/frills_long
+	name = "Long Unathi Frills"
+	icon_state = "soghun_longfrills"
+
+
+/datum/sprite_accessory/mutant/frills/una/frills_medium
+	name = "Unathi Frills"
+	icon_state = "frills"
+
+
+/datum/sprite_accessory/mutant/frills/una/frills_water
+	name = "Aquatic Frills"
+	icon_state = "aquatic_frills"
+
+
+/datum/sprite_accessory/mutant/frills/una/frills_short
+	name = "Short Unathi Frills"
+	icon_state = "soghun_shortfrills"
+
+
+/datum/sprite_accessory/mutant/frills/una/exotic
+	name = "Exotic Frills"
+	icon_state = "big_frills"
+
+
+/datum/sprite_accessory/mutant/spines/una/spines_long
+	name = "Long Unathi Spines"
+	icon_state = "soghun_longspines"
+
+
+/datum/sprite_accessory/mutant/spines/una/spines_short
+	name = "Short Unathi Spines"
+	icon_state = "soghun_shortspines"
+
+
+/datum/sprite_accessory/mutant/spines/una/spikes_norm
 	name = "Head Spikes"
 	icon_state = "head_spikes"
 
 
-/datum/sprite_accessory/hair/una/spikes_thicc
+/datum/sprite_accessory/mutant/spines/una/spikes_thicc
 	name = "Thick Head Spikes"
 	icon_state = "overgrown_head_spikes"
-
-
-/datum/sprite_accessory/hair/una/quad
-	name = "Four Horns"
-	icon_state = "double_horns"
 
 
 /datum/sprite_accessory/skin/unathi

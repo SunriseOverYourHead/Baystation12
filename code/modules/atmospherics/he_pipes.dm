@@ -49,9 +49,6 @@
 		if(target.initialize_directions_he & get_dir(target,src))
 			node2 = target
 			break
-	if(!node1 && !node2)
-		qdel(src)
-		return
 
 	update_icon()
 
@@ -123,19 +120,15 @@
 	..()
 	// Only check back side for normal pipes
 	for(var/obj/machinery/atmospherics/target in get_step(src,GLOB.flip_dir[src.dir]))
-		if(target.initialize_directions & get_dir(target,src))
+		if((target.initialize_directions & get_dir(target,src)) && target.piping_layer == piping_layer)
 			// Snowflake check; keeps back from connecting to HE pipes
 			if(!istype(target,/obj/machinery/atmospherics/pipe/simple/heat_exchanging))
 				node1 = target
 				break
 	// Only check front side for HE pipes
 	for(var/obj/machinery/atmospherics/pipe/simple/heat_exchanging/target in get_step(src,initialize_directions_he))
-		if(target.initialize_directions_he & get_dir(target,src))
+		if((target.initialize_directions_he & get_dir(target,src)) && target.piping_layer == piping_layer)
 			node2 = target
 			break
-
-	if(!node1 && !node2)
-		qdel(src)
-		return
 
 	update_icon()

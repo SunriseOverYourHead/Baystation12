@@ -32,27 +32,12 @@
 		/datum/mil_branch/auf
 	)
 
-	species_to_branch_blacklist = list(
-		/singleton/species/human   = list(/datum/mil_branch/alien, /datum/mil_branch/skrell_fleet),
-		/singleton/species/machine = list(/datum/mil_branch/alien, /datum/mil_branch/skrell_fleet),
-		/singleton/species/vox     = list(
-			/datum/mil_branch/expeditionary_corps,
-			/datum/mil_branch/fleet,
-			/datum/mil_branch/civilian,
-			/datum/mil_branch/solgov,
-			/datum/mil_branch/skrell_fleet
-		)
-	)
-
-	species_to_branch_whitelist = list(
-		/singleton/species/diona        = list(/datum/mil_branch/civilian),
-		/singleton/species/nabber       = list(/datum/mil_branch/civilian),
-		/singleton/species/skrell       = list(/datum/mil_branch/civilian, /datum/mil_branch/expeditionary_corps, /datum/mil_branch/skrell_fleet),
-		/singleton/species/unathi       = list(/datum/mil_branch/civilian, /datum/mil_branch/expeditionary_corps),
-		/singleton/species/unathi/yeosa = list(/datum/mil_branch/civilian, /datum/mil_branch/expeditionary_corps),
-		/singleton/species/adherent     = list(/datum/mil_branch/civilian),
-		/singleton/species/vox          = list(/datum/mil_branch/alien)
-	)
+	// Every species can join every branch now (explicit user decision, 2026-09-02, alongside the job-level
+	// "every role except Captain" change in torch_jobs.dm) - branch choice used to gate which roles a species
+	// could effectively reach even after the job-level restriction was lifted, so it had to open up too for
+	// "all roles" to actually mean all roles.
+	species_to_branch_blacklist = list()
+	species_to_branch_whitelist = list()
 
 	species_to_rank_blacklist = list(
 		/singleton/species/machine = list(

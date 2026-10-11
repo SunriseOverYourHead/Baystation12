@@ -52,12 +52,33 @@
 	if(speaking.flags & INNATE)
 		return 1
 
-	//Language check.
-	for(var/datum/language/L in src.languages)
-		if(speaking.name == L.name)
-			return 1
+	//Language check. This is the *fluent* threshold, not the "do you know any of it" one -- anything below C1 is
+	//handled by the graded path in get_speech_comprehension() instead of being a flat yes/no.
+	return get_language_level(speaking) >= LANGUAGE_LEVEL_C1
 
-	return 0
+/**
+ * How much of what `other` is saying in `speaking` this mob actually catches, as a percentage.
+ *
+ * Two things are folded together here. The listener's own proficiency sets the ceiling, and the speaker's fluency
+ * sets another: a beginner's speech comes out broken no matter how well you understand the language. The lower of
+ * the two wins. Speakers are exempt from their own penalty, because you always know what you meant to say.
+ *
+ * Returns LANGUAGE_COMPREHENSION_FULL for every case say_understands() exempts (the dead, universal speech, INNATE
+ * languages, brain worms, species that read each other) so those paths keep behaving exactly as they did.
+ */
+/mob/proc/get_speech_comprehension(mob/other, datum/language/speaking)
+	// You always read back your own words intact, whatever your command of the language you chose to mangle them in.
+	if(other == src)
+		return LANGUAGE_COMPREHENSION_FULL
+
+	var/comprehension = say_understands(other, speaking) ? LANGUAGE_COMPREHENSION_FULL : language_level_comprehension(get_language_level(speaking))
+
+	// ismob rather than a null check: runechat routes through /atom/movable, so the "speaker" can be a megaphone or
+	// another object relaying speech. Those have no proficiency of their own and impose no penalty.
+	if(ismob(other) && speaking && !(speaking.flags & INNATE))
+		comprehension = min(comprehension, language_level_fluency(other.get_language_level(speaking)))
+
+	return comprehension
 
 /mob/proc/say_quote(message, datum/language/speaking = null)
 	var/ending = copytext(message, -1)
@@ -110,7 +131,7 @@
 
 	if(length(message) >= 2 && is_language_prefix(prefix))
 		var/language_prefix = lowertext(copytext_char(message, 2 ,3))
-		var/datum/language/L = language_keys[language_prefix]
+		var/datum/language/L = resolve_spoken_variant(language_keys[language_prefix])
 		if (can_speak(L))
 			return L
 

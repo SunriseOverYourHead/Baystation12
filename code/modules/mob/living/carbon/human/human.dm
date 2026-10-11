@@ -62,6 +62,10 @@
 		deltimer(dream_timer)
 		dream_timer = null
 	GLOB.human_mobs -= src
+	QDEL_NULL(examine_panel)
+	QDEL_NULL(sexcon)
+	if(chastity_device)
+		chastity_device.unequip_from(src)
 	worn_underwear = null
 	for(var/organ in organs)
 		qdel(organ)
@@ -169,58 +173,12 @@
 /mob/living/carbon/human/var/temperature_resistance = T0C+75
 
 
+// TGUI now (strip_panel_tgui.dm) -- see that file's header for why. show_inv() stays as the entry point since
+// other code (mob.dm's self-drag-onto-someone MouseDrop(), holder.dm) already calls it by name.
 /mob/living/carbon/human/show_inv(mob/user as mob)
-	if(user.incapacitated()  || !user.Adjacent(src) || !user.IsAdvancedToolUser())
+	if(user.incapacitated() || !user.Adjacent(src) || !user.IsAdvancedToolUser())
 		return
-
-	var/dat = ""
-
-	for(var/entry in species.hud.gear)
-		var/list/slot_ref = species.hud.gear[entry]
-		if((slot_ref["slot"] in list(slot_l_store, slot_r_store)))
-			continue
-		var/obj/item/thing_in_slot = get_equipped_item(slot_ref["slot"])
-		dat += "<BR><B>[slot_ref["name"]]:</b> <a href='byond://?src=\ref[src];item=[slot_ref["slot"]]'>[istype(thing_in_slot) ? thing_in_slot : "nothing"]</a>"
-		if(istype(thing_in_slot, /obj/item/clothing))
-			var/obj/item/clothing/C = thing_in_slot
-			if(length(C.accessories))
-				dat += "<BR><A href='byond://?src=\ref[src];item=tie;holder=\ref[C]'>Remove accessory</A>"
-	dat += "<BR><HR>"
-
-	if(species.hud.has_hands)
-		dat += "<BR><b>Left hand:</b> <A href='byond://?src=\ref[src];item=[slot_l_hand]'>[istype(l_hand) ? l_hand : "nothing"]</A>"
-		dat += "<BR><b>Right hand:</b> <A href='byond://?src=\ref[src];item=[slot_r_hand]'>[istype(r_hand) ? r_hand : "nothing"]</A>"
-
-	// Do they get an option to set internals?
-	if(istype(wear_mask, /obj/item/clothing/mask) || istype(head, /obj/item/clothing/head/helmet/space))
-		if(istype(back, /obj/item/tank) || istype(belt, /obj/item/tank) || istype(s_store, /obj/item/tank))
-			dat += "<BR><A href='byond://?src=\ref[src];item=internals'>Toggle internals.</A>"
-
-	var/obj/item/clothing/under/suit = w_uniform
-	// Other incidentals.
-	if(istype(suit))
-		dat += "<BR><b>Pockets:</b> <A href='byond://?src=\ref[src];item=pockets'>Empty or Place Item</A>"
-		if(suit.has_sensor == 1)
-			dat += "<BR><A href='byond://?src=\ref[src];item=sensors'>Set sensors</A>"
-		if (suit.has_sensor && user.get_multitool())
-			dat += "<BR><A href='byond://?src=\ref[src];item=lock_sensors'>[suit.has_sensor == SUIT_LOCKED_SENSORS ? "Unl" : "L"]ock sensors</A>"
-	if(handcuffed)
-		dat += "<BR><A href='byond://?src=\ref[src];item=[slot_handcuffed]'>Handcuffed</A>"
-
-	for (var/obj/aura/web/W in auras)
-		dat += "<BR><A href='byond://?src=\ref[src];webbed=1'>Webbed</A>"
-		break
-
-	for(var/entry in worn_underwear)
-		var/obj/item/underwear/UW = entry
-		dat += "<BR><a href='byond://?src=\ref[src];item=\ref[UW]'>Remove \the [UW]</a>"
-
-	dat += "<BR><A href='byond://?src=\ref[src];refresh=1'>Refresh</A>"
-
-	var/datum/browser/popup = new(user, "mob[name]", name, 340, 540)
-	popup.set_content(dat)
-	popup.open()
-	return
+	ui_interact(user)
 
 // called when something steps onto a human
 // this handles mulebots and vehicles
@@ -388,21 +346,7 @@
 			return TOPIC_HANDLED
 	return ..()
 
-/mob/living/carbon/human/CanUseTopic(mob/user, datum/topic_state/state, href_list)
-	. = ..()
-	if(href_list && (href_list["refresh"] || href_list["item"]))
-		return min(., ..(user, GLOB.physical_state, href_list))
-
 /mob/living/carbon/human/OnTopic(mob/user, href_list)
-	if (href_list["refresh"])
-		show_inv(user)
-		return TOPIC_HANDLED
-
-	if(href_list["item"])
-		if(!handle_strip(href_list["item"],user,locate(href_list["holder"])))
-			show_inv(user)
-		return TOPIC_HANDLED
-
 	if (href_list["criminal"])
 		if(hasHUD(user, HUD_SECURITY))
 
@@ -531,30 +475,11 @@
 		to_chat(user, "[SPAN_INFO("[allergies]")]")
 		return TOPIC_HANDLED
 
-	if (href_list["webbed"])
-		for (var/obj/aura/web/W in auras)
-			W.remove_webbing(user)
+	if (href_list["examine_closer"])
+		get_examine_panel().ui_interact(user)
 		return TOPIC_HANDLED
 
-
 	return ..()
-
-/mob/living/carbon/human/update_flavor_text(key)
-	var/msg
-	switch(key)
-		if("done")
-			show_browser(src, null, "window=flavor_changes")
-			return
-		if("general")
-			msg = sanitize(input(src,"Update the general description of your character. This will be shown regardless of clothing. Do not include OOC information here.","Flavor Text",html_decode(flavor_texts[key])) as message, extra = 0)
-		else
-			if(!(key in flavor_texts))
-				return
-			msg = sanitize(input(src,"Update the flavor text for your [key].","Flavor Text",html_decode(flavor_texts[key])) as message, extra = 0)
-	if(!CanInteract(src, GLOB.self_state))
-		return
-	flavor_texts[key] = msg
-	set_flavor()
 
 ///eyecheck()
 ///Returns a number between -1 to 2
@@ -1227,7 +1152,7 @@
 	if(species.base_color && default_colour)
 		skin_color = species.base_color
 	else
-		skin_color = "#000000"
+		skin_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 
 	if(species.holder_type)
 		holder_type = species.holder_type
@@ -1344,6 +1269,11 @@
 				free_languages    |= all_languages[lang]
 			for(var/lang in check.get_spoken_languages())
 				permitted_languages |= all_languages[lang]
+			// Secondary languages are what character setup offers as *learnable* for this culture. They were
+			// missing here, so any later call to this proc -- a species change, a culture edit -- stripped every
+			// legitimately chosen secondary language back off the mob.
+			for(var/lang in check.secondary_langs)
+				permitted_languages |= all_languages[lang]
 
 	for(var/thing in languages)
 		var/datum/language/lang = thing
@@ -1357,6 +1287,8 @@
 
 	for(var/thing in free_languages)
 		var/datum/language/lang = thing
+		if(!lang) // a cultural_info entry's default_language/language/name_language/additional_langs referenced a
+			continue // name with no matching entry in all_languages -- skip rather than crash on lang.name below.
 		add_language(lang.name)
 
 	if(LAZYLEN(default_languages) && isnull(default_language))
@@ -1437,46 +1369,6 @@
 					to_chat(user, SPAN_WARNING("There is no exposed flesh or thin material on [src]'s [affecting.name] to inject into."))
 					return 0
 
-
-/mob/living/carbon/human/print_flavor_text(shrink = 1)
-	var/list/equipment = list(src.head,src.wear_mask,src.glasses,src.w_uniform,src.wear_suit,src.gloves,src.shoes)
-	var/head_exposed = 1
-	var/face_exposed = 1
-	var/eyes_exposed = 1
-	var/torso_exposed = 1
-	var/arms_exposed = 1
-	var/legs_exposed = 1
-	var/hands_exposed = 1
-	var/feet_exposed = 1
-
-	for(var/obj/item/clothing/C in equipment)
-		if(C.body_parts_covered & HEAD)
-			head_exposed = 0
-		if(C.body_parts_covered & FACE)
-			face_exposed = 0
-		if(C.body_parts_covered & EYES)
-			eyes_exposed = 0
-		if(C.body_parts_covered & UPPER_TORSO)
-			torso_exposed = 0
-		if(C.body_parts_covered & ARMS)
-			arms_exposed = 0
-		if(C.body_parts_covered & HANDS)
-			hands_exposed = 0
-		if(C.body_parts_covered & LEGS)
-			legs_exposed = 0
-		if(C.body_parts_covered & FEET)
-			feet_exposed = 0
-
-	flavor_text = ""
-	for (var/T in flavor_texts)
-		if(flavor_texts[T] && flavor_texts[T] != "")
-			if((T == "general") || (T == "head" && head_exposed) || (T == "face" && face_exposed) || (T == "eyes" && eyes_exposed) || (T == "torso" && torso_exposed) || (T == "arms" && arms_exposed) || (T == "hands" && hands_exposed) || (T == "legs" && legs_exposed) || (T == "feet" && feet_exposed))
-				flavor_text += flavor_texts[T]
-				flavor_text += "\n\n"
-	if(!shrink)
-		return flavor_text
-	else
-		return ..()
 
 /mob/living/carbon/human/getDNA()
 	if(species.species_flags & SPECIES_FLAG_NO_SCAN)

@@ -5,13 +5,99 @@
 	return
 
 /singleton/species/proc/get_tail(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/tail/T = H.internal_organs_by_name[BP_TAIL]
+	if(T?.sprite_datum)
+		return T.sprite_datum.icon_state
 	return tail
 
 /singleton/species/proc/get_tail_animation(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/tail/T = H.internal_organs_by_name[BP_TAIL]
+	if(T?.sprite_datum?.icon_animation)
+		return T.sprite_datum.icon_animation
 	return tail_animation
 
 /singleton/species/proc/get_tail_hair(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/tail/T = H.internal_organs_by_name[BP_TAIL]
+	if(T?.sprite_datum)
+		return T.sprite_datum.hair_state
 	return tail_hair
+
+/singleton/species/proc/get_tail_blend(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/tail/T = H.internal_organs_by_name[BP_TAIL]
+	if(T?.sprite_datum)
+		return T.sprite_datum.mutant_blend
+	return tail_blend
+
+// Returns the tail organ's own color override, or null if it should fall back to skin_color (the pre-organ
+// default behaviour).
+/singleton/species/proc/get_tail_color(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/tail/T = H.internal_organs_by_name[BP_TAIL]
+	if(T && T.colors && T.colors[1])
+		return T.colors[1]
+	return null
+
+// Most mutant-organ categories (tail/horns/frills/etc) are opt-in cosmetic add-ons, off by default until the
+// player explicitly enables them in chargen (see /datum/preferences/copy_to(), preferences.dm) -- fine for a
+// species like Anthro where the organ is a true option. For a species where the organ is just part of the
+// canonical body (e.g. a Unathi's tail), that opt-in-off-by-default behaviour is wrong: it deletes the organ
+// entirely unless the player happens to toggle it on, and even then offers a "None" choice that falls back to
+// a stale legacy tail sprite (get_tail() etc, species_getters.dm) instead of actually removing anything. A
+// species overriding this to TRUE for an organ_tag keeps that organ always present with its default style
+// (colors are still customizable), with no toggle or "None" option shown at all.
+/singleton/species/proc/is_mutant_organ_mandatory(organ_tag)
+	return FALSE
+
+// Wings have no legacy species-level fallback (unlike tail) -- they only ever exist as a chosen organ, so these
+// simply return null when there's no organ or no style picked, which callers treat as "don't draw wings."
+/singleton/species/proc/get_wings(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/wings/W = H.internal_organs_by_name[BP_WINGS]
+	if(W?.sprite_datum)
+		return W.sprite_datum.icon_state
+	return null
+
+/singleton/species/proc/get_wings_icon_file(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/wings/W = H.internal_organs_by_name[BP_WINGS]
+	if(W?.sprite_datum)
+		return W.sprite_datum.icon
+	return null
+
+/singleton/species/proc/get_wings_blend(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/wings/W = H.internal_organs_by_name[BP_WINGS]
+	if(W?.sprite_datum)
+		return W.sprite_datum.mutant_blend
+	return ICON_ADD
+
+/singleton/species/proc/get_wings_color(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/wings/W = H.internal_organs_by_name[BP_WINGS]
+	if(W && W.colors && W.colors[1])
+		return W.colors[1]
+	return null
+
+// Fluff and Moth Markings mirror Wings' getters exactly -- same reasoning (oversized 45x34 art rendered as a
+// dedicated mob-level overlay, not through chest's compositing loop) and no legacy species-level fallback either.
+/singleton/species/proc/get_fluff(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/fluff/F = H.internal_organs_by_name[BP_FLUFF]
+	if(F?.sprite_datum)
+		return F.sprite_datum.icon_state
+	return null
+
+/singleton/species/proc/get_fluff_icon_file(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/fluff/F = H.internal_organs_by_name[BP_FLUFF]
+	if(F?.sprite_datum)
+		return F.sprite_datum.icon
+	return null
+
+/singleton/species/proc/get_fluff_blend(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/fluff/F = H.internal_organs_by_name[BP_FLUFF]
+	if(F?.sprite_datum)
+		return F.sprite_datum.mutant_blend
+	return ICON_ADD
+
+/singleton/species/proc/get_fluff_color(mob/living/carbon/human/H)
+	var/obj/item/organ/internal/mutant/fluff/F = H.internal_organs_by_name[BP_FLUFF]
+	if(F && F.colors && F.colors[1])
+		return F.colors[1]
+	return null
 
 /singleton/species/proc/get_blood_mask(mob/living/carbon/human/H)
 	return blood_mask

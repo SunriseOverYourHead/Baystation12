@@ -1,5 +1,5 @@
 import { useBackend } from 'tgui/backend';
-import { Dropdown, LabeledList, Section } from 'tgui-core/components';
+import { Box, Dropdown, LabeledList, Section } from 'tgui-core/components';
 
 import type { PreferencesMenuData } from '../types';
 import { useServerPrefs } from '../useServerPrefs';
@@ -10,6 +10,11 @@ export function CulturalPage() {
 
   const culturalOptions: Record<string, string[]> =
     (serverPrefs?.cultural_options as Record<string, string[]>) ?? {};
+  const culturalDescriptions: Record<string, Record<string, string>> =
+    (serverPrefs?.cultural_descriptions as Record<
+      string,
+      Record<string, string>
+    >) ?? {};
   const tagLabels: Record<string, string> =
     (serverPrefs?.cultural_tag_labels as Record<string, string>) ?? {};
   const currentInfo = data.cultural_info ?? {};
@@ -29,6 +34,7 @@ export function CulturalPage() {
           const options = culturalOptions[tag];
           const label = tagLabels[tag] ?? tag;
           const selected = currentInfo[tag] ?? options[0];
+          const description = culturalDescriptions[tag]?.[selected];
           return (
             <LabeledList.Item key={tag} label={label}>
               <Dropdown
@@ -39,6 +45,11 @@ export function CulturalPage() {
                   act('set_cultural_info', { tag, value: val })
                 }
               />
+              {!!description && (
+                <Box mt={0.5} italic color="label">
+                  {description}
+                </Box>
+              )}
             </LabeledList.Item>
           );
         })}

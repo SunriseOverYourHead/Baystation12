@@ -299,3 +299,4 @@ var/global/const/FALLOFF_SOUNDS = 0.5
 	set category = "OOC"
 
 	sound_to(usr, sound(null))
+	src.chatOutput?.stop_music()

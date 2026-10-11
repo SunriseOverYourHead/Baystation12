@@ -3,6 +3,13 @@
 	desc = "As the user's handbook will tell you, the Xynergy XP-3 is /not/ a shotgun, it just launches payloads of same caliber at high speed towards targets. Nicknamed 'Boomstick' for the way it behaves when full-power ammunition is loaded."
 	icon = 'maps/torch/icons/obj/explshotgun.dmi'
 	icon_state = "expshotgun0"
+	item_icons = list(
+		slot_l_hand_str = 'icons/mob/onmob/items/lefthand_guns.dmi',
+		slot_r_hand_str = 'icons/mob/onmob/items/righthand_guns.dmi',
+		slot_back_str = 'maps/torch/icons/obj/explshotgun.dmi',
+	)
+	colocated_sprites = FALSE
+	item_state_slots = list(slot_back_str = "expshotgun0")
 	starts_loaded = 0
 	req_access = list(access_hop)
 	authorized_modes = list(UNAUTHORIZED)

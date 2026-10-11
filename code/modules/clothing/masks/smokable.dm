@@ -41,7 +41,9 @@
 	if(lit)
 		STOP_PROCESSING(SSobj, src)
 
-/obj/item/clothing/mask/smokable/fire_act()
+// Must match the parent signature (code/game/atoms.dm's /atom/proc/fire_act) - see the identical fix/comment in
+// code/modules/atmospherics/pipes.dm for why an empty-parameter override crashes the moment a real fire touches it.
+/obj/item/clothing/mask/smokable/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	light(0)
 
 /obj/item/clothing/mask/smokable/proc/smoke(amount)

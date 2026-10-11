@@ -1,4 +1,10 @@
 /singleton/species/shapeshifter
+	// Internal/mechanical species for polymorph-style effects (see shapeshifter_select_shape/hair/gender below) --
+	// never meant to be chosen directly in chargen. Needs this explicit flag: unlike every other non-playable
+	// species here, it never set spawn_flags at all, so it inherited the base class's spawn_flags = 0 default,
+	// which lacks SPECIES_IS_RESTRICTED -- meaning it silently leaked into GLOB.playable_species as a blank,
+	// broken entry (no name, no preview_icon override either so it also inherited Human's preview art).
+	spawn_flags = SPECIES_IS_RESTRICTED
 	inherent_verbs = list(
 		/mob/living/carbon/human/proc/shapeshifter_select_shape,
 		/mob/living/carbon/human/proc/shapeshifter_select_hair,

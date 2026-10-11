@@ -286,6 +286,7 @@
 	supervisors = "the Commanding Officer and the Executive Officer"
 	department = "Infantry"
 	department_flag = INF
+	head_position = 1
 	total_positions = 1
 	spawn_positions = 1
 	selection_color = "#69c931"
@@ -328,7 +329,7 @@
 							 /datum/computer_file/program/camera_monitor,
 							 /datum/computer_file/program/reports)
 
-/datum/job/hos/get_description_blurb()
+/datum/job/po/get_description_blurb()
 	return "You are the Platoon Officer. You coordinate and wrangle the Marine Corps platoon staffed aboard the Ship. You pass orders to the Squad Leader, who is your operational right-hand in the field. Delegate to him. Ensure there is no friction between the marine complement and the Navy personnel onboard. Guarantee that the SOP is followed and that the marines maintain a minimum state of combat-readiness at all times. Semper Fi, Platoon Officer."
 
 /datum/job/representative

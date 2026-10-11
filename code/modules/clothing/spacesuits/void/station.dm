@@ -20,6 +20,7 @@
 		)
 	max_pressure_protection = ENG_VOIDSUIT_MAX_PRESSURE
 	siemens_coefficient = 0.3
+	cover_theme = "engineering"
 
 /obj/item/clothing/suit/space/void/engineering
 	name = "engineering voidsuit"
@@ -40,6 +41,7 @@
 		rad = ARMOR_RAD_RESISTANT
 		)
 	allowed = list(/obj/item/device/flashlight,/obj/item/tank,/obj/item/device/suit_cooling_unit,/obj/item/storage/toolbox,/obj/item/storage/briefcase/inflatable,/obj/item/device/t_scanner,/obj/item/rcd,/obj/item/rpd)
+	cover_theme = "engineering"
 
 /obj/item/clothing/suit/space/void/engineering/prepared
 	helmet = /obj/item/clothing/head/helmet/space/void/engineering
@@ -67,6 +69,7 @@
 	light_overlay = "helmet_light_dual_alt"
 	head_light_range = 5
 	max_pressure_protection = ENG_VOIDSUIT_MAX_PRESSURE
+	cover_theme = "supply"
 
 /obj/item/clothing/suit/space/void/mining
 	icon_state = "rig-mining"
@@ -86,6 +89,7 @@
 		)
 	max_pressure_protection = ENG_VOIDSUIT_MAX_PRESSURE
 	allowed = list(/obj/item/device/flashlight,/obj/item/tank,/obj/item/stack/flag,/obj/item/device/suit_cooling_unit,/obj/item/storage/ore,/obj/item/device/t_scanner,/obj/item/pickaxe, /obj/item/rcd,/obj/item/rpd)
+	cover_theme = "supply"
 
 /obj/item/clothing/suit/space/void/mining/prepared
 	helmet = /obj/item/clothing/head/helmet/space/void/mining
@@ -108,6 +112,7 @@
 		bio = ARMOR_BIO_SHIELDED,
 		rad = ARMOR_RAD_SMALL
 		)
+	cover_theme = "medical"
 
 /obj/item/clothing/suit/space/void/medical
 	icon_state = "rig-medical"
@@ -125,6 +130,7 @@
 		bio = ARMOR_BIO_SHIELDED,
 		rad = ARMOR_RAD_SMALL
 		)
+	cover_theme = "medical"
 
 /obj/item/clothing/suit/space/void/medical/prepared
 	helmet = /obj/item/clothing/head/helmet/space/void/medical
@@ -151,6 +157,7 @@
 		)
 	siemens_coefficient = 0.3
 	light_overlay = "helmet_light_dual"
+	cover_theme = "security"
 
 /obj/item/clothing/suit/space/void/security
 	icon_state = "rig-sec"
@@ -170,6 +177,7 @@
 		)
 	allowed = list(/obj/item/gun,/obj/item/device/flashlight,/obj/item/tank,/obj/item/device/suit_cooling_unit,/obj/item/melee/baton)
 	siemens_coefficient = 0.3
+	cover_theme = "security"
 
 /obj/item/clothing/suit/space/void/security/prepared
 	helmet = /obj/item/clothing/head/helmet/space/void/security
@@ -198,6 +206,7 @@
 	light_overlay = "helmet_light_dual"
 	head_light_range = 5
 	max_pressure_protection = FIRESUIT_MAX_PRESSURE
+	cover_theme = "engineering"
 
 /obj/item/clothing/suit/space/void/atmos
 	desc = "A durable voidsuit with advanced temperature-regulation systems as well as minor radiation protection. Well worth the price."
@@ -218,6 +227,7 @@
 	max_heat_protection_temperature = FIRESUIT_MAX_HEAT_PROTECTION_TEMPERATURE
 	max_pressure_protection = FIRESUIT_MAX_PRESSURE
 	allowed = list(/obj/item/device/flashlight,/obj/item/tank,/obj/item/device/suit_cooling_unit,/obj/item/storage/toolbox,/obj/item/storage/briefcase/inflatable,/obj/item/device/t_scanner,/obj/item/rcd,/obj/item/rpd)
+	cover_theme = "engineering"
 
 /obj/item/clothing/suit/space/void/atmos/prepared
 	helmet = /obj/item/clothing/head/helmet/space/void/atmos

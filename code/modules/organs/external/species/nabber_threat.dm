@@ -2,6 +2,33 @@
 	name = "thorax"
 	encased = "carapace"
 	action_button_name = "Perform Threat Display"
+	// GAS's torso tile is 32x40 (species.icon_template = template_tall.dmi) vs the standard 32x32, and BYOND
+	// anchors overlays at the bottom-left origin shared with the (taller) base canvas -- so human-aligned art
+	// composited with no offset lands too low relative to GAS's own silhouette. Measured directly: torso_f/
+	// torso_m's own bbox in icons/mob/human_races/species/nabber/body.dmi is (11,8,20,31) (its own 32x40 tile)
+	// vs human's (10,10,21,20) in a 32x32 tile; converting both to BYOND's bottom-up Y and comparing centroids
+	// gives the offset below (a plain re-centering translation, not a resculpt -- GAS's silhouette shape here
+	// is different enough that this won't be a perfect fit, only a much closer one than an unadjusted 0,0).
+	// NOT hand-verified per-direction the way groin's offset was (this round's ask was genitals-only) -- kept as
+	// a single flat value applied uniformly across all 4 directions for now.
+	mutant_organ_pixel_offset = alist(
+		SOUTH = list(0, 4),
+		NORTH = list(0, 4),
+		EAST = list(0, 4),
+		WEST = list(0, 4)
+	)
+
+/obj/item/organ/external/chest/insectoid/nabber/monarch_queen
+	name = "thorax"
+	encased = "carapace"
+	// MSQ has its own distinct body art (nabber/msq/body.dmi, a standard 32x32 tile, unlike base GAS/Worker's
+	// 32x40) -- needs its own measured offset, not GAS's. Same caveat as above: not hand-verified per-direction.
+	mutant_organ_pixel_offset = alist(
+		SOUTH = list(1, -5),
+		NORTH = list(1, -5),
+		EAST = list(1, -5),
+		WEST = list(1, -5)
+	)
 
 /obj/item/organ/external/chest/insectoid/nabber/refresh_action_button()
 	. = ..()

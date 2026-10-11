@@ -12,13 +12,23 @@
 	assisted_langs = list(LANGUAGE_NABBER)
 	min_age = 18
 	max_age = 100
+	human_equivalent_age_formula = "identity"
 	hidden_from_codex = FALSE
 	bandages_icon = 'icons/mob/bandage.dmi'
+	default_genital_color = "#A84040"
 
 	spawn_flags = SPECIES_CAN_JOIN
 	appearance_flags = SPECIES_APPEARANCE_HAS_HAIR_COLOR | SPECIES_APPEARANCE_HAS_SKIN_TONE_NORMAL | SPECIES_APPEARANCE_HAS_LIPS | SPECIES_APPEARANCE_HAS_UNDERWEAR | SPECIES_APPEARANCE_HAS_EYE_COLOR
 
 	sexybits_location = BP_GROIN
+
+	override_organ_types = list(
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
+	)
 
 	inherent_verbs = list(/mob/living/carbon/human/proc/tie_hair)
 
@@ -109,11 +119,18 @@
 	health_hud_intensity = 1.75
 	meat_type = /obj/item/reagent_containers/food/snacks/fish/octopus
 	bone_material = MATERIAL_BONE_CARTILAGE
-	genders = list(PLURAL)
+	// MALE/FEMALE added alongside the species' natural PLURAL so the Body Type selector (always shown now, every
+	// species) has a choice that actually sticks -- Skrell's own sex is derived from headtail_length, not
+	// mob.gender (see get_sex() override below), so this is purely a player-expression choice with no mechanical
+	// effect, exactly as intended.
+	genders = list(MALE, FEMALE, PLURAL)
 	pronouns = list(PRONOUNS_THEY_THEM)
 	hidden_from_codex = FALSE
 	min_age = 19
 	max_age = 90
+
+	force_male_sheath_mode = "Slit"
+	default_genital_color = "#003366"
 
 	burn_mod = 0.9
 	oxy_mod = 1.3
@@ -132,7 +149,9 @@
 	darksight_tint = DARKTINT_MODERATE
 
 	spawn_flags = SPECIES_CAN_JOIN | SPECIES_IS_WHITELISTED
-	appearance_flags = SPECIES_APPEARANCE_HAS_HAIR_COLOR | SPECIES_APPEARANCE_HAS_STATIC_HAIR | SPECIES_APPEARANCE_HAS_LIPS | SPECIES_APPEARANCE_HAS_UNDERWEAR | SPECIES_APPEARANCE_HAS_SKIN_COLOR
+	// No SPECIES_APPEARANCE_HAS_HAIR_COLOR -- the headtail is skin, not hair, and always renders in skin_color
+	// (see /obj/item/organ/external/head/sync_colour_to_human|sync_colour_to_dna, _external_icons.dm).
+	appearance_flags = SPECIES_APPEARANCE_HAS_STATIC_HAIR | SPECIES_APPEARANCE_HAS_LIPS | SPECIES_APPEARANCE_HAS_UNDERWEAR | SPECIES_APPEARANCE_HAS_SKIN_COLOR
 
 	flesh_color = "#8cd7a3"
 	blood_color = "#1d2cbf"
@@ -211,7 +230,12 @@
 		BP_LIVER =    /obj/item/organ/internal/liver,
 		BP_KIDNEYS =  /obj/item/organ/internal/kidneys,
 		BP_BRAIN =    /obj/item/organ/internal/brain,
-		BP_EYES =     /obj/item/organ/internal/eyes/skrell
+		BP_EYES =     /obj/item/organ/internal/eyes/skrell,
+		BP_BREASTS =  /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =    /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =    /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 
 	exertion_effect_chance = 10
@@ -274,8 +298,10 @@
 	hunger_factor = 3
 	thirst_factor = 0.01
 
-	min_age = 1
+	min_age = 0
 	max_age = 300
+	human_equivalent_age_formula = "constant"
+	human_equivalent_age_constant = 20
 
 	description = "Commonly referred to (erroneously) as 'plant people', the Dionaea are a strange space-dwelling collective \
 	species hailing from Epsilon Ursae Minoris. Each 'diona' is a cluster of numerous cat-sized organisms called nymphs; \
@@ -291,17 +317,23 @@
 		BP_RESPONSE = /obj/item/organ/internal/diona/node,
 		BP_GBLADDER = /obj/item/organ/internal/diona/bladder,
 		BP_POLYP =    /obj/item/organ/internal/diona/polyp,
-		BP_ANCHOR =   /obj/item/organ/internal/diona/ligament
+		BP_ANCHOR =   /obj/item/organ/internal/diona/ligament,
+		BP_BREASTS =  /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =    /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =    /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 
+	// BP_GROIN moved after the legs -- see species.dm's has_limbs comment.
 	has_limbs = list(
 		BP_CHEST =  list("path" = /obj/item/organ/external/diona/chest),
-		BP_GROIN =  list("path" = /obj/item/organ/external/diona/groin),
 		BP_HEAD =   list("path" = /obj/item/organ/external/head/diona),
 		BP_L_ARM =  list("path" = /obj/item/organ/external/diona/arm),
 		BP_R_ARM =  list("path" = /obj/item/organ/external/diona/arm/right),
 		BP_L_LEG =  list("path" = /obj/item/organ/external/diona/leg),
 		BP_R_LEG =  list("path" = /obj/item/organ/external/diona/leg/right),
+		BP_GROIN =  list("path" = /obj/item/organ/external/diona/groin),
 		BP_L_HAND = list("path" = /obj/item/organ/external/diona/hand),
 		BP_R_HAND = list("path" = /obj/item/organ/external/diona/hand/right),
 		BP_L_FOOT = list("path" = /obj/item/organ/external/diona/foot),
@@ -338,7 +370,9 @@
 	blood_color = "#004400"
 	flesh_color = "#907e4a"
 
-	genders = list(PLURAL)
+	// Diona are always Other (NEUTER) -- explicit user direction, unlike every other species they don't gain
+	// Male/Female/Trans access; the Body Type picker itself is hidden client-side for them entirely (MainPage.tsx).
+	genders = list(NEUTER)
 	pronouns = list(PRONOUNS_IT_ITS)
 
 	available_cultural_info = list(

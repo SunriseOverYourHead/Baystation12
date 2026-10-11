@@ -185,12 +185,15 @@
 /mob/living/silicon/can_speak(datum/language/speaking)
 	return universal_speak || (speaking in src.speech_synthesizer_langs)	//need speech synthesizer support to vocalize a language
 
-/mob/living/silicon/add_language(language, can_speak=1)
+// Note the argument order: silicons had a second parameter of their own long before the base proc gained one, and
+// every caller passes it positionally, so `can_speak` keeps second place and the proficiency level comes third.
+// Machines are fluent or they are not installed, so the level defaults to C2 and nothing in-tree passes anything else.
+/mob/living/silicon/add_language(language, can_speak = TRUE, level = LANGUAGE_LEVEL_C2)
 	var/datum/language/added_language = all_languages[language]
 	if(!added_language)
 		return
 
-	. = ..(language)
+	. = ..(language, level)
 	if (can_speak && (added_language in languages) && !(added_language in speech_synthesizer_langs))
 		speech_synthesizer_langs += added_language
 		return 1

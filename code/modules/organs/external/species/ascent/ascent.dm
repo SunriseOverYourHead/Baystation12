@@ -5,10 +5,48 @@
 	var/list/max_webs = 4
 	var/web_weave_time = 20 SECONDS
 	var/cooldown
+	// Hand-placed by the user directly in icons/mob/reference_parts.dmi (full 4-dir body composites + a separate
+	// Hemi reference, diffed per-direction against Hemi's own known reference position -- NOT against a
+	// regenerated body silhouette; the user's edited file had the body content cleared out of each species state,
+	// leaving just the repositioned Hemi shape, and the first extraction pass wrongly diffed against a freshly
+	// regenerated body, which folded the body's own "disappearance" into the measurement and produced badly wrong
+	// values). Visually re-verified via a rendered composite before shipping this time.
+	mutant_organ_pixel_offset = alist(
+		SOUTH = list(0, -7),
+		NORTH = list(0, -7),
+		EAST = list(0, -3),
+		WEST = list(0, -3)
+	)
 
 /obj/item/organ/external/groin/insectoid/mantid/gyne
 	max_webs = 8
 	web_weave_time = 10 SECONDS
+	mutant_organ_pixel_offset = alist(
+		SOUTH = list(5, -2),
+		NORTH = list(5, -2),
+		EAST = list(10, 1),
+		WEST = list(-2, 1)
+	)
+
+// Chest/breast offsets have not been hand-placed the same way as groin's above yet (this round's ask was
+// genitals-only) -- kept as a single flat value applied uniformly across all 4 directions for now, same as every
+// category was before this round. Revisit with a per-direction reference_parts.dmi pass if breasts turn out to
+// need it too.
+/obj/item/organ/external/chest/insectoid/mantid
+	mutant_organ_pixel_offset = alist(
+		SOUTH = list(0, -2),
+		NORTH = list(0, -2),
+		EAST = list(0, -2),
+		WEST = list(0, -2)
+	)
+
+/obj/item/organ/external/chest/insectoid/mantid/gyne
+	mutant_organ_pixel_offset = alist(
+		SOUTH = list(5, 10),
+		NORTH = list(5, 10),
+		EAST = list(5, 10),
+		WEST = list(5, 10)
+	)
 
 /obj/item/organ/external/groin/insectoid/mantid/Destroy()
 	for(var/obj/effect/razorweb/web in existing_webs)

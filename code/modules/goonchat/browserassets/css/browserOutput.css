@@ -128,6 +128,57 @@ a.popt {text-decoration: none;}
 	font-size: 8pt;
 	padding-top: 2px;
 }
+#nowPlaying {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 190px;
+	z-index: 5;
+	height: 40px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	padding: 4px 8px;
+	background: #202020;
+	border-bottom: 1px solid #171717;
+}
+body.nowPlayingVisible #messages {
+	margin-top: 40px;
+}
+#nowPlayingInfo {
+	max-width: 45%;
+	min-width: 0;
+	overflow: hidden;
+	flex-shrink: 0;
+}
+#nowPlayingTitle {
+	font-weight: bold;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#nowPlayingArtist {
+	font-size: 0.85em;
+	opacity: 0.75;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#nowPlayingControls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: 8px;
+	flex-shrink: 0;
+}
+#nowPlayingVolume {
+	width: 80px;
+}
+#nowPlayingStop {
+	color: #a4bad6;
+	text-decoration: none;
+	font-size: 1.1em;
+}
 #userBar {
 	position: fixed;
 	top: 0;

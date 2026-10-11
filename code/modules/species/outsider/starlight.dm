@@ -6,24 +6,31 @@
 	bone_material = null
 	skin_material = null
 
+	// BP_GROIN moved after the legs -- see species.dm's has_limbs comment.
 	has_limbs = list(
 		BP_CHEST =  list("path" = /obj/item/organ/external/chest/unbreakable),
-		BP_GROIN =  list("path" = /obj/item/organ/external/groin/unbreakable),
 		BP_HEAD =   list("path" = /obj/item/organ/external/head/unbreakable),
 		BP_L_ARM =  list("path" = /obj/item/organ/external/arm/unbreakable),
 		BP_R_ARM =  list("path" = /obj/item/organ/external/arm/right/unbreakable),
 		BP_L_LEG =  list("path" = /obj/item/organ/external/leg/unbreakable),
 		BP_R_LEG =  list("path" = /obj/item/organ/external/leg/right/unbreakable),
+		BP_GROIN =  list("path" = /obj/item/organ/external/groin/unbreakable),
 		BP_L_HAND = list("path" = /obj/item/organ/external/hand/unbreakable),
 		BP_R_HAND = list("path" = /obj/item/organ/external/hand/right/unbreakable),
 		BP_L_FOOT = list("path" = /obj/item/organ/external/foot/unbreakable),
 		BP_R_FOOT = list("path" = /obj/item/organ/external/foot/right/unbreakable)
 		)
 	has_organ = list(
-		BP_BRAIN = /obj/item/organ/internal/brain/starlight
+		BP_BRAIN = /obj/item/organ/internal/brain/starlight,
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 	spawn_flags = SPECIES_IS_RESTRICTED
-	genders = list(NEUTER)
+	// MALE/FEMALE/PLURAL ("Trans") -- Other (NEUTER) is Diona-exclusive, see station.dm's Diona genders comment.
+	genders = list(MALE, FEMALE, PLURAL)
 	force_cultural_info = list(
 		TAG_CULTURE = CULTURE_STARLIGHT
 	)

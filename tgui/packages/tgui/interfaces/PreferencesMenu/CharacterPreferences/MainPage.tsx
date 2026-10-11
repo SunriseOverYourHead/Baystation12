@@ -8,6 +8,7 @@ import {
   Button,
   Dropdown, // NOVA EDIT ADDITION
   Floating,
+  Icon,
   Input,
   LabeledList,
   Section,
@@ -35,6 +36,7 @@ import {
 import { useRandomToggleState } from '../useRandomToggleState';
 import { useServerPrefs } from '../useServerPrefs';
 import { BackgroundPage } from './BackgroundPage';
+import { CharacterAlteringToggles } from './CharacterAlteringToggles';
 import { DeleteCharacterPopup } from './DeleteCharacterPopup';
 import { MultiNameInput, NameInput } from './names';
 import { VocalsInput, VoiceInput } from './vocals'; // NOVA EDIT ADDITION
@@ -47,7 +49,6 @@ const CLOTHING_SELECTION_WIDTH = 5.4;
 const CLOTHING_SELECTION_MULTIPLIER = 5.2;
 
 type CharacterControlsProps = {
-  handleRotate: () => void;
   handleOpenSpecies: () => void;
   gender: Gender;
   setGender: (gender: Gender) => void;
@@ -57,14 +58,25 @@ type CharacterControlsProps = {
 };
 
 function CharacterControls(props: CharacterControlsProps) {
+  const { act } = useBackend<PreferencesMenuData>();
   return (
     <Stack>
       <Stack.Item>
         <Button
-          onClick={props.handleRotate}
+          onClick={() => act('rotate', { backwards: false })}
+          fontSize="22px"
+          icon="redo"
+          tooltip="Rotate Clockwise"
+          tooltipPosition="top"
+        />
+      </Stack.Item>
+
+      <Stack.Item>
+        <Button
+          onClick={() => act('rotate', { backwards: true })}
           fontSize="22px"
           icon="undo"
-          tooltip="Rotate"
+          tooltip="Rotate Counter-Clockwise"
           tooltipPosition="top"
         />
       </Stack.Item>
@@ -102,6 +114,30 @@ function CharacterControls(props: CharacterControlsProps) {
   );
 }
 
+// BS12 addition: lets the preview mannequin be dressed in nothing, underwear only, the player's chosen loadout,
+// or their selected job's uniform -- reuses the preview_job/preview_gear/preview_nude toggle that previously
+// only drove the old HTML preference panel's "Hide/Show Loadout"/"Hide/Show Uniform" buttons (see
+// "update_preview" in code/modules/client/preferences_tgui.dm). A dropdown, matching Bubberstation's own
+// version of this control. "Naked (Aroused)" (a second preview_nude mode, gated by preview_aroused) additionally
+// forces the mannequin's penis/vagina organ into its aroused sprite -- see apply_preview_arousal() in
+// code/modules/client/preference_setup/general/05_preview.dm.
+const PREVIEW_MODES = ['Naked', 'Naked (Aroused)', 'Underwear', 'Loadout', 'Job'];
+
+function PreviewModeDropdown() {
+  const { act, data } = useBackend<PreferencesMenuData>();
+  const currentMode = data.character_preferences.misc.preview_mode;
+  return (
+    <Dropdown
+      width="100%"
+      options={PREVIEW_MODES}
+      selected={currentMode}
+      onSelected={(mode: string) =>
+        act('update_preview', { updated_preview: mode })
+      }
+    />
+  );
+}
+
 type ChoicedSelectionProps = {
   name: string;
   catalog: FeatureChoicedServerData;
@@ -115,8 +151,8 @@ function ChoicedSelection(props: ChoicedSelectionProps) {
   const { catalog, supplementalFeature, supplementalValue } = props;
   const [searchText, setSearchText] = useState('');
 
-  if (!catalog.icons) {
-    return <Box color="red">Provided catalog had no icons!</Box>;
+  if (!catalog.choices?.length) {
+    return <Box color="red">Provided catalog had no choices!</Box>;
   }
 
   return (
@@ -156,8 +192,9 @@ function ChoicedSelection(props: ChoicedSelectionProps) {
         <Stack.Item grow>
           <Section fill scrollable noTopPadding>
             <Stack wrap>
-              {searchInCatalog(searchText, catalog.icons).map(
-                ([name, image], index) => {
+              {searchInCatalog(searchText, catalog.choices).map(
+                (name, index) => {
+                  const image = catalog.icons?.[name];
                   return (
                     <Button
                       key={index}
@@ -173,7 +210,7 @@ function ChoicedSelection(props: ChoicedSelectionProps) {
                         position: 'relative',
                       }}
                     >
-                      {image.endsWith('.png') ? (
+                      {image?.endsWith('.png') ? (
                         <img
                           alt=""
                           src={image}
@@ -187,7 +224,7 @@ function ChoicedSelection(props: ChoicedSelectionProps) {
                             imageRendering: 'pixelated',
                           }}
                         />
-                      ) : (
+                      ) : image ? (
                         <Box
                           className={classes([
                             'preferences32x32',
@@ -199,6 +236,13 @@ function ChoicedSelection(props: ChoicedSelectionProps) {
                               'translateX(-50%) translateY(-50%) scale(0.8)',
                           }}
                         />
+                      ) : (
+                        // No preview art (e.g. a "None"/nude option, or Bald/Shaved) -- still a valid,
+                        // selectable choice, just nothing to draw. A red X makes that explicit rather than
+                        // looking like a broken/loading image.
+                        <Box style={{ lineHeight: '56px', textAlign: 'center' }}>
+                          <Icon name="times" color="red" size={1.5} />
+                        </Box>
                       )}
                     </Button>
                   );
@@ -212,13 +256,10 @@ function ChoicedSelection(props: ChoicedSelectionProps) {
   );
 }
 
-function searchInCatalog(searchText = '', catalog: Record<string, string>) {
-  let items = Object.entries(catalog);
+function searchInCatalog(searchText = '', choices: string[]) {
+  let items = choices;
   if (searchText) {
-    items = filter(
-      items,
-      createSearch(searchText, ([name, _icon]) => name),
-    );
+    items = filter(items, createSearch(searchText, (name) => name));
   }
   return items;
 }
@@ -234,7 +275,7 @@ function GenderButton(props: GenderButtonProps) {
       placement="right"
       content={
         <Stack backgroundColor="white" p={0.3}>
-          {[Gender.Male, Gender.Female, Gender.Other, Gender.Other2].map(
+          {[Gender.Male, Gender.Female, Gender.Other].map(
             (gender) => {
               return (
                 <Stack.Item key={gender}>
@@ -259,7 +300,7 @@ function GenderButton(props: GenderButtonProps) {
         <Button
           fontSize="22px"
           icon={GENDERS[props.gender].icon}
-          tooltip="Gender"
+          tooltip="Body Type"
           tooltipPosition="top"
         />
       </div>
@@ -319,18 +360,26 @@ function MainFeature(props: MainFeatureProps) {
         }}
         position="relative"
       >
-        <Box
-          className={classes([
-            'preferences32x32',
-            catalog.icons![currentValue],
-            'centered-image',
-          ])}
-          style={{
-            transform: randomization
-              ? 'translateX(-70%) translateY(-70%) scale(1.1)'
-              : 'translateX(-50%) translateY(-50%) scale(1.3)',
-          }}
-        />
+        {catalog.icons?.[currentValue] ? (
+          <Box
+            className={classes([
+              'preferences32x32',
+              catalog.icons[currentValue],
+              'centered-image',
+            ])}
+            style={{
+              transform: randomization
+                ? 'translateX(-70%) translateY(-70%) scale(1.1)'
+                : 'translateX(-50%) translateY(-50%) scale(1.3)',
+            }}
+          />
+        ) : (
+          // No preview art for the current selection (e.g. Bald/Shaved/None) -- previously rendered as a
+          // silently blank box, indistinguishable from a broken image.
+          <Box style={{ lineHeight: `${CLOTHING_CELL_SIZE}px`, textAlign: 'center' }}>
+            <Icon name="times" color="red" size={1.5} />
+          </Box>
+        )}
 
         {randomization && (
           <RandomizationButton
@@ -476,93 +525,10 @@ const HAIR_INLINE_KEYS = new Set([
   'facial_hair_color',
 ]);
 
-function HairPanel() {
-  const { act, data } = useBackend<PreferencesMenuData>();
-  const serverPrefs = useServerPrefs();
-  const prefs = data.character_preferences.secondary_features || {};
-
-  const hairStyle = prefs['head_hair_style'] as string | undefined;
-  const hairColor = prefs['hair_color'] as string | undefined;
-  const facialStyle = prefs['facial_hair_style'] as string | undefined;
-  const facialColor = prefs['facial_hair_color'] as string | undefined;
-
-  const hairChoices =
-    (serverPrefs?.head_hair_style as FeatureChoicedServerData | undefined)
-      ?.choices ?? [];
-  const facialChoices =
-    (serverPrefs?.facial_hair_style as FeatureChoicedServerData | undefined)
-      ?.choices ?? [];
-
-  if (hairStyle === undefined && facialStyle === undefined) return null;
-
-  const setHair = createSetPreference(act, 'head_hair_style');
-  const setFacial = createSetPreference(act, 'facial_hair_style');
-
-  return (
-    <Stack.Item>
-      <Section title="Hair">
-        <LabeledList>
-          {hairStyle !== undefined && (
-            <LabeledList.Item label="Hair">
-              <Stack>
-                <Stack.Item grow>
-                  <Dropdown
-                    buttons
-                    options={hairChoices}
-                    selected={hairStyle}
-                    onSelected={setHair}
-                    width="100%"
-                  />
-                </Stack.Item>
-                {hairColor !== undefined && (
-                  <Stack.Item>
-                    <FeatureColorInput
-                      featureId="hair_color"
-                      handleSetValue={() => {}}
-                      value={hairColor}
-                      serverData={undefined}
-                      shrink
-                    />
-                  </Stack.Item>
-                )}
-              </Stack>
-            </LabeledList.Item>
-          )}
-          {facialStyle !== undefined && (
-            <LabeledList.Item label="Facial Hair">
-              <Stack>
-                <Stack.Item grow>
-                  <Dropdown
-                    buttons
-                    options={facialChoices}
-                    selected={facialStyle}
-                    onSelected={setFacial}
-                    width="100%"
-                  />
-                </Stack.Item>
-                {facialColor !== undefined && (
-                  <Stack.Item>
-                    <FeatureColorInput
-                      featureId="facial_hair_color"
-                      handleSetValue={() => {}}
-                      value={facialColor}
-                      serverData={undefined}
-                      shrink
-                    />
-                  </Stack.Item>
-                )}
-              </Stack>
-            </LabeledList.Item>
-          )}
-        </LabeledList>
-      </Section>
-    </Stack.Item>
-  );
-}
-
-// BS12: Sidebar quick-access buttons shown to the right of the character preview
-function SidebarSprite(props: { src?: string; fallbackIcon: string }) {
-  const { src, fallbackIcon } = props;
+// BS12: Sidebar quick-access buttons shown to the right of the character preview. No `src` always means the
+// current selection has no art (e.g. Bald/Shaved, or a "None" underwear item) -- a red X makes that explicit.
+function SidebarSprite(props: { src?: string }) {
+  const { src } = props;
   if (src) {
     return (
       <img
@@ -580,7 +546,11 @@ function SidebarSprite(props: { src?: string; fallbackIcon: string }) {
       />
     );
   }
-  return <Box className={`fa fa-${fallbackIcon}`} />;
+  return (
+    <Box style={{ lineHeight: `${CLOTHING_CELL_SIZE}px`, textAlign: 'center' }}>
+      <Icon name="times" color="red" size={1.5} />
+    </Box>
+  );
 }
 
 function CharacterSideBar() {
@@ -674,7 +644,7 @@ function CharacterSideBar() {
             }
           >
             <Button tooltip={`Hair: ${hairStyle}`} tooltipPosition="right" style={buttonStyle}>
-              <SidebarSprite src={sidebarIcons.hair} fallbackIcon="scissors" />
+              <SidebarSprite src={sidebarIcons.hair} />
             </Button>
           </Floating>
         </Stack.Item>
@@ -728,7 +698,7 @@ function CharacterSideBar() {
             }
           >
             <Button tooltip={`Facial Hair: ${facialStyle}`} tooltipPosition="right" style={buttonStyle}>
-              <SidebarSprite src={sidebarIcons.facial_hair} fallbackIcon="user" />
+              <SidebarSprite src={sidebarIcons.facial_hair} />
             </Button>
           </Floating>
         </Stack.Item>
@@ -772,7 +742,7 @@ function CharacterSideBar() {
               tooltipPosition="right"
               style={buttonStyle}
             >
-              <SidebarSprite src={sidebarIcons.backpack} fallbackIcon="bag-shopping" />
+              <SidebarSprite src={sidebarIcons.backpack} />
             </Button>
           </Floating>
         </Stack.Item>
@@ -818,104 +788,12 @@ function CharacterSideBar() {
                 tooltipPosition="right"
                 style={buttonStyle}
               >
-                <SidebarSprite
-                  src={sidebarIcons.underwear?.[category]}
-                  fallbackIcon="tshirt"
-                />
+                <SidebarSprite src={sidebarIcons.underwear?.[category]} />
               </Button>
             </Floating>
           </Stack.Item>
         );
       })}
-    </Stack>
-  );
-}
-
-function BackpackRow() {
-  const { act, data } = useBackend<PreferencesMenuData>();
-  const serverPrefs = useServerPrefs();
-  const backpackChoices = serverPrefs?.backpack_options?.choices ?? [];
-  if (!backpackChoices.length) return null;
-  return (
-    <Stack.Item>
-      <Section title="Backpack">
-        <Dropdown
-          width="100%"
-          options={backpackChoices}
-          selected={data.backpack ?? ''}
-          onSelected={(val: string) => act('set_backpack', { backpack: val })}
-        />
-      </Section>
-    </Stack.Item>
-  );
-}
-
-// BS12: Equipment preferences (sensor mode, underwear — backpack moved to Visual tab)
-const SENSOR_LABELS: Record<number, string> = {
-  0: 'Off',
-  1: 'Binary',
-  2: 'Vitals',
-  3: 'Tracking',
-};
-
-function EquipmentPrefs() {
-  const { act, data } = useBackend<PreferencesMenuData>();
-  const serverPrefs = useServerPrefs();
-  const backpackOptions = serverPrefs?.backpack_options?.choices ?? [];
-  const underwearOptions = serverPrefs?.underwear_options ?? {};
-  const currentBackpack = data.backpack ?? '';
-  const currentSensor = data.sensor_setting ?? 0;
-  const currentUnderwear = data.underwear ?? {};
-
-  return (
-    <Stack vertical>
-      <Stack.Item>
-        <Section title="Equipment">
-          <LabeledList>
-            <LabeledList.Item label="Backpack">
-              <Dropdown
-                width="200px"
-                options={backpackOptions}
-                selected={currentBackpack}
-                onSelected={(val: string) =>
-                  act('set_backpack', { backpack: val })
-                }
-              />
-            </LabeledList.Item>
-            <LabeledList.Item label="Suit Sensors">
-              <Dropdown
-                width="200px"
-                options={[0, 1, 2, 3]}
-                selected={currentSensor}
-                displayText={SENSOR_LABELS[currentSensor] ?? 'Off'}
-                onSelected={(val: number) =>
-                  act('set_sensor', { sensor: val })
-                }
-              />
-            </LabeledList.Item>
-          </LabeledList>
-        </Section>
-      </Stack.Item>
-      {Object.keys(underwearOptions).length > 0 && (
-        <Stack.Item>
-          <Section title="Underwear">
-            <LabeledList>
-              {Object.entries(underwearOptions).map(([category, catalog]) => (
-                <LabeledList.Item key={category} label={category}>
-                  <Dropdown
-                    width="200px"
-                    options={catalog.choices}
-                    selected={currentUnderwear[category] ?? catalog.choices[0]}
-                    onSelected={(val: string) =>
-                      act('set_underwear', { category, item: val })
-                    }
-                  />
-                </LabeledList.Item>
-              ))}
-            </LabeledList>
-          </Section>
-        </Stack.Item>
-      )}
     </Stack>
   );
 }
@@ -934,9 +812,6 @@ export function MainPage(props: MainPageProps) {
   const [randomToggleEnabled] = useRandomToggleState();
 
   const serverData = useServerPrefs();
-
-  const currentSpeciesData =
-    serverData?.species[data.character_preferences.misc.species];
 
   const contextualPreferences =
     data.character_preferences.secondary_features || [];
@@ -972,7 +847,6 @@ export function MainPage(props: MainPageProps) {
   enum PrefPage {
     Visual, // The visual parts
     Profile, // Age, blood type, flavor text, records, culture
-    Equipment, // BS12: backpack, sensor, underwear
   }
 
   const [currentPrefPage, setCurrentPrefPage] = useState(PrefPage.Visual);
@@ -987,8 +861,9 @@ export function MainPage(props: MainPageProps) {
       );
       prefPageContents = (
         <Stack vertical fill>
-          <HairPanel />
-          <BackpackRow />
+          <Stack.Item>
+            <CharacterAlteringToggles />
+          </Stack.Item>
           <PreferenceList
             randomizations={getRandomization(
               visualPrefs,
@@ -1021,9 +896,6 @@ export function MainPage(props: MainPageProps) {
           </Stack.Item>
         </Stack>
       );
-      break;
-    case PrefPage.Equipment:
-      prefPageContents = <EquipmentPrefs />;
       break;
     default:
       exhaustiveCheck(currentPrefPage);
@@ -1071,13 +943,8 @@ export function MainPage(props: MainPageProps) {
               <CharacterControls
                 gender={data.character_preferences.misc.gender}
                 handleOpenSpecies={props.openSpecies}
-                handleRotate={() => {
-                  act('rotate');
-                }}
                 setGender={createSetPreference(act, 'gender')}
-                showGender={
-                  currentSpeciesData ? !!currentSpeciesData.sexes : true
-                }
+                showGender={data.character_preferences.misc.species !== 'Diona'}
                 canDeleteCharacter={
                   Object.values(data.character_profiles).filter(
                     (name) => !!name,
@@ -1092,6 +959,10 @@ export function MainPage(props: MainPageProps) {
                 height="80%" // NOVA EDIT - ORIGINAL: height="100%"
                 id={data.character_preview_view}
               />
+            </Stack.Item>
+
+            <Stack.Item>
+              <PreviewModeDropdown />
             </Stack.Item>
 
             <Stack.Item position="relative">
@@ -1193,15 +1064,6 @@ export function MainPage(props: MainPageProps) {
                   setPage={setCurrentPrefPage}
                 >
                   Character Profile
-                </PageButton>
-              </Stack.Item>
-              <Stack.Item grow={2}>
-                <PageButton
-                  currentPage={currentPrefPage}
-                  page={PrefPage.Equipment}
-                  setPage={setCurrentPrefPage}
-                >
-                  Equipment
                 </PageButton>
               </Stack.Item>
             </Stack>

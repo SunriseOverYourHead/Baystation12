@@ -38,6 +38,16 @@
 
 	var/tinted = null	//Set to non-null for toggleable tint helmets
 
+	// Which mutant_cover_pattern.dmi state (if any) gets multiplied onto a head-parented
+	// external organ (horns/ears/spines/frills/snout/xenodorsal/xenohead) that's sticking out
+	// from under this helmet -- see get_worn_head_cover_theme() (update_icons.dm) and
+	// apply_mutant_cover_pattern() (_accessory_mutant.dm). "generic" for any space helmet with
+	// no more specific department theme set below.
+	var/cover_theme = "generic"
+
+/obj/item/clothing/head/helmet/space/proc/get_cover_theme()
+	return cover_theme
+
 /obj/item/clothing/head/helmet/space/Destroy()
 	if(camera && !ispath(camera))
 		QDEL_NULL(camera)
@@ -143,6 +153,15 @@
 	valid_accessory_slots = list(ACCESSORY_SLOT_INSIGNIA, ACCESSORY_SLOT_INSIGNIA_EVA)
 	equip_delay = 5 SECONDS
 
+	// Which mutant_cover_pattern.dmi state (if any) gets multiplied onto a chest-parented
+	// external organ (tail/wings/fluff) that's sticking out from under this suit -- see
+	// get_worn_cover_theme() (update_icons.dm) and apply_mutant_cover_pattern()
+	// (_accessory_mutant.dm). "generic" for any space suit with no more specific department
+	// theme set below.
+	var/cover_theme = "generic"
+
+/obj/item/clothing/suit/space/proc/get_cover_theme()
+	return cover_theme
 
 /obj/item/clothing/suit/space/equip_delay_before(mob/user, slot, equip_flags)
 	user.setClickCooldown(1 SECOND)

@@ -16,6 +16,16 @@
 		)
 	species_restricted = null
 
+// Rigs only carry ITEM_FLAG_AIRTIGHT while sealed (see update_component_sealed() above -- it's
+// toggled on all four pieces on seal/unseal), so gate the head-organ cover pattern on that
+// dynamic bit rather than the theme var alone: an unsealed/open-helmet rig should NOT mask
+// horns/ears/etc, matching the same "suit must actually be sealed" behavior Nova's own MODsuit
+// hardlight system has.
+/obj/item/clothing/head/helmet/space/rig/get_cover_theme()
+	if(!(item_flags & ITEM_FLAG_AIRTIGHT))
+		return null
+	return ..()
+
 /obj/item/clothing/gloves/rig
 	name = "gauntlets"
 	item_flags = ITEM_FLAG_THICKMATERIAL | ITEM_FLAG_AIRTIGHT | ITEM_FLAG_INVALID_FOR_CHAMELEON
@@ -57,6 +67,11 @@
 	var/max_w_class = ITEM_SIZE_NORMAL
 	var/slots = 2 STORAGE_FREEFORM
 
+// Same seal-gating as the rig helmet's own get_cover_theme() override above.
+/obj/item/clothing/suit/space/rig/get_cover_theme()
+	if(!(item_flags & ITEM_FLAG_AIRTIGHT))
+		return null
+	return ..()
 
 /obj/item/clothing/suit/space/rig/Destroy()
 	LAZYCLEARLIST(supporting_limbs)

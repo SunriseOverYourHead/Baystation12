@@ -2,6 +2,15 @@
 	name = "\improper Foundation revolver"
 	icon = 'icons/obj/guns/foundation.dmi'
 	icon_state = "foundation"
+	item_icons = list(
+		slot_l_hand_str = 'code/modules/projectiles/guns/projectile/revolver/revolver.dmi',
+		slot_r_hand_str = 'code/modules/projectiles/guns/projectile/revolver/revolver.dmi',
+	)
+	colocated_sprites = FALSE
+	item_state_slots = list(
+		slot_l_hand_str = "revolver_l",
+		slot_r_hand_str = "revolver_r",
+	)
 	desc = "The CF 'Troubleshooter', a compact plastic-composite weapon designed for concealed carry by Cuchulain Foundation field agents. Smells faintly of copper."
 	ammo_type = /obj/item/ammo_casing/pistol/huge/nullglass
 

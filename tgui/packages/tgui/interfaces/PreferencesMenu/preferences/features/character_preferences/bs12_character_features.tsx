@@ -7,13 +7,10 @@ import {
   type FeatureChoicedServerData,
   CheckboxInput,
   type FeatureNumericData,
-  FeatureShortTextInput,
   FeatureSliderInput,
   type FeatureToggle,
   type FeatureValueProps,
 } from '../base';
-
-type FeatureShortTextData = { maximum_length: number };
 import { FeatureDropdownInput } from '../dropdowns';
 
 // Hair style selector — choices provided by server per species
@@ -48,6 +45,16 @@ export const pronouns: FeatureChoiced = {
   ) => <FeatureDropdownInput {...props} />,
 };
 
+// Only ever sent (and so only ever rendered) for Trans (PLURAL) body type -- see 02_body.dm's own comment.
+export const trans_body_type: FeatureChoiced = {
+  name: 'Body Type',
+  description:
+    'Whether your body renders with male or female proportions -- independent of your Trans identity.',
+  component: (
+    props: FeatureValueProps<string, string, FeatureChoicedServerData>,
+  ) => <FeatureDropdownInput {...props} />,
+};
+
 // Base skin colour dropdown — choices provided by server per species
 export const base_skin: FeatureChoiced = {
   name: 'Base skin',
@@ -68,15 +75,6 @@ export const nearsighted: FeatureToggle = {
 export const bs12_skin_tone: Feature<number, number, FeatureNumericData> = {
   name: 'Skin tone',
   component: FeatureSliderInput,
-};
-
-// OOC notes / metadata text field
-export const metadata: Feature<string, string, FeatureShortTextData> = {
-  name: 'OOC notes',
-  description: 'Out-of-character notes visible to other players who examine you.',
-  component: (
-    props: FeatureValueProps<string, string, FeatureShortTextData>,
-  ) => <FeatureShortTextInput {...props} />,
 };
 
 // Spawn point dropdown

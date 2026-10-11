@@ -47,7 +47,9 @@
 	heat_level_3 = SYNTH_HEAT_LEVEL_3
 
 	species_flags = SPECIES_FLAG_NO_SCAN | SPECIES_FLAG_NO_PAIN | SPECIES_FLAG_NO_POISON | SPECIES_FLAG_NO_MINOR_CUT
-	spawn_flags =   SPECIES_CAN_JOIN | SPECIES_IS_WHITELISTED | SPECIES_NO_FBP_CONSTRUCTION | SPECIES_NO_FBP_CHARGEN
+	// Adherent commented out of being a selectable species per request -- SPECIES_CAN_JOIN removed, restricted instead.
+	// spawn_flags =   SPECIES_CAN_JOIN | SPECIES_IS_WHITELISTED | SPECIES_NO_FBP_CONSTRUCTION | SPECIES_NO_FBP_CHARGEN
+	spawn_flags =   SPECIES_IS_RESTRICTED | SPECIES_IS_WHITELISTED | SPECIES_NO_FBP_CONSTRUCTION | SPECIES_NO_FBP_CHARGEN
 
 	appearance_flags = SPECIES_APPEARANCE_HAS_EYE_COLOR | SPECIES_APPEARANCE_HAS_BASE_SKIN_COLOURS
 	blood_color = "#2de00d"
@@ -73,9 +75,9 @@
 		)
 	)
 
+	// BP_GROIN moved after the legs -- see species.dm's has_limbs comment.
 	has_limbs = list(
 		BP_CHEST =  list("path" = /obj/item/organ/external/chest/crystal),
-		BP_GROIN =  list("path" = /obj/item/organ/external/groin/crystal),
 		BP_HEAD =   list("path" = /obj/item/organ/external/head/crystal),
 		BP_L_ARM =  list("path" = /obj/item/organ/external/arm/crystal),
 		BP_R_ARM =  list("path" = /obj/item/organ/external/arm/right/crystal),
@@ -83,6 +85,7 @@
 		BP_R_HAND = list("path" = /obj/item/organ/external/hand/right/crystal),
 		BP_L_LEG =  list("path" = /obj/item/organ/external/tendril),
 		BP_R_LEG =  list("path" = /obj/item/organ/external/tendril/two),
+		BP_GROIN =  list("path" = /obj/item/organ/external/groin/crystal),
 		BP_L_FOOT = list("path" = /obj/item/organ/external/tendril/three),
 		BP_R_FOOT = list("path" = /obj/item/organ/external/tendril/four)
 	)
@@ -93,7 +96,12 @@
 		BP_JETS =         /obj/item/organ/internal/powered/jets,
 		BP_FLOAT =        /obj/item/organ/internal/powered/float,
 		BP_CELL =         /obj/item/organ/internal/cell/adherent,
-		BP_COOLING_FINS = /obj/item/organ/internal/powered/cooling_fins
+		BP_COOLING_FINS = /obj/item/organ/internal/powered/cooling_fins,
+		BP_BREASTS =      /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =        /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES =    /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =        /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 	move_trail = /obj/decal/cleanable/blood/tracks/snake
 	max_players = 3

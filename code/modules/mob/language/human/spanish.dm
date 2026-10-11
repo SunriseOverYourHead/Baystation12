@@ -11,6 +11,7 @@
 	colour = "iberian"
 	key = "5"
 	shorthand = "Iber"
+	tag_icon = "iber"
 	partial_understanding = list(
 		LANGUAGE_HUMAN_EURO = 30,
 		LANGUAGE_HUMAN_SELENIAN = 15,

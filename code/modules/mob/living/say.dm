@@ -305,6 +305,13 @@ var/global/list/channel_to_radio_key = new
 
 		get_mobs_and_objs_in_view_fast(T, message_range, listening, listening_obj, /datum/client_preference/ghost_ears)
 
+	// Vocal chirps (vocal_chirps.dm). Deliberately placed here rather than in handle_speech_sound(): that hook
+	// returns a single sound for hear_say() to play, whereas a chirp is a short TRAIN of sounds scaled to message
+	// length, so it needs its own emitter and the listener list. Everything that shouldn't chirp has already
+	// returned out of this proc above -- emotes, hivemind languages, muzzled speech, the :w whisper prefix, and
+	// sign language -- leaving only genuinely audible local speech here.
+	play_vocal_chirps(message, listening, whispering, length(used_radios))
+
 	var/list/speech_bubble_recipients = list()
 	for(var/mob/M in listening)
 		if(M)
@@ -337,9 +344,13 @@ var/global/list/channel_to_radio_key = new
 				if(O) //It's possible that it could be deleted in the meantime.
 					O.hear_talk(src, stars(message), verb, speaking)
 
-	invoke_async(src, TYPE_PROC_REF(/atom/movable, animate_chat), message, speaking, italics, speech_bubble_recipients)
+	// animate_chat()'s third arg is a RUNECHAT_* size, not a boolean. This used to pass `italics` straight in,
+	// which happened to work only because RUNECHAT_SMALL == 1 -- so muffled speech (whispering, thin air, talking
+	// into a radio) rendered small by accident. That reads well, so it's kept, just stated explicitly.
+	var/runechat_size = italics ? RUNECHAT_SMALL : RUNECHAT_DEFAULT
+	invoke_async(src, TYPE_PROC_REF(/atom/movable, animate_chat), message, speaking, runechat_size, speech_bubble_recipients)
 	if (length(eavesdroppers))
-		invoke_async(src, TYPE_PROC_REF(/atom/movable, animate_chat), stars(message), speaking, italics, eavesdroppers)
+		invoke_async(src, TYPE_PROC_REF(/atom/movable, animate_chat), stars(message), speaking, runechat_size, eavesdroppers)
 
 	if(mind)
 		mind.last_words = message

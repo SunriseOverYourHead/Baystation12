@@ -98,10 +98,6 @@
 	icon = 'maps/random_ruins/exoplanet_ruins/icarus/icarus.dmi'
 	icon_state = "model"
 
-/obj/item/gun/projectile/pistol/m22f/icarus
-	name = "rusty military pistol"
-	desc = "A Hephaestus Industries M22F. A large pistol issued as an SCGDF service weapon. This one has seen better days, and has the name \"Alex\" engraved into it."
-
 //SCG deco
 
 /obj/structure/sign/icarus_dedicationplaque

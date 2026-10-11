@@ -10,6 +10,14 @@
 
 	volume = 70
 
+	// Unlike vent_scrubber/vent_pump (room-fixture endpoint devices, always centered on their own tile), a zpipe
+	// connects HORIZONTALLY to a regular pipe neighbor via its dir side (initialize_directions = SOUTH below) - it
+	// sits inline with that pipe, same as the shutoff valve variants, so it needs the default piping_layer_pixel_shift
+	// (TRUE) to track pipe/smart's own baked-in per-layer shift and visually land on top of it, not the flat
+	// centered position a fixed static sprite would otherwise render at. Previously disabled here on the mistaken
+	// assumption it should behave like vent_scrubber/vent_pump - that caused fuel-migrated (layer 1) zpipes to
+	// visibly misalign with the layer-1 pipe segment they connect to.
+
 	dir = SOUTH
 	initialize_directions = SOUTH
 
@@ -56,7 +64,16 @@
 	return list(node1, node2)
 
 /obj/machinery/atmospherics/pipe/zpipe/on_update_icon()
-	return
+	// Was a no-op - the scrubbers/supply/fuel/cyan/red subtypes below only ever declared color as a compile-time
+	// class default, which base /obj/machinery/atmospherics/Initialize() copies into pipe_color and then nulls out
+	// (color = null) - with nothing here to write it back to the render var, none of them were ever actually
+	// tinted. Their only real visual distinction was the "-scrubbers"/"-supply" icon_state variants below, which
+	// turned out to be measured (via icons/obj/structures/structures.dmi) as pixel-identical grayscale art to the
+	// plain "up"/"down" state, just baked ~3-4px off-center - fighting apply_piping_layer_offset()'s runtime shift
+	// the same way clamp.dmi's "vclamp-scrubbers"/"vclamp-supply" fought the shutoff valve's shift (see shutoff.dm's
+	// on_update_icon()). Now that icon_state stays on the plain, correctly-centered "up"/"down" for every subtype,
+	// this is what makes them visually distinct again - by color instead of by a conflicting baked offset.
+	color = pipe_color
 
 /obj/machinery/atmospherics/pipe/zpipe/disconnect(obj/machinery/atmospherics/reference)
 	if(reference == node1)
@@ -81,6 +98,7 @@
 	desc = "A pipe segment to connect upwards."
 
 /obj/machinery/atmospherics/pipe/zpipe/up/atmos_init()
+	migrate_legacy_exclusive_network()
 	..()
 	var/node1_dir
 
@@ -119,6 +137,7 @@
 	desc = "A pipe segment to connect downwards."
 
 /obj/machinery/atmospherics/pipe/zpipe/down/atmos_init()
+	migrate_legacy_exclusive_network()
 	..()
 	var/node1_dir
 
@@ -149,8 +168,9 @@
 // supply/scrubbers  //
 ///////////////////////
 
+// icon_state deliberately left at the parent's plain "up"/"down" (not "up-scrubbers"/"up-supply") - see
+// zpipe/on_update_icon()'s comment.
 /obj/machinery/atmospherics/pipe/zpipe/up/scrubbers
-	icon_state = "up-scrubbers"
 	name = "upwards scrubbers pipe"
 	desc = "A scrubbers pipe segment to connect upwards."
 	connect_types = CONNECT_TYPE_SCRUBBER
@@ -158,7 +178,6 @@
 	color = PIPE_COLOR_RED
 
 /obj/machinery/atmospherics/pipe/zpipe/up/supply
-	icon_state = "up-supply"
 	name = "upwards supply pipe"
 	desc = "A supply pipe segment to connect upwards."
 	connect_types = CONNECT_TYPE_SUPPLY
@@ -166,7 +185,6 @@
 	color = PIPE_COLOR_BLUE
 
 /obj/machinery/atmospherics/pipe/zpipe/down/scrubbers
-	icon_state = "down-scrubbers"
 	name = "downwards scrubbers pipe"
 	desc = "A scrubbers pipe segment to connect downwards."
 	connect_types = CONNECT_TYPE_SCRUBBER
@@ -174,7 +192,6 @@
 	color = PIPE_COLOR_RED
 
 /obj/machinery/atmospherics/pipe/zpipe/down/supply
-	icon_state = "down-supply"
 	name = "downwards supply pipe"
 	desc = "A supply pipe segment to connect downwards."
 	connect_types = CONNECT_TYPE_SUPPLY

@@ -9,25 +9,30 @@
 	var/head_hair_style = "Bald"
 
 	/// The color of head hair applied to this mob
-	var/head_hair_color = "#000000"
+	var/head_hair_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 
 	/// The style of facial hair applied to this mob
 	var/facial_hair_style = "Shaved"
 
 	/// The color of facial hair applied to this mob
-	var/facial_hair_color = "#000000"
+	var/facial_hair_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 
 	/// The color that will be used for the eyes of this mob
-	var/eye_color = "#000000"
+	var/eye_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 
 	/// The skin color that will be applied to this mob if it does not use a tone
-	var/skin_color = "#000000"
+	var/skin_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 
 	/// The skin tone scale that will be applied to this mob if it does not use a color
 	var/skin_tone = 0
 
 	/// The base icon that will be used for this mob if it allows more than one
 	var/base_skin = ""
+
+	/// Chosen leg type (LEG_TYPE_NORMAL/LEG_TYPE_DIGITIGRADE) for species with SPECIES_APPEARANCE_HAS_LEG_TYPE
+	/// (Anthro) -- see get_digitigrade_icon_override() on the leg/foot organs and get_body_shape_key() for how
+	/// this picks the rendered leg shape and the matching clothing pixel-remap (_leg_shape_remap.dm).
+	var/leg_type = LEG_TYPE_DIGITIGRADE
 
 	/// The style of makeup applied to this mob
 	var/makeup_style
@@ -72,6 +77,8 @@
 	var/mob/remoteview_target
 	var/hand_blood_color
 
+	// Only meaningful when gender == PLURAL ("Trans") -- see 02_body.dm's own var comment.
+	var/trans_body_type = MALE
 	var/list/flavor_texts = list()
 	var/pulling_punches    // Are you trying not to hurt your opponent?
 	var/full_prosthetic    // We are a robutt.
@@ -92,6 +99,45 @@
 	var/sec_record = ""
 	var/gen_record = ""
 	var/exploit_record = ""
+	var/headshot_url = ""
+	var/headshot_nsfw_url = ""
+	var/art_reference_url = ""
+	var/art_ref_nsfw = FALSE
+	// Self-flagged "this is AI-generated" per media slot -- see the preference var's own comment (05_identity_media.dm).
+	// view_ai_generated_headshots (the viewer-side flip side of these) is deliberately NOT mirrored here -- it's
+	// read live off the VIEWER's own client.prefs in examine_panel.dm, not off any mob.
+	var/headshot_ai_generated = FALSE
+	var/headshot_nsfw_ai_generated = FALSE
+	var/art_reference_ai_generated = FALSE
+	var/ooc_notes = ""
+	// Mirrors /datum/preferences' own master_erp_preferences -- needed on the mob itself so the Examine Panel/
+	// Character Directory (which operate on arbitrary target mobs, not necessarily the viewer's own live
+	// preferences datum) can check whether the TARGET has ERP enabled at all.
+	var/master_erp_preferences = FALSE
+	var/show_in_directory = TRUE
+	var/attraction = "Unset"
+	var/display_gender = "Unset"
+	var/emote_length = "No Preference"
+	var/approach_pref = "Unset"
+	var/furry_pref = "Unset"
+	var/scalie_pref = "Unset"
+	var/other_pref = "Unset"
+	var/demihuman_pref = "Unset"
+	var/human_pref = "Unset"
+	var/character_ad = ""
+	var/erp_status = "No"
+	var/erp_status_nc = "No"
+	var/erp_status_v = "No"
+	var/erp_status_hypno = "No"
+	var/erp_free_use = FALSE
+	var/can_knot_partners = FALSE
+	// Consent flag for Sate Desire specifically -- see the preference var's own comment (06_erp_directory.dm).
+	var/mechanical_erp = FALSE
+	var/custom_species = ""
+	var/custom_species_lore = ""
+	var/character_flavor_text = ""
+	var/flavor_text_nsfw = ""
+	var/show_nsfw_flavor_text = "Nude Only"
 
 	var/datum/mil_branch/char_branch
 	var/datum/mil_rank/char_rank

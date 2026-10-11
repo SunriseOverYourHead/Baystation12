@@ -10,7 +10,7 @@
 	use_power = POWER_USE_IDLE
 	idle_power_usage = 100 //Watts, I hope.  Just enough to do the computer and display things.
 
-	var/max_power = 500000
+	var/max_power = 20000000 // raised back from 10MW - reversed per the new 15MW-per-TEG target, which a 10MW cap couldn't ever show
 	var/thermal_efficiency = 0.65
 
 	var/obj/machinery/atmospherics/binary/circulator/circ1
@@ -144,7 +144,7 @@
 	last_circ1_gen = circ1.return_stored_energy()
 	last_circ2_gen = circ2.return_stored_energy()
 	stored_energy += last_thermal_gen + last_circ1_gen + last_circ2_gen
-	lastgen1 = stored_energy*0.4 //smoothened power generation to prevent slingshotting as pressure is equalized, then restored by pumps
+	lastgen1 = stored_energy*0.2 //smoothened power generation to prevent slingshotting as pressure is equalized, then restored by pumps
 	stored_energy -= lastgen1
 	effective_gen = (lastgen1 + lastgen2) / 2
 

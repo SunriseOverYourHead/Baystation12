@@ -20,11 +20,38 @@
 	var/list/space_chance = 55        // Likelihood of getting a space in the random scramble string
 	var/machine_understands = 1       // Whether machines can parse and understand this language
 	var/shorthand = "???"			  // Shorthand that shows up in chat for this language.
+	/// Icon state in icons/language_tags.dmi, shown in chat instead of the shorthand for viewers who have chat
+	/// tag icons enabled. Null means this language has no badge drawn yet and always falls back to `shorthand`.
+	var/tag_icon
 	var/list/partial_understanding				  // List of languages that can /somehwat/ understand it, format is: name = chance of understanding a word
 	var/warning = ""
 	var/hidden_from_codex			  // If it should not show up in Codex
 	var/category = /datum/language    // Used to point at root language types that shouldn't be visible
 	var/has_written_form = FALSE
+	/// Languages sharing a non-null group are regional variants of one tongue -- English (GB) and English (US), say.
+	/// They are wired to understand each other at LANGUAGE_GROUP_UNDERSTANDING by wire_language_groups(), they share
+	/// a single speech prefix key, and character setup presents them as one entry with a variant picker.
+	var/language_group
+	/// The variant's label within its group, e.g. "Britain". Only meaningful when `language_group` is set; setup
+	/// falls back to `name` without one.
+	var/variant_name
+	/// Set on exactly one member of each group: the variant that owns the group's entry in `language_keys`, and so
+	/// the one a bare prefix resolves to before resolve_spoken_variant() swaps in whichever variant you actually know.
+	var/is_group_primary = FALSE
+
+/// The compact in-chat marker for this language: a badge image where one has been drawn and the viewer wants tag
+/// icons, otherwise the plain "(SHORTHAND)" text this has always printed. Both forms say the same thing, so the
+/// fallback is a real fallback rather than a degraded one -- which is also what lets languages be given badges
+/// piecemeal instead of all at once.
+/datum/language/proc/get_chat_tag(client/viewer)
+	if(!tag_icon)
+		return "([shorthand])"
+	return create_text_tag(tag_icon, "([shorthand])", viewer, 'icons/language_tags.dmi')
+
+/// TRUE for root types that exist only to be inherited from -- /datum/language/human, a variant group's shared
+/// parent -- rather than to be spoken. Follows the convention already used by the codex: a root is its own category.
+/datum/language/proc/is_abstract()
+	return type == category
 
 /datum/language/proc/can_be_spoken_properly_by(mob/speaker)
 	return TRUE
@@ -53,9 +80,19 @@
 /datum/language
 	var/list/scramble_cache = list()
 
-/datum/language/proc/scramble(input, list/known_languages)
+/**
+ * Degrades `input` word by word for a listener who does not fully understand this language.
+ *
+ * Each word independently survives verbatim with `understand_chance` probability and is otherwise replaced with
+ * syllable gibberish, so a partial understander reads a mix of real and invented words rather than a wall of noise.
+ *
+ * `base_understanding` is the listener's own proficiency in this language expressed as a percentage (see
+ * /mob/proc/get_speech_comprehension). Credit from `partial_understanding` -- knowing a related tongue -- stacks on
+ * top of it, which is what lets an A1 Spanish speaker who is also fluent in Iberian follow along nearly perfectly.
+ */
+/datum/language/proc/scramble(input, list/known_languages, base_understanding = 0)
 
-	var/understand_chance = 0
+	var/understand_chance = base_understanding
 	for(var/datum/language/L in known_languages)
 		if(LAZYACCESS(partial_understanding, L.name))
 			understand_chance += partial_understanding[L.name]
@@ -171,15 +208,97 @@
 	return 1
 
 // Language handling.
-/mob/proc/add_language(language)
+//
+// `languages` is an associative list of /datum/language to proficiency level. Typed for-loops iterate an assoc
+// list's keys, so `for(var/datum/language/L in languages)` and `(lang in languages)` read exactly as they did when
+// this was a flat list -- only code that *writes* to it has to care about the values.
+/mob/proc/add_language(language, level = LANGUAGE_LEVEL_C2)
 
 	var/datum/language/new_language = all_languages[language]
 
-	if(!istype(new_language) || (new_language in languages))
+	if(!istype(new_language))
 		return 0
 
-	languages.Add(new_language)
+	// A level at or below NONE is never a meaningful request -- a mob that knows nothing of a language simply is not
+	// given it -- and it is the shape a stray FALSE from an older two-argument call takes. Treat it as "unspecified"
+	// and grant full fluency, which is what every caller that passes no level at all expects.
+	if(!isnum(level) || level < LANGUAGE_LEVEL_MIN)
+		level = LANGUAGE_LEVEL_C2
+	level = min(level, LANGUAGE_LEVEL_MAX)
+
+	// Already known: upgrade to the better of the two levels rather than refusing outright, so a culture grant can
+	// promote a language the player only picked up to B1 without a second grant path silently demoting them.
+	if(new_language in languages)
+		if(level > languages[new_language])
+			languages[new_language] = level
+		return 0
+
+	languages[new_language] = level
 	return 1
+
+/// This mob's proficiency in `L`, as a LANGUAGE_LEVEL_* constant. The universal-speech and INNATE exemptions report
+/// full fluency so callers do not have to special-case them.
+/mob/proc/get_language_level(datum/language/L)
+	if(!istype(L))
+		return LANGUAGE_LEVEL_NONE
+	if(universal_speak || universal_understand || (L.flags & INNATE))
+		return LANGUAGE_LEVEL_C2
+	return languages[L] || LANGUAGE_LEVEL_NONE
+
+/// Percentage of words a listener at `level` catches. The A grades are deliberately low enough to read as struggling.
+/proc/language_level_comprehension(level)
+	switch(level)
+		if(LANGUAGE_LEVEL_A1) return 25
+		if(LANGUAGE_LEVEL_A2) return 45
+		if(LANGUAGE_LEVEL_B1) return 65
+		if(LANGUAGE_LEVEL_B2) return 85
+		if(LANGUAGE_LEVEL_C1, LANGUAGE_LEVEL_C2) return LANGUAGE_COMPREHENSION_FULL
+	return 0
+
+/// Percentage of a speaker's words that come out intelligibly at `level`. Gentler than the comprehension curve:
+/// speaking badly should be usable, not useless, so even A1 gets most of a sentence across.
+/proc/language_level_fluency(level)
+	switch(level)
+		if(LANGUAGE_LEVEL_A1) return 55
+		if(LANGUAGE_LEVEL_A2) return 75
+		if(LANGUAGE_LEVEL_B1) return 90
+		if(LANGUAGE_LEVEL_B2, LANGUAGE_LEVEL_C1, LANGUAGE_LEVEL_C2) return LANGUAGE_COMPREHENSION_FULL
+	return 0
+
+/**
+ * Coerces a stored or client-supplied proficiency into a valid LANGUAGE_LEVEL_*.
+ *
+ * Levels reach us from two places that disagree about type: JSON savefiles and TGUI params decode them as numbers,
+ * while the legacy savefile reader and any hand-edited record hand back text. Normalising both here rather than
+ * reaching for text2num() at each call site matters -- text2num() is specified for text, and quietly turning a
+ * perfectly good number into null would have defaulted every character back to C2 on their next save.
+ */
+/proc/sanitize_language_level(level, default_level = LANGUAGE_LEVEL_C2)
+	if(!isnum(level))
+		level = text2num(level)
+	if(!isnum(level))
+		return default_level
+	return clamp(round(level), LANGUAGE_LEVEL_MIN, LANGUAGE_LEVEL_MAX)
+
+/proc/language_level_name(level)
+	switch(level)
+		if(LANGUAGE_LEVEL_A1) return "A1"
+		if(LANGUAGE_LEVEL_A2) return "A2"
+		if(LANGUAGE_LEVEL_B1) return "B1"
+		if(LANGUAGE_LEVEL_B2) return "B2"
+		if(LANGUAGE_LEVEL_C1) return "C1"
+		if(LANGUAGE_LEVEL_C2) return "C2"
+	return "None"
+
+/proc/language_level_desc(level)
+	switch(level)
+		if(LANGUAGE_LEVEL_A1) return "Beginner. You catch isolated words and speak haltingly."
+		if(LANGUAGE_LEVEL_A2) return "Elementary. You follow simple speech and make yourself understood with effort."
+		if(LANGUAGE_LEVEL_B1) return "Intermediate. You hold a conversation, missing the occasional word."
+		if(LANGUAGE_LEVEL_B2) return "Upper intermediate. You follow almost everything and speak comfortably."
+		if(LANGUAGE_LEVEL_C1) return "Advanced. Fluent for every practical purpose."
+		if(LANGUAGE_LEVEL_C2) return "Native or near-native. Complete command of the language."
+	return "You do not know this language."
 
 /mob/proc/remove_language(rem_language)
 	var/datum/language/L = all_languages[rem_language]
@@ -231,12 +350,15 @@
 
 	for(var/datum/language/L in languages)
 		if(!(L.flags & NONGLOBAL))
+			var/level = get_language_level(L)
+			var/header = "<b>[L.name] ([L.shorthand]) ([get_language_prefix()][L.key]) - [language_level_name(level)]</b>"
+			var/footer = "[L.desc]<br/><i>[language_level_desc(level)]</i><br/><br/>"
 			if(L == default_language)
-				dat += "<b>[L.name]([L.shorthand]) ([get_language_prefix()][L.key])</b> - default - <a href='byond://?src=\ref[src];default_lang=reset'>reset</a><br/>[L.desc]<br/><br/>"
+				dat += "[header] - default - <a href='byond://?src=\ref[src];default_lang=reset'>reset</a><br/>[footer]"
 			else if (can_speak(L))
-				dat += "<b>[L.name]([L.shorthand]) ([get_language_prefix()][L.key])</b> - <a href='byond://?src=\ref[src];default_lang=\ref[L]'>set default</a><br/>[L.desc]<br/><br/>"
+				dat += "[header] - <a href='byond://?src=\ref[src];default_lang=\ref[L]'>set default</a><br/>[footer]"
 			else
-				dat += "<b>[L.name]([L.shorthand]) ([get_language_prefix()][L.key])</b> - cannot speak!<br/>[L.desc]<br/><br/>"
+				dat += "[header] - cannot speak!<br/>[footer]"
 
 	show_browser(src, dat, "window=checklanguage")
 
@@ -261,6 +383,66 @@
 	for(var/datum/language/L in source.languages)
 		if(L.flags & except_flags)
 			continue
-		target.add_language(L.name)
+		target.add_language(L.name, source.languages[L])
+
+/**
+ * Cross-wires every regional variant of a tongue to understand its siblings, called once after all_languages is
+ * populated. Doing it here rather than in the datum definitions keeps the tables from growing quadratically: adding
+ * a sixth Spanish variant is one new file, not five edits to existing ones.
+ *
+ * Note the direction. `partial_understanding` lives on the language being *spoken* and is keyed by languages the
+ * *listener* knows, so A's table is what gets consulted when A is spoken -- see /datum/language/proc/scramble.
+ */
+/proc/wire_language_groups()
+	var/list/by_group = list()
+	for(var/lang_name in all_languages)
+		var/datum/language/L = all_languages[lang_name]
+		if(!L.language_group || L.is_abstract())
+			continue
+		LAZYADD(by_group[L.language_group], L)
+
+	for(var/group in by_group)
+		var/list/members = by_group[group]
+		for(var/datum/language/spoken in members)
+			for(var/datum/language/known in members)
+				if(spoken == known)
+					continue
+				LAZYSET(spoken.partial_understanding, known.name, LANGUAGE_GROUP_UNDERSTANDING)
+
+/// Every variant of `L`'s group, `L` included. A list of one for a language that is not part of a group.
+/proc/get_language_group_members(datum/language/L)
+	. = list(L)
+	if(!L || !L.language_group)
+		return
+	. = list()
+	for(var/lang_name in all_languages)
+		var/datum/language/other = all_languages[lang_name]
+		if(other.language_group == L.language_group && !other.is_abstract())
+			. += other
+
+/**
+ * Variants of one tongue share a single speech prefix, so `,e` has to mean "speak my English" rather than naming a
+ * specific dialect. Given the variant a prefix literally resolved to, this returns the one this mob actually speaks:
+ * the group's primary if they know it, otherwise whichever sibling they know best.
+ *
+ * Returns `L` unchanged for ungrouped languages and when the mob knows no member of the group -- can_speak() is
+ * left to reject it, exactly as before.
+ */
+/mob/proc/resolve_spoken_variant(datum/language/L)
+	if(!L || !L.language_group)
+		return L
+	if(can_speak(L))
+		return L
+
+	var/datum/language/best
+	var/best_level = LANGUAGE_LEVEL_NONE
+	for(var/datum/language/variant in get_language_group_members(L))
+		if(!can_speak(variant))
+			continue
+		var/level = get_language_level(variant)
+		if(!best || level > best_level)
+			best = variant
+			best_level = level
+	return best || L
 
 #undef SCRAMBLE_CACHE_LEN

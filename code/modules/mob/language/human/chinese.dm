@@ -9,6 +9,7 @@
 	colour = "chinese"
 	key = "2"
 	shorthand = "YngYu"
+	tag_icon = "yngyu"
 	space_chance = 30
 	partial_understanding = list(
 		LANGUAGE_HUMAN_EURO = 5,

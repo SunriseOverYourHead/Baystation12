@@ -86,6 +86,7 @@
 	forceMove(H)
 	if(update_icons)
 		H.update_underwear()
+	H.refresh_genital_visibility_if_needed()
 
 	return TRUE
 
@@ -97,6 +98,7 @@
 	dropInto(H.loc)
 	user.put_in_hands(src)
 	H.update_underwear()
+	H.refresh_genital_visibility_if_needed()
 
 	return TRUE
 

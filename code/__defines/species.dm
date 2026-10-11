@@ -34,6 +34,12 @@
 #define SPECIES_APPEARANCE_HAS_SKIN_TONE_TRITON     FLAG_10  // Skin tone selectable in chargen for tritonian humans
 #define SPECIES_APPEARANCE_HAS_BASE_SKIN_COLOURS    FLAG_11 // Has multiple base skin sprites to go off of
 #define SPECIES_APPEARANCE_HAS_STATIC_HAIR          FLAG_12 // Once selected in chargen, hair won't change through most means (such as being affected by chemicals)
+#define SPECIES_APPEARANCE_HAS_LEG_TYPE              FLAG_13 // Leg type (plantigrade/digitigrade) selectable in chargen; see get_digitigrade_icon_override() in the leg/foot organs.
+
+// Leg type choices for SPECIES_APPEARANCE_HAS_LEG_TYPE species -- wording matches Bubberstation's own
+// NORMAL_LEGS/DIGITIGRADE_LEGS exactly, per user request.
+#define LEG_TYPE_NORMAL "Normal Legs"
+#define LEG_TYPE_DIGITIGRADE "Digitigrade Legs"
 #define SPECIES_APPEARANCE_HAS_A_SKIN_TONE (SPECIES_APPEARANCE_HAS_SKIN_TONE_NORMAL | SPECIES_APPEARANCE_HAS_SKIN_TONE_GRAV | SPECIES_APPEARANCE_HAS_SKIN_TONE_SPCR | SPECIES_APPEARANCE_HAS_SKIN_TONE_TRITON) // Species has a numeric skintone
 
 

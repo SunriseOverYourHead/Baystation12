@@ -507,6 +507,31 @@ function handleClientData(ckey, ip, compid) {
 	setCookie('connData', JSON.stringify(opts.clientData), 365);
 }
 
+function handlePlayMusic(data) {
+	var audio = document.getElementById('nowPlayingAudio');
+	if (!audio || !data.url) return;
+	var savedVolume = getCookie('audiovolume');
+	audio.volume = savedVolume ? parseFloat(savedVolume) : 0.5;
+	audio.src = data.url;
+	audio.play().catch(function() {});
+	$('#nowPlayingTitle').text(data.title || 'Unknown Track');
+	$('#nowPlayingArtist').text((data.artist && data.artist !== 'Unknown Artist') ? data.artist : '');
+	$('#nowPlayingVolume').val(audio.volume);
+	$('#nowPlaying').css('display', 'flex');
+	$('body').addClass('nowPlayingVisible');
+}
+
+function handleStopMusic() {
+	var audio = document.getElementById('nowPlayingAudio');
+	if (audio) {
+		audio.pause();
+		audio.removeAttribute('src');
+		audio.load();
+	}
+	$('#nowPlaying').css('display', 'none');
+	$('body').removeClass('nowPlayingVisible');
+}
+
 //Server calls this on ehjax response
 //Or, y'know, whenever really
 function ehjaxCallback(data) {
@@ -535,13 +560,21 @@ function ehjaxCallback(data) {
 		internalOutput('<div class="connectionClosed internal restarting">The connection has been closed because the server is restarting. Please wait while you automatically reconnect.</div>', 'internal');
 	} else {
 		//Oh we're actually being sent data instead of an instruction
+		//We don't know exactly how many times BYOND's transport itself decodes this in transit,
+		//so try progressively more decode passes until one of them actually parses as JSON.
 		var dataJ;
-		try {
-			dataJ = $.parseJSON(data);
-		} catch (e) {
-			//But...incorrect :sadtrombone:
-			window.onerror('JSON: '+e+'. '+data, 'browserOutput.html', 327);
-			return;
+		var candidates = [data, byondDecode(data), byondDecode(byondDecode(data))];
+		for (var ci = 0; ci < candidates.length; ci++) {
+			try {
+				dataJ = $.parseJSON(candidates[ci]);
+				break;
+			} catch (e) {
+				if (ci === candidates.length - 1) {
+					//But...incorrect :sadtrombone:
+					window.onerror('JSON: '+e+'. '+data, 'browserOutput.html', 327);
+					return;
+				}
+			}
 		}
 		data = dataJ;
 
@@ -566,6 +599,10 @@ function ehjaxCallback(data) {
 
 				replaceRegexes[i] = [new RegExp(regexName, regexFlags), regexReplaced];
 			}
+		} else if (data.playMusic) {
+			handlePlayMusic(data.playMusic);
+		} else if (data.stopMusic) {
+			handleStopMusic();
 		}
 	}
 }
@@ -912,6 +949,39 @@ $(function() {
 			$('body,html').scrollTop($messages.outerHeight());
 			opts.priorChatHeight = $(this).height();
 		}
+	});
+
+
+	/*****************************************
+	*
+	* NOW PLAYING (ADMIN WEB AUDIO)
+	*
+	******************************************/
+
+	(function() {
+		var savedVolume = getCookie('audiovolume');
+		var startVolume = savedVolume ? parseFloat(savedVolume) : 0.5;
+		$('#nowPlayingVolume').val(startVolume);
+		var audio = document.getElementById('nowPlayingAudio');
+		if (audio) {
+			audio.volume = startVolume;
+			audio.addEventListener('ended', handleStopMusic);
+			audio.addEventListener('error', handleStopMusic);
+		}
+	})();
+
+	$('#nowPlayingStop').click(function(e) {
+		e.preventDefault();
+		handleStopMusic();
+	});
+
+	$('#nowPlayingVolume').on('input change', function() {
+		var volume = parseFloat($(this).val());
+		var audio = document.getElementById('nowPlayingAudio');
+		if (audio) {
+			audio.volume = volume;
+		}
+		setCookie('audiovolume', volume, 365);
 	});
 
 

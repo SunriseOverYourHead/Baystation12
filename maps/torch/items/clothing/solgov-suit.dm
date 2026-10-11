@@ -338,7 +338,14 @@
 
 /obj/item/clothing/suit/space/void/engineering/alt/sol
 	icon = 'maps/torch/icons/obj/obj_suit_solgov.dmi'
-	item_icons = list(slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi')
+	// Hand entries preserved from /obj/item/clothing/suit/space -- assigning item_icons REPLACES the parent's
+	// list outright, and dropping the l/r hand sheets here left held voidsuits with no valid in-hand art
+	// (their "*_voidsuit" states only exist in lefthand/righthand_spacesuits.dmi, not the generic hand sheet).
+	item_icons = list(
+		slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi',
+		slot_l_hand_str = 'icons/mob/onmob/items/lefthand_spacesuits.dmi',
+		slot_r_hand_str = 'icons/mob/onmob/items/righthand_spacesuits.dmi',
+		)
 	sprite_sheets = list(
 		SPECIES_UNATHI = 'maps/torch/icons/mob/unathi/onmob_suit_spacesuits_solgov_unathi.dmi',
 		SPECIES_SKRELL = 'maps/torch/icons/mob/skrell/onmob_suit_solgov_skrell.dmi',
@@ -355,7 +362,14 @@
 
 /obj/item/clothing/suit/space/void/atmos/alt/sol
 	icon = 'maps/torch/icons/obj/obj_suit_solgov.dmi'
-	item_icons = list(slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi')
+	// Hand entries preserved from /obj/item/clothing/suit/space -- assigning item_icons REPLACES the parent's
+	// list outright, and dropping the l/r hand sheets here left held voidsuits with no valid in-hand art
+	// (their "*_voidsuit" states only exist in lefthand/righthand_spacesuits.dmi, not the generic hand sheet).
+	item_icons = list(
+		slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi',
+		slot_l_hand_str = 'icons/mob/onmob/items/lefthand_spacesuits.dmi',
+		slot_r_hand_str = 'icons/mob/onmob/items/righthand_spacesuits.dmi',
+		)
 	sprite_sheets = list(
 		SPECIES_UNATHI = 'maps/torch/icons/mob/unathi/onmob_suit_spacesuits_solgov_unathi.dmi',
 		SPECIES_SKRELL = 'maps/torch/icons/mob/skrell/onmob_suit_solgov_skrell.dmi',
@@ -372,7 +386,14 @@
 
 /obj/item/clothing/suit/space/void/pilot/sol
 	icon = 'maps/torch/icons/obj/obj_suit_solgov.dmi'
-	item_icons = list(slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi')
+	// Hand entries preserved from /obj/item/clothing/suit/space -- assigning item_icons REPLACES the parent's
+	// list outright, and dropping the l/r hand sheets here left held voidsuits with no valid in-hand art
+	// (their "*_voidsuit" states only exist in lefthand/righthand_spacesuits.dmi, not the generic hand sheet).
+	item_icons = list(
+		slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi',
+		slot_l_hand_str = 'icons/mob/onmob/items/lefthand_spacesuits.dmi',
+		slot_r_hand_str = 'icons/mob/onmob/items/righthand_spacesuits.dmi',
+		)
 	sprite_sheets = list(
 		SPECIES_UNATHI = 'maps/torch/icons/mob/unathi/onmob_suit_spacesuits_solgov_unathi.dmi',
 		SPECIES_SKRELL = 'maps/torch/icons/mob/skrell/onmob_suit_solgov_skrell.dmi',
@@ -389,7 +410,14 @@
 
 /obj/item/clothing/suit/space/void/medical/alt/sol
 	icon = 'maps/torch/icons/obj/obj_suit_solgov.dmi'
-	item_icons = list(slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi')
+	// Hand entries preserved from /obj/item/clothing/suit/space -- assigning item_icons REPLACES the parent's
+	// list outright, and dropping the l/r hand sheets here left held voidsuits with no valid in-hand art
+	// (their "*_voidsuit" states only exist in lefthand/righthand_spacesuits.dmi, not the generic hand sheet).
+	item_icons = list(
+		slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi',
+		slot_l_hand_str = 'icons/mob/onmob/items/lefthand_spacesuits.dmi',
+		slot_r_hand_str = 'icons/mob/onmob/items/righthand_spacesuits.dmi',
+		)
 	sprite_sheets = list(
 		SPECIES_UNATHI = 'maps/torch/icons/mob/unathi/onmob_suit_spacesuits_solgov_unathi.dmi',
 		SPECIES_SKRELL = 'maps/torch/icons/mob/skrell/onmob_suit_solgov_skrell.dmi',
@@ -408,7 +436,14 @@
 	name = "command voidsuit"
 	desc = "A light, radiation resistant voidsuit commonly used among SCG uniformed services. This one has an EC seal on its chest plate and command department markings."
 	icon = 'maps/torch/icons/obj/obj_suit_solgov.dmi'
-	item_icons = list(slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi')
+	// Hand entries preserved from /obj/item/clothing/suit/space -- assigning item_icons REPLACES the parent's
+	// list outright, and dropping the l/r hand sheets here left held voidsuits with no valid in-hand art
+	// (their "*_voidsuit" states only exist in lefthand/righthand_spacesuits.dmi, not the generic hand sheet).
+	item_icons = list(
+		slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi',
+		slot_l_hand_str = 'icons/mob/onmob/items/lefthand_spacesuits.dmi',
+		slot_r_hand_str = 'icons/mob/onmob/items/righthand_spacesuits.dmi',
+		)
 	icon_state = "rig_command"
 	item_state = "rig_command"
 	sprite_sheets = list(
@@ -433,7 +468,14 @@
 /obj/item/clothing/suit/space/void/exploration
 	name = "exploration voidsuit"
 	icon = 'maps/torch/icons/obj/obj_suit_solgov.dmi'
-	item_icons = list(slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi')
+	// Hand entries preserved from /obj/item/clothing/suit/space -- assigning item_icons REPLACES the parent's
+	// list outright, and dropping the l/r hand sheets here left held voidsuits with no valid in-hand art
+	// (their "*_voidsuit" states only exist in lefthand/righthand_spacesuits.dmi, not the generic hand sheet).
+	item_icons = list(
+		slot_wear_suit_str = 'maps/torch/icons/mob/onmob_suit_solgov.dmi',
+		slot_l_hand_str = 'icons/mob/onmob/items/lefthand_spacesuits.dmi',
+		slot_r_hand_str = 'icons/mob/onmob/items/righthand_spacesuits.dmi',
+		)
 	desc = "The bulky Exoplanet Exploration Unit is a standard voidsuit for Expeditionary Corps field operations. It features extra padding and respectable radiation-resistant lining."
 	icon_state = "rig_explorer"
 	item_state = "rig_explorer"

@@ -39,9 +39,11 @@
 	)
 
 	//These should probably be moved into the evac controller...
+	// shuttle_docked_message is unused for the starship's Return to Port flow - see finish_preparing_evac() in
+	// code/controllers/evacuation/evacuation_pods.dm, which merges it into shuttle_called_message below.
 	shuttle_docked_message = "Attention all hands: Jump preparation complete. The bluespace drive is now spooling up, secure all stations for departure. Time to jump: approximately %ETD%."
 	shuttle_leaving_dock = "Attention all hands: Jump initiated, exiting bluespace in %ETA%."
-	shuttle_called_message = "Attention all hands: Jump sequence initiated. Transit procedures are now in effect. Jump in %ETA%."
+	shuttle_called_message = "Attention all hands: Jump sequence initiated. The bluespace drive is spooling up for the jump home, secure all stations for departure. Jump in %ETA%."
 	shuttle_recall_message = "Attention all hands: Jump sequence aborted, return to normal operating conditions."
 
 	evac_controller_type = /datum/evacuation_controller/starship

@@ -228,6 +228,11 @@ GUEST_BAN
 ## Where your users can go to complain at each other in real time
 # DISCORD_URL https://example.com
 
+## Path to a yt-dlp (or youtube-dl) executable
+## Enables the admin "Play Internet Sound" verb
+## Leave commented out to disable the feature
+# INVOKE_YOUTUBEDL yt-dlp
+
 ## Ban appeals URL
 ## Where your users can go to tell you they've changed
 # BANAPPEALS https://example.com

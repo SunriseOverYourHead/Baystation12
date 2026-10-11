@@ -5,11 +5,13 @@
 /obj/item/clothing/accessory/blue
 	name = "blue tie"
 	color = "#123c5a"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_TIE // uses the base "tie" icon_state, matching what the reference art was extracted from
 
 
 /obj/item/clothing/accessory/red
 	name = "red tie"
 	color = "#800000"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_TIE // uses the base "tie" icon_state, matching what the reference art was extracted from
 
 
 /obj/item/clothing/accessory/blue_clip
@@ -26,6 +28,7 @@
 /obj/item/clothing/accessory/black
 	name = "black tie"
 	color = "#1e1e1e"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_TIE // uses the base "tie" icon_state, matching what the reference art was extracted from
 
 
 /obj/item/clothing/accessory/yellow
@@ -37,6 +40,7 @@
 /obj/item/clothing/accessory/navy
 	name = "navy tie"
 	color = "#182e44"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_TIE // uses the base "tie" icon_state, matching what the reference art was extracted from
 
 
 /obj/item/clothing/accessory/horrible

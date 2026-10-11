@@ -13,6 +13,7 @@
 	constructed_path = /obj/machinery/atmospherics/pipe/simple/hidden/universal
 	pipe_class = PIPE_CLASS_BINARY
 	rotate_class = PIPE_ROTATE_TWODIR
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/connector
 	name = "connector"
@@ -22,6 +23,7 @@
 	build_icon_state = "connector"
 	constructed_path = /obj/machinery/atmospherics/portables_connector
 	pipe_class = PIPE_CLASS_UNARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/unaryvent
 	name = "unary vent"
@@ -31,6 +33,7 @@
 	build_icon_state = "uvent"
 	constructed_path = /obj/machinery/atmospherics/unary/vent_pump
 	pipe_class = PIPE_CLASS_UNARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/unaryvent/large
 	name = "high volume unary vent"
@@ -45,6 +48,7 @@
 	build_icon_state = "pump"
 	constructed_path = /obj/machinery/atmospherics/binary/pump
 	pipe_class = PIPE_CLASS_BINARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/pressureregulator
 	name = "pressure regulator"
@@ -54,6 +58,7 @@
 	build_icon_state = "passivegate"
 	constructed_path = /obj/machinery/atmospherics/binary/passive_gate
 	pipe_class = PIPE_CLASS_BINARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/hpgaspump
 	name = "high powered gas pump"
@@ -63,6 +68,7 @@
 	build_icon_state = "volumepump"
 	constructed_path = /obj/machinery/atmospherics/binary/pump/high_power
 	pipe_class = PIPE_CLASS_BINARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/scrubber
 	name = "scrubber"
@@ -72,6 +78,7 @@
 	build_icon_state = "scrubber"
 	constructed_path = /obj/machinery/atmospherics/unary/vent_scrubber
 	pipe_class = PIPE_CLASS_UNARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/meter
 	name = "meter"
@@ -110,6 +117,7 @@
 	constructed_path = /obj/machinery/atmospherics/valve
 	pipe_class = PIPE_CLASS_BINARY
 	rotate_class = PIPE_ROTATE_TWODIR
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/digitalvalve
 	name = "digital valve"
@@ -119,6 +127,7 @@
 	constructed_path = /obj/machinery/atmospherics/valve/digital
 	pipe_class = PIPE_CLASS_BINARY
 	rotate_class = PIPE_ROTATE_TWODIR
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/mtvalve
 	name = "manual t-valve"
@@ -127,6 +136,7 @@
 	build_icon_state = "mtvalve"
 	constructed_path = /obj/machinery/atmospherics/tvalve
 	pipe_class = PIPE_CLASS_TRINARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/mtvalvem
 	name = "manual t-valve (mirrored)"
@@ -135,6 +145,7 @@
 	build_icon_state = "mtvalvem"
 	constructed_path = /obj/machinery/atmospherics/tvalve/mirrored
 	pipe_class = PIPE_CLASS_TRINARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/dtvalve
 	name = "digital t-valve"
@@ -144,6 +155,7 @@
 	build_icon_state = "map_tvalve0"
 	constructed_path = /obj/machinery/atmospherics/tvalve/digital
 	pipe_class = PIPE_CLASS_TRINARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/dtvalvem
 	name = "digital t-valve (mirrored)"
@@ -153,6 +165,7 @@
 	build_icon_state = "map_tvalvem0"
 	constructed_path = /obj/machinery/atmospherics/tvalve/mirrored/digital
 	pipe_class = PIPE_CLASS_TRINARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/air_sensor
 	name = "gas sensor"
@@ -177,6 +190,7 @@
 	pipe_color = null
 	constructed_path = /obj/machinery/atmospherics/unary/outlet_injector
 	pipe_class = PIPE_CLASS_UNARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/drain
 	name = "gutter"
@@ -212,6 +226,7 @@
 	constructed_path = /obj/machinery/atmospherics/unary/tank
 	pipe_class = PIPE_CLASS_UNARY
 	colorable = TRUE
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/pipesparker
 	name = "pipe sparker"
@@ -224,6 +239,7 @@
 	pipe_class = PIPE_CLASS_UNARY
 	pipe_color = null
 	colorable = FALSE
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/device/gas_extractor
 	name = "gas extractor"
@@ -236,3 +252,4 @@
 	pipe_color = null
 	constructed_path = /obj/machinery/atmospherics/unary/gas_extractor
 	pipe_class = PIPE_CLASS_UNARY
+	placement_mode = PIPE_PLACEMENT_ORTHOGONAL

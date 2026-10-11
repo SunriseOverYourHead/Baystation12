@@ -174,6 +174,18 @@
 				var/list/marklist = dna.body_markings[tag]
 				E.markings = marklist.Copy()
 
+		//Mutant organs (tail, ...)
+		for(var/tag in dna.mutant_organs)
+			var/obj/item/organ/internal/mutant/M = H.internal_organs_by_name[tag]
+			if(!istype(M))
+				continue
+			var/list/choice = dna.mutant_organs[tag]
+			var/list/style_list = M.get_style_list()
+			if(islist(style_list) && choice["style"])
+				M.sprite_datum = style_list[choice["style"]] // null (eg "None") clears the organ's style
+			if(islist(choice["colors"]))
+				M.colors = choice["colors"].Copy()
+
 		//Base skin and blend
 		for(var/obj/item/organ/external/E in H.organs)
 			E.set_dna(E.dna)

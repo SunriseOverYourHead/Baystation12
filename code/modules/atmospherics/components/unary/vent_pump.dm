@@ -20,6 +20,7 @@
 	connect_types = CONNECT_TYPE_REGULAR|CONNECT_TYPE_SUPPLY|CONNECT_TYPE_FUEL //connects to regular, supply pipes, and fuel pipes
 	level = ATOM_LEVEL_UNDER_TILE
 	identifier = "AVP"
+	atmos_single_device_per_tile = TRUE
 
 	var/hibernate = 0 //Do we even process?
 	var/pump_direction = 1 //0 = siphoning, 1 = releasing
@@ -73,6 +74,24 @@
 	frame_type = /obj/item/pipe
 	construct_state = /singleton/machine_construction/default/item_chassis
 	base_type = /obj/machinery/atmospherics/unary/vent_pump
+
+	// Centered on a proper tiled floor regardless of layer (matching NovaSector) - the layer nudge only applies
+	// once the tile's covering is removed, exposing bare plating. See piping_layer_pixel_shift_needs_exposed_tile's
+	// declaration in atmospherics.dm.
+	piping_layer_pixel_shift_needs_exposed_tile = TRUE
+
+// Every vent (including /siphon - still the same supply-network device, just running its pump reversed) is
+// forced onto its own dedicated blue/layer-4 loop, regardless of what's mapped or what the RPD was set to at
+// construction. See the matching comment on vent_scrubber/pre_atmos_migrate() for why this is split between
+// Initialize() (via pre_atmos_migrate(), atmospherics.dm) and atmos_init() here.
+/obj/machinery/atmospherics/unary/vent_pump/pre_atmos_migrate()
+	pipe_color = PIPE_COLOR_BLUE
+	piping_layer = 4
+	apply_piping_layer_offset()
+
+/obj/machinery/atmospherics/unary/vent_pump/atmos_init()
+	pre_atmos_migrate()
+	..()
 
 /obj/machinery/atmospherics/unary/vent_pump/on
 	use_power = POWER_USE_IDLE
@@ -471,6 +490,14 @@
 		/singleton/stock_part_preset/radio/receiver/vent_pump/tank = 1,
 		/singleton/stock_part_preset/radio/event_transmitter/vent_pump/tank = 1
 	)
+
+// Unlike every other vent_pump, this one is NOT part of the blue/layer-4 supply loop - it's a canister/tank
+// connector meant to sit on the default layer 3 (regular, uncolored) network. Overriding just pre_atmos_migrate()
+// is enough: vent_pump/atmos_init() (inherited, not overridden here) calls pre_atmos_migrate() polymorphically,
+// so it dispatches to this override instead of the parent's blue/layer-4 forcing.
+/obj/machinery/atmospherics/unary/vent_pump/tank/pre_atmos_migrate()
+	piping_layer = PIPING_LAYER_DEFAULT
+	apply_piping_layer_offset()
 
 /obj/machinery/atmospherics/unary/vent_pump/siphon/on/atmos/tank
 	controlled = FALSE

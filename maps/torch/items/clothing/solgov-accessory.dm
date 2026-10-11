@@ -560,6 +560,7 @@ department tags
 	on_rolled_sleeves = "dept_exped_sleeves"
 	slot = ACCESSORY_SLOT_FLASH
 	accessory_flags = FLAGS_OFF
+	leg_remap_category = CLOTHING_LEG_CATEGORY_INSIGNIA
 
 /obj/item/clothing/accessory/solgov/department/command
 	name = "command insignia"
@@ -687,6 +688,7 @@ ranks - ec
 	slot = ACCESSORY_SLOT_RANK
 	gender = PLURAL
 	accessory_flags = ACCESSORY_REMOVABLE | ACCESSORY_HIGH_VISIBILITY
+	leg_remap_category = CLOTHING_LEG_CATEGORY_RANK
 
 /obj/item/clothing/accessory/solgov/rank/ec
 	name = "explorer ranks"

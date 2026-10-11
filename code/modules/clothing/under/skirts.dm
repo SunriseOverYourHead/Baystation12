@@ -6,6 +6,7 @@
 	worn_state = "blackskirt"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS
 	rolled_sleeves = -1
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 
 // discreet skirts, dont cover upper/arms etc
 /obj/item/clothing/under/skirt/khaki
@@ -50,6 +51,7 @@
 	icon_state = "skirt_short"
 	worn_state = "skirt_short"
 	body_parts_covered = LOWER_TORSO
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 
 /obj/item/clothing/under/skirt_c/dress
 	name = "short dress"
@@ -57,6 +59,7 @@
 	icon_state = "shortdress"
 	worn_state = "shortdress"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
+	leg_remap_category = CLOTHING_LEG_CATEGORY_PANTS // dress-shaped, not skirt-shaped -- don't inherit skirt_c's SKIRT category
 
 /obj/item/clothing/under/skirt_c/dress/black
 	name = "black short dress"

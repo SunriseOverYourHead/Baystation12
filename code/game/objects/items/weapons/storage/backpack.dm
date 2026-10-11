@@ -24,6 +24,7 @@
 	max_storage_space = DEFAULT_BACKPACK_STORAGE
 	open_sound = 'sound/effects/storage/unzip.ogg'
 	allow_slow_dump = TRUE
+	leg_remap_category = CLOTHING_LEG_CATEGORY_BACKPACK
 
 	/// Can this backpack be opened while worn on the back?
 	var/worn_access = TRUE
@@ -192,6 +193,7 @@
 		slot_l_hand_str = "rucksack",
 		slot_r_hand_str = "rucksack"
 	)
+	leg_remap_category = CLOTHING_LEG_CATEGORY_RUCKSACK
 
 /obj/item/storage/backpack/rucksack/blue
 	name = "blue rucksack"
@@ -246,6 +248,7 @@
 	w_class = ITEM_SIZE_HUGE
 	max_storage_space = DEFAULT_BACKPACK_STORAGE + 10
 	worn_access = FALSE
+	leg_remap_category = CLOTHING_LEG_CATEGORY_DUFFLEBAG
 
 /obj/item/storage/backpack/dufflebag/syndie
 	name = "black dufflebag"
@@ -323,6 +326,7 @@
 	name = "satchel"
 	desc = "A trendy-looking satchel."
 	icon_state = "satchel-norm"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SATCHEL
 
 /obj/item/storage/backpack/satchel/grey
 	name = "grey satchel"
@@ -365,6 +369,7 @@
 	max_w_class = ITEM_SIZE_NORMAL
 	max_storage_space = DEFAULT_LARGEBOX_STORAGE
 	color = "#212121"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_POCKETBOOK // overrides satchel's category -- own shape, own reference art
 
 /obj/item/storage/backpack/satchel/pocketbook/brown
 	name = "brown pocketbook"
@@ -524,6 +529,7 @@
 	name = "messenger bag"
 	desc = "A small, sturdy backpack, worn over one shoulder."
 	icon_state = "courierbag"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_MESSENGERBAG
 
 /obj/item/storage/backpack/messenger/chem
 	name = "pharmacy messenger bag"

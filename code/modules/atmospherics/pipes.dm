@@ -37,7 +37,13 @@
 /obj/machinery/atmospherics/pipe/hides_under_flooring()
 	return level != ATOM_LEVEL_OVER_TILE
 
-/obj/machinery/atmospherics/pipe/fire_act()
+// Must match the parent signature (code/game/atoms.dm's /atom/proc/fire_act) - callers use named arguments
+// (code/game/objects/effects/fire/fire.dm's /obj/turf_fire/Process()/Crossed() call
+// fire_act(exposed_temperature = ..., exposed_volume = ...)), and DM resolves those against whatever override
+// actually runs. This override previously declared zero parameters, which crashed with "bad arg name
+// 'exposed_temperature'" the moment a real fire ever touched a pipe - a pre-existing engine bug, not something
+// introduced by the reactor work.
+/obj/machinery/atmospherics/pipe/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	return FALSE
 
 /obj/machinery/atmospherics/pipe/on_death()
@@ -182,6 +188,15 @@
 	name = "pipe"
 	desc = "A one meter section of regular pipe."
 
+	// piping_layer_pixel_shift is left at its default (TRUE) here, unlike vent_scrubber/vent_pump - those are
+	// standalone room-fixture endpoint devices (nothing else to align with), but this class (and manifold/
+	// manifold4w/cap below) either gets fully replaced by a real pipe/smart before ever rendering at a shifted
+	// layer (see convert_to_smart_pipe_on_migrate below - the exclusive-network scrubber/supply/fuel subtypes),
+	// or - for the leaf types that DON'T get replaced (color_adapter/layer_adapter subclass this; so do the
+	// universal adapter and pipe sparker recipes) - sits inline with a real layer-shifted pipe/smart segment and
+	// needs the matching runtime shift to visually land on top of it, exactly like the shutoff valve/zpipe fix.
+	convert_to_smart_pipe_on_migrate = TRUE
+
 	volume = ATMOS_DEFAULT_VOLUME_PIPE
 
 	dir = SOUTH
@@ -197,6 +212,8 @@
 
 /obj/machinery/atmospherics/pipe/simple/Initialize()
 	. = ..()
+	if(. == INITIALIZE_HINT_QDEL)
+		return
 	// Pipe colors and icon states are handled by an image cache - so color and icon should
 	//  be null. For mapping purposes color is defined in the object definitions.
 	icon = null
@@ -278,24 +295,21 @@
 
 	ClearOverlays()
 
-	if(!node1 && !node2)
-		var/turf/T = get_turf(src)
-		new /obj/item/pipe(loc, src)
-		for (var/obj/machinery/meter/meter in T)
-			if (meter.target == src)
-				meter.dismantle()
-		qdel(src)
-	else if(node1 && node2)
+	if(node1 && node2)
 		AddOverlays(icon_manager.get_atmos_icon("pipe", , pipe_color, "[pipe_icon]intact[icon_connect_type]"))
-		set_leaking(FALSE)
 	else
 		AddOverlays(icon_manager.get_atmos_icon("pipe", , pipe_color, "[pipe_icon]exposed[node1?1:0][node2?1:0][icon_connect_type]"))
-		set_leaking(TRUE)
+	//Leaking is no longer tied to "not fully connected" - a pipe missing a neighbor (freshly placed, or
+	//peacefully disconnected via unwrench) is simply capped/inert, not leaking. Only violent destruction
+	//(burst()/on_death()) represents an actual breach, and those already do their own instant, one-time gas
+	//release (see burst() below) rather than going through this continuous-leak mechanism.
+	set_leaking(FALSE)
 
 /obj/machinery/atmospherics/pipe/simple/update_underlays()
 	return
 
 /obj/machinery/atmospherics/pipe/simple/atmos_init()
+	migrate_legacy_exclusive_network()
 	..()
 	var/node1_dir
 	var/node2_dir
@@ -318,10 +332,9 @@
 				node2 = target
 				break
 
-	if(!node1 && !node2)
-		qdel(src)
-		return
-
+	//No longer self-deletes when unconnected - pipes should be placeable standalone (matches how cap/vent, the
+	//other pipe types in this file, already behaved; this just brings simple/manifold/manifold4w/he pipes in
+	//line with them instead of being the odd ones out).
 	var/turf/T = loc
 	if(level == ATOM_LEVEL_UNDER_TILE && !T.is_plating()) hide(1)
 	update_icon()
@@ -441,12 +454,221 @@
 	alert_pressure = 350*ONE_ATMOSPHERE
 	connect_types = CONNECT_TYPE_FUEL
 
+// The ONE regular-pipe fitting the RPD builds now (per connect_types category - regular/supply/scrubber/fuel/
+// HE) - matches NovaSector's actual design: a single quaternary (up to 4 connections) pipe whose shape is
+// computed at render time from which directions are actually connected, rather than the player picking a
+// discrete shape (straight/bent/manifold/manifold4w/cap) up front. Ported from NovaSector's
+// code/modules/atmospherics/machinery/pipes/{pipes,smart}.dm - connectable directions default to all 4
+// cardinals and stay reprogrammable via the RPD's Reprogram mode (unchanged from the old binary version).
+// The old discrete pipe/manifold, pipe/manifold4w and pipe/cap classes are untouched and keep working for
+// whatever's already placed on existing maps - only the *catalog* (pipe_datums.dm) stops offering them.
+/obj/machinery/atmospherics/pipe/smart
+	name = "pipe"
+	desc = "A one meter section of regular pipe. Its shape follows its connections, and its connectable directions can be reprogrammed with an RPD in Reprogram mode."
+	icon = 'icons/atmos/pipes_bitmask.dmi'
+	icon_state = ""
+	pipe_class = PIPE_CLASS_QUATERNARY
+	alpha = 255
+	// pipes_bitmask.dmi already draws a distinct, shifted tile per piping_layer - see the comment on the var
+	// declaration in atmospherics.dm.
+	piping_layer_pixel_shift = FALSE
+
+	var/obj/machinery/atmospherics/node3
+	var/obj/machinery/atmospherics/node4
+	/// Bitmask of directions this pipe is currently connected on - recomputed by on_update_icon(), not authoritative (node1-4 are).
+	var/connections = 0
+	// p_init_dir (which directions this pipe is allowed to connect on) is declared on the base
+	// /obj/machinery/atmospherics class now, not here - construction.dm's use_tool() needs to set it generically
+	// on any newly-built machine. Default there is already NORTH|SOUTH|EAST|WEST, same as before.
+
+/obj/machinery/atmospherics/pipe/smart/get_initialze_directions()
+	return p_init_dir
+
+/obj/machinery/atmospherics/pipe/smart/atmos_init()
+	..()
+	var/connect_directions = initialize_directions
+
+	for(var/direction in GLOB.cardinal)
+		if(direction & connect_directions)
+			for(var/obj/machinery/atmospherics/target in get_step(src,direction))
+				if((target.initialize_directions & get_dir(target,src)) && check_connect_types(target,src))
+					node1 = target
+					connect_directions &= ~direction
+					break
+			if(node1)
+				break
+
+	for(var/direction in GLOB.cardinal)
+		if(direction & connect_directions)
+			for(var/obj/machinery/atmospherics/target in get_step(src,direction))
+				if((target.initialize_directions & get_dir(target,src)) && check_connect_types(target,src))
+					node2 = target
+					connect_directions &= ~direction
+					break
+			if(node2)
+				break
+
+	for(var/direction in GLOB.cardinal)
+		if(direction & connect_directions)
+			for(var/obj/machinery/atmospherics/target in get_step(src,direction))
+				if((target.initialize_directions & get_dir(target,src)) && check_connect_types(target,src))
+					node3 = target
+					connect_directions &= ~direction
+					break
+			if(node3)
+				break
+
+	for(var/direction in GLOB.cardinal)
+		if(direction & connect_directions)
+			for(var/obj/machinery/atmospherics/target in get_step(src,direction))
+				if((target.initialize_directions & get_dir(target,src)) && check_connect_types(target,src))
+					node4 = target
+					connect_directions &= ~direction
+					break
+			if(node4)
+				break
+
+	var/turf/T = loc
+	if(level == ATOM_LEVEL_UNDER_TILE && !T.is_plating()) hide(1)
+	update_icon()
+
+/obj/machinery/atmospherics/pipe/smart/disconnect(obj/machinery/atmospherics/reference)
+	if(reference == node1)
+		if(istype(node1, /obj/machinery/atmospherics/pipe))
+			qdel(parent)
+		node1 = null
+	if(reference == node2)
+		if(istype(node2, /obj/machinery/atmospherics/pipe))
+			qdel(parent)
+		node2 = null
+	if(reference == node3)
+		if(istype(node3, /obj/machinery/atmospherics/pipe))
+			qdel(parent)
+		node3 = null
+	if(reference == node4)
+		if(istype(node4, /obj/machinery/atmospherics/pipe))
+			qdel(parent)
+		node4 = null
+	update_icon()
+
+/obj/machinery/atmospherics/pipe/smart/pipeline_expansion()
+	return list(node1, node2, node3, node4)
+
+/obj/machinery/atmospherics/pipe/smart/Destroy()
+	if(node1)
+		node1.disconnect(src)
+		node1 = null
+	if(node2)
+		node2.disconnect(src)
+		node2 = null
+	if(node3)
+		node3.disconnect(src)
+		node3 = null
+	if(node4)
+		node4.disconnect(src)
+		node4 = null
+	. = ..()
+
+/obj/machinery/atmospherics/pipe/smart/on_update_icon(safety = 0)
+	if(!atmos_initalized)
+		return
+	if(!check_icon_cache())
+		return
+
+	connections = 0
+	if(node1)
+		connections |= get_dir(src, node1)
+	if(node2)
+		connections |= get_dir(src, node2)
+	if(node3)
+		connections |= get_dir(src, node3)
+	if(node4)
+		connections |= get_dir(src, node4)
+
+	//dir is purely a rendering hint here (get_initialze_directions() ignores it entirely) - lines the sprite up
+	//with its actual connections, same as NovaSector's own update_pipe_icon().
+	switch(connections)
+		if(EAST|WEST)
+			dir = EAST
+		if(SOUTH|NORTH)
+			dir = SOUTH
+		else
+			if(connections)
+				dir = connections
+
+	var/bitfield = CARDINAL_TO_FULLPIPES(connections)
+	if(ISSTUB(connections))
+		//pad out a dangling 0-or-1-connection pipe with "short" (capped) stub bits, pulling from whichever
+		//directions are still allowed (initialize_directions) until it's no longer a stub - there's no sprite
+		//for a single-direction pipe. Stops as soon as it's not a stub anymore, rather than capping every
+		//allowed direction, to avoid clutter.
+		var/bits_to_add = 0
+		if(connections != 0)
+			bits_to_add |= REVERSE_DIR(connections) & initialize_directions
+		var/candidate = 0
+		var/shift = 0
+		while(ISSTUB(connections | bits_to_add) && (initialize_directions >> shift) != 0)
+			candidate = initialize_directions & (1 << shift)
+			if(!(candidate & connections))
+				bits_to_add |= candidate
+			shift += 1
+		bitfield |= CARDINAL_TO_SHORTPIPES(bits_to_add)
+
+	color = pipe_color
+	icon_state = "[bitfield]_[piping_layer]"
+	//Leaking is no longer tied to "not fully connected" - see the matching comment on pipe/simple/on_update_icon().
+	set_leaking(FALSE)
+
+// Color adapter and layer adapter - straight, binary (2-node) bridge segments, subclassing pipe/simple rather
+// than pipe/smart since they're not shape-adaptive; they just sit at one tile and connect otherwise-incompatible
+// neighbors. Ported from NovaSector's code/modules/atmospherics/machinery/pipes/color_adapter.dm and
+// layermanifold.dm, adapted to this engine's simpler single-icon_state (no per-node overlay compositing) and
+// node1/node2 (not nodes[]) architecture - the actual bridging logic lives entirely in check_connect_types()
+// (atmospherics.dm), gated by the pipe_color_bridge/pipe_layer_bridge flags these two set; pipe/simple's existing
+// atmos_init() already calls check_connect_types() for its neighbor search, so no atmos_init() override is needed
+// for connectivity. on_update_icon() calls ..() to draw the normal intact/exposed pipe body (pipe/simple's own
+// icon_manager-driven overlay, correctly reflecting actual node1/node2 state) then adds a small coupling-fixture
+// overlay on top from the adapter's own copied sprite sheet, purely to visually flag "this segment is special" -
+// earlier versions used a single static full-body sprite per adapter instead, which looked permanently "fully
+// connected on both sides" (the layer adapter's "manifoldlayer" state in particular always shows all 5 layers
+// converging) regardless of actual connections; this fixes that.
+/obj/machinery/atmospherics/pipe/color_adapter
+	name = "color adapter"
+	desc = "A one meter section of regular pipe used to connect pipes of different colors together."
+	pipe_color_bridge = TRUE
+
+/obj/machinery/atmospherics/pipe/color_adapter/on_update_icon(safety = 0)
+	// Same guards as pipe/simple/on_update_icon() (called via ..() below) - without them, an update_icon() call
+	// that fires before atmos_init() has run would skip the body (..() returns early) while still adding the
+	// coupling overlay below, leaving it orphaned/duplicated on later calls since ClearOverlays() never ran.
+	if(!atmos_initalized)
+		return
+	if(!check_icon_cache())
+		return
+	..()
+	AddOverlays(image('icons/atmos/color_adapter.dmi', icon_state = "adapter_center", dir = dir))
+
+/obj/machinery/atmospherics/pipe/layer_adapter
+	name = "layer adapter"
+	desc = "A one meter section of regular pipe used to connect pipes on different layers together."
+	pipe_layer_bridge = TRUE
+
+/obj/machinery/atmospherics/pipe/layer_adapter/on_update_icon(safety = 0)
+	if(!atmos_initalized)
+		return
+	if(!check_icon_cache())
+		return
+	..()
+	AddOverlays(image('icons/atmos/layer_adapter.dmi', icon_state = "manifoldlayer_center", dir = dir))
+
 /obj/machinery/atmospherics/pipe/manifold
 	icon = 'icons/atmos/manifold.dmi'
 	icon_state = ""
 	name = "pipe manifold"
 	desc = "A manifold composed of regular pipes."
 	volume = ATMOS_DEFAULT_VOLUME_PIPE * 1.5
+	// See the comment on pipe/simple's declaration.
+	convert_to_smart_pipe_on_migrate = TRUE
 
 	dir = SOUTH
 	initialize_directions = EAST|NORTH|WEST
@@ -460,6 +682,8 @@
 
 /obj/machinery/atmospherics/pipe/manifold/Initialize()
 	. = ..()
+	if(. == INITIALIZE_HINT_QDEL)
+		return
 	alpha = 255
 	icon = null
 
@@ -526,36 +750,29 @@
 	if(!check_icon_cache())
 		return
 
-	set_leaking(!(node1 && node2 && node3))
+	//Leaking is no longer tied to "not fully connected" - see the matching comment on pipe/simple/on_update_icon().
+	set_leaking(FALSE)
 	alpha = 255
 
-	if(!node1 && !node2 && !node3)
-		var/turf/T = get_turf(src)
-		new /obj/item/pipe(loc, src)
-		for (var/obj/machinery/meter/meter in T)
-			if (meter.target == src)
-				meter.dismantle()
-		qdel(src)
-	else
-		ClearOverlays()
-		AddOverlays(icon_manager.get_atmos_icon("manifold", , pipe_color, "core" + icon_connect_type))
-		AddOverlays(icon_manager.get_atmos_icon("manifold", , , "clamps" + icon_connect_type))
-		underlays.Cut()
+	ClearOverlays()
+	AddOverlays(icon_manager.get_atmos_icon("manifold", , pipe_color, "core" + icon_connect_type))
+	AddOverlays(icon_manager.get_atmos_icon("manifold", , , "clamps" + icon_connect_type))
+	underlays.Cut()
 
-		var/turf/T = get_turf(src)
-		var/list/directions = list(NORTH, SOUTH, EAST, WEST)
-		var/node1_direction = get_dir(src, node1)
-		var/node2_direction = get_dir(src, node2)
-		var/node3_direction = get_dir(src, node3)
+	var/turf/T = get_turf(src)
+	var/list/directions = list(NORTH, SOUTH, EAST, WEST)
+	var/node1_direction = get_dir(src, node1)
+	var/node2_direction = get_dir(src, node2)
+	var/node3_direction = get_dir(src, node3)
 
-		directions -= dir
+	directions -= dir
 
-		directions -= add_underlay(T,node1,node1_direction,icon_connect_type)
-		directions -= add_underlay(T,node2,node2_direction,icon_connect_type)
-		directions -= add_underlay(T,node3,node3_direction,icon_connect_type)
+	directions -= add_underlay(T,node1,node1_direction,icon_connect_type)
+	directions -= add_underlay(T,node2,node2_direction,icon_connect_type)
+	directions -= add_underlay(T,node3,node3_direction,icon_connect_type)
 
-		for(var/D in directions)
-			add_underlay(T,,D,icon_connect_type)
+	for(var/D in directions)
+		add_underlay(T,,D,icon_connect_type)
 
 
 /obj/machinery/atmospherics/pipe/manifold/update_underlays()
@@ -563,6 +780,7 @@
 	update_icon()
 
 /obj/machinery/atmospherics/pipe/manifold/atmos_init()
+	migrate_legacy_exclusive_network()
 	..()
 	var/connect_directions = (NORTH|SOUTH|EAST|WEST)&(~dir)
 
@@ -600,10 +818,6 @@
 						break
 			if (node3)
 				break
-
-	if(!node1 && !node2 && !node3)
-		qdel(src)
-		return
 
 	var/turf/T = get_turf(src)
 	if(level == ATOM_LEVEL_UNDER_TILE && !T.is_plating()) hide(1)
@@ -715,6 +929,8 @@
 	name = "4-way pipe manifold"
 	desc = "A manifold composed of regular pipes."
 	volume = ATMOS_DEFAULT_VOLUME_PIPE * 2
+	// See the comment on pipe/simple's declaration.
+	convert_to_smart_pipe_on_migrate = TRUE
 
 	dir = SOUTH
 	initialize_directions = NORTH|SOUTH|EAST|WEST
@@ -730,6 +946,8 @@
 
 /obj/machinery/atmospherics/pipe/manifold4w/Initialize()
 	. = ..()
+	if(. == INITIALIZE_HINT_QDEL)
+		return
 	alpha = 255
 	icon = null
 
@@ -801,51 +1019,31 @@
 	if(!check_icon_cache())
 		return
 
-	set_leaking(!(node1 && node2 && node3 && node4))
+	//Leaking is no longer tied to "not fully connected" - see the matching comment on pipe/simple/on_update_icon().
+	set_leaking(FALSE)
 	alpha = 255
 
-	if(!node1 && !node2 && !node3 && !node4)
-		var/turf/T = get_turf(src)
-		new /obj/item/pipe(loc, src)
-		for (var/obj/machinery/meter/meter in T)
-			if (meter.target == src)
-				meter.dismantle()
-		qdel(src)
-	else
-		ClearOverlays()
-		AddOverlays(icon_manager.get_atmos_icon("manifold", , pipe_color, "4way" + icon_connect_type))
-		AddOverlays(icon_manager.get_atmos_icon("manifold", , , "clamps_4way" + icon_connect_type))
-		underlays.Cut()
+	ClearOverlays()
+	AddOverlays(icon_manager.get_atmos_icon("manifold", , pipe_color, "4way" + icon_connect_type))
+	AddOverlays(icon_manager.get_atmos_icon("manifold", , , "clamps_4way" + icon_connect_type))
+	underlays.Cut()
 
-		/*
-		var/list/directions = list(NORTH, SOUTH, EAST, WEST)
+	var/turf/T = get_turf(src)
+	var/list/directions = list(NORTH, SOUTH, EAST, WEST)
+	var/node1_direction = get_dir(src, node1)
+	var/node2_direction = get_dir(src, node2)
+	var/node3_direction = get_dir(src, node3)
+	var/node4_direction = get_dir(src, node4)
 
+	directions -= dir
 
-		directions -= add_underlay(node1)
-		directions -= add_underlay(node2)
-		directions -= add_underlay(node3)
-		directions -= add_underlay(node4)
+	directions -= add_underlay(T,node1,node1_direction,icon_connect_type)
+	directions -= add_underlay(T,node2,node2_direction,icon_connect_type)
+	directions -= add_underlay(T,node3,node3_direction,icon_connect_type)
+	directions -= add_underlay(T,node4,node4_direction,icon_connect_type)
 
-		for(var/D in directions)
-			add_underlay(,D)
-		*/
-
-		var/turf/T = get_turf(src)
-		var/list/directions = list(NORTH, SOUTH, EAST, WEST)
-		var/node1_direction = get_dir(src, node1)
-		var/node2_direction = get_dir(src, node2)
-		var/node3_direction = get_dir(src, node3)
-		var/node4_direction = get_dir(src, node4)
-
-		directions -= dir
-
-		directions -= add_underlay(T,node1,node1_direction,icon_connect_type)
-		directions -= add_underlay(T,node2,node2_direction,icon_connect_type)
-		directions -= add_underlay(T,node3,node3_direction,icon_connect_type)
-		directions -= add_underlay(T,node4,node4_direction,icon_connect_type)
-
-		for(var/D in directions)
-			add_underlay(T,,D,icon_connect_type)
+	for(var/D in directions)
+		add_underlay(T,,D,icon_connect_type)
 
 
 /obj/machinery/atmospherics/pipe/manifold4w/update_underlays()
@@ -858,6 +1056,7 @@
 	update_icon()
 
 /obj/machinery/atmospherics/pipe/manifold4w/atmos_init()
+	migrate_legacy_exclusive_network()
 	..()
 	for(var/obj/machinery/atmospherics/target in get_step(src,1))
 		if(target.initialize_directions & 2)
@@ -882,10 +1081,6 @@
 			if (check_connect_types(target,src))
 				node4 = target
 				break
-
-	if(!node1 && !node2 && !node3 && !node4)
-		qdel(src)
-		return
 
 	var/turf/T = get_turf(src)
 	if(level == ATOM_LEVEL_UNDER_TILE && !T.is_plating()) hide(1)
@@ -997,6 +1192,8 @@
 	icon = 'icons/atmos/pipes.dmi'
 	icon_state = ""
 	volume = 35
+	// See the comment on pipe/simple's declaration.
+	convert_to_smart_pipe_on_migrate = TRUE
 
 	pipe_class = PIPE_CLASS_UNARY
 	dir = SOUTH
@@ -1050,6 +1247,7 @@
 	AddOverlays(icon_manager.get_atmos_icon("pipe", , pipe_color, icon_state))
 
 /obj/machinery/atmospherics/pipe/cap/atmos_init()
+	migrate_legacy_exclusive_network()
 	..()
 	for(var/obj/machinery/atmospherics/target in get_step(src, dir))
 		if(target.initialize_directions & get_dir(target,src))

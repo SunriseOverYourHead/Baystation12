@@ -14725,6 +14725,10 @@
 	},
 /turf/simulated/floor/tiled/dark,
 /area/aux_eva)
+"TS" = (
+/obj/machinery/computer/ship/galaxymap,
+/turf/simulated/floor/tiled/dark,
+/area/bridge)
 "TT" = (
 /obj/floor_decal/techfloor{
 	dir = 4
@@ -23921,7 +23925,7 @@ Wv
 eP
 cy
 Af
-hn
+TS
 hn
 HK
 hn

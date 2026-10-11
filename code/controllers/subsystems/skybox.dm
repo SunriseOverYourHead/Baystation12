@@ -97,6 +97,34 @@ SUBSYSTEM_DEF(skybox)
 		client.update_skybox(TRUE)
 
 
+/**
+ * Overrides the cached skybox for a specific set of z-levels only, instead of change_skybox()'s server-wide
+ * background_icon swap (used for e.g. the Nar'Sie hell dimension) - lets one ship's bluespace jump show a
+ * "cascade" skybox to its own crew/viewers without touching what anyone else in the round sees. Bypasses
+ * generate_skybox() entirely (no base color/stars/overmap-details layering, same as how change_skybox() itself
+ * disables those for special one-off states) since a transit effect should fully replace the background, not
+ * blend with it.
+ */
+/datum/controller/subsystem/skybox/proc/set_zlevel_override(list/zlevels, icon_state)
+	var/image/override_image = overlay_image(skybox_icon, icon_state, flags = RESET_COLOR)
+	for (var/z in zlevels)
+		skybox_cache["[z]"] = override_image
+	refresh_clients_on(zlevels)
+
+/// Reverts set_zlevel_override() - the next get_skybox(z) call for these z-levels regenerates normally.
+/datum/controller/subsystem/skybox/proc/clear_zlevel_override(list/zlevels)
+	for (var/z in zlevels)
+		skybox_cache -= "[z]"
+	refresh_clients_on(zlevels)
+
+/// Forces update_skybox() for every client whose eye currently sits on one of these z-levels - the same gap
+/// reset_view() (code/modules/mob/mob.dm) papers over for eye changes, but here for a cache change instead.
+/datum/controller/subsystem/skybox/proc/refresh_clients_on(list/zlevels)
+	for (var/client/C as anything in GLOB.clients)
+		var/turf/T = get_turf(C.eye)
+		if (T && (T.z in zlevels))
+			C.update_skybox(TRUE)
+
 /datum/controller/subsystem/skybox/proc/change_skybox(new_state, new_color, new_use_stars, new_use_overmap_details)
 	var/need_rebuild = FALSE
 	if (new_state != background_icon)

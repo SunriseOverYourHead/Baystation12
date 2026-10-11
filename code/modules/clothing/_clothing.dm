@@ -510,6 +510,8 @@ BLIND     // can't see anything
 		SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_head_unathi.dmi',
 		SPECIES_NABBER = 'icons/mob/species/nabber/onmob_head_gas.dmi'
 	)
+	// Safe to set globally -- see the identical comment on /obj/item/clothing/suit's own leg_remap_category above.
+	leg_remap_category = CLOTHING_LEG_CATEGORY_HELMET
 	body_parts_covered = HEAD
 	slot_flags = SLOT_HEAD
 	item_flags = ITEM_FLAG_WASHER_ALLOWED
@@ -719,6 +721,11 @@ BLIND     // can't see anything
 	permeability_coefficient = 0.50
 	force = 2
 	species_restricted = list("exclude", SPECIES_NABBER, SPECIES_UNATHI, SPECIES_VOX)
+	// Default leg-shape category for generic shoes -- see leg_remap_category in _clothing.dm's /under section for
+	// the same pattern. A species-tailored variant with its own already-correctly-shaped art (e.g. jackboots/
+	// unathi's toe-less sprite) should override this back to null -- it doesn't need (and shouldn't get) a remap
+	// on top of art that's already adapted.
+	leg_remap_category = CLOTHING_LEG_CATEGORY_BOOTS
 	sprite_sheets = list(
 		SPECIES_VOX = 'icons/mob/species/vox/onmob_feet_vox.dmi',
 		SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_feet_unathi.dmi',
@@ -887,6 +894,11 @@ BLIND     // can't see anything
 	blood_overlay_type = "suitblood"
 	siemens_coefficient = 0.9
 	w_class = ITEM_SIZE_NORMAL
+	// Safe to set globally -- get_mob_overlay()'s spritesheet-preference check (items.dm) already skips this
+	// whenever a real sprite_sheets state is in use, so Vox/Unathi/Nabber below still render off their own sheets
+	// exactly as before. Teshari/Anthro (and any Nabber suit state not actually covered by their sheet) fall
+	// through to this pixel-remap instead of rendering unmodified human art (2026-09-04).
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SUIT
 
 	sprite_sheets = list(
 		SPECIES_VOX = 'icons/mob/species/vox/onmob_suit_vox.dmi',
@@ -929,6 +941,12 @@ BLIND     // can't see anything
 		)
 	name = "under"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
+	// Default leg-shape category for the whole /under slot -- most of this family is genuinely pants/jumpsuit
+	// shaped, so this covers "all clothes" per the user's own framing rather than needing an assignment per leaf
+	// type. Practical skirts fall back to this same PANTS rule too (explicit user call -- close enough in shape,
+	// not worth a separate reference pair). Families with a fundamentally different, longer silhouette (dresses,
+	// gowns, kilts, formal wear -- see skirts.dm/miscellaneous.dm) override this back to null below.
+	leg_remap_category = CLOTHING_LEG_CATEGORY_PANTS
 	permeability_coefficient = 0.90
 	slot_flags = SLOT_ICLOTHING
 	item_flags = ITEM_FLAG_WASHER_ALLOWED

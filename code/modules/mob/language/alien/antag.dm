@@ -59,6 +59,7 @@
 	"SKRE","AHK","EHK","RAWK","KRA","AAA","EEE","KI","II","KRI","KA")
 	machine_understands = 0
 	shorthand = "Vox"
+	tag_icon = "vox"
 	has_written_form = TRUE
 
 /datum/language/vox/can_speak_special(mob/speaker)
@@ -93,6 +94,7 @@
 		"d'rekkathnor", "khari'd", "gual'te", "nikka", "nikt'o", "barada", "kla'atu", "barhah", "hra" ,"zar'garis")
 	machine_understands = 0
 	shorthand = "CT"
+	tag_icon = "ct"
 	hidden_from_codex = TRUE
 	has_written_form = TRUE
 
@@ -119,6 +121,7 @@
 	"eg","bog","voijs","nekks","bollos","qoulsan","borrksakja","neemen","aka","nikka","qyegno","shafra","beolas","Byno")
 	machine_understands = 0
 	shorthand = "AL"
+	tag_icon = "al"
 	hidden_from_codex = TRUE
 	has_written_form = TRUE
 

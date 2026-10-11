@@ -427,6 +427,14 @@
 		else
 			helmet.flags_inv |= HIDEMASK
 	update_icon(1)
+	// ITEM_FLAG_AIRTIGHT just got toggled above, which is what the rig chest/helmet's own
+	// get_cover_theme() overrides gate on -- so the mutant-organ cover pattern (tail/wings/fluff
+	// via the chest, horns/ears/etc via the helmet) needs to be explicitly re-derived here too,
+	// or it'd stay one seal/unseal step stale.
+	if(wearer && chest)
+		wearer.update_inv_wear_suit()
+	if(wearer && helmet)
+		wearer.update_inv_head()
 
 /obj/item/rig/Process()
 

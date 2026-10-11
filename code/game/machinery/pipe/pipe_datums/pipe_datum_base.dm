@@ -2,11 +2,13 @@ GLOBAL_LIST_EMPTY(all_pipe_datums_by_category)
 GLOBAL_LIST_EMPTY(all_disposal_pipe_datums_by_category)
 
 /proc/initialize_pipe_datum_category_list()
+	// Supply/scrubber/fuel are no longer separate buildable categories - now that piping_layer+pipe_color
+	// independently separate pipes, a plain Regular pipe painted the right color on the right layer does the same
+	// job (see the vent_scrubber/vent_pump atmos_init() overrides, which force RED/layer2 and BLUE/layer4 so the
+	// classic scrubber/supply loops still exist without needing an exclusive pipe network). The old discrete
+	// pipe/simple/manifold/etc. supply and scrubbers subtypes (pipes.dm) are untouched for existing maps.
 	var/list/categories = list(
 		/datum/pipe/pipe_dispenser/simple,
-		/datum/pipe/pipe_dispenser/supply,
-		/datum/pipe/pipe_dispenser/scrubber,
-		/datum/pipe/pipe_dispenser/fuel,
 		/datum/pipe/pipe_dispenser/he,
 		/datum/pipe/pipe_dispenser/device
 		)
@@ -39,6 +41,8 @@ GLOBAL_LIST_EMPTY(all_disposal_pipe_datums_by_category)
 	var/pipe_class = PIPE_CLASS_BINARY										//The node classification for this item.
 	var/rotate_class = PIPE_ROTATE_STANDARD                                 //How it behaves when rotated
 	var/placement_mode = PIPE_PLACEMENT_SIMPLE
+	var/pipe_color_bridge = FALSE											//Bridges a color mismatch - see check_connect_types()
+	var/pipe_layer_bridge = FALSE											//Bridges a layer mismatch - see check_connect_types()
 
 //==========
 //Procedures
@@ -62,15 +66,18 @@ GLOBAL_LIST_EMPTY(all_disposal_pipe_datums_by_category)
 	if(!desc)								//Try to make up a nice description if we don't have one
 		desc = "\A [name]."
 
-/datum/pipe/proc/Build(datum/pipe/D, loc, pipe_color = PIPE_COLOR_WHITE)
+/datum/pipe/proc/Build(datum/pipe/D, loc, pipe_color = PIPE_COLOR_WHITE, piping_layer = PIPING_LAYER_DEFAULT)
 	if(D.build_path)
 		var/obj/item/pipe/new_item = new build_path(loc)
 		if(istype(new_item))
 			if(D.connect_types != null)
 				new_item.connect_types = D.connect_types
+			new_item.piping_layer = piping_layer
 			new_item.pipe_class = D.pipe_class
 			new_item.rotate_class = D.rotate_class
 			new_item.constructed_path = D.constructed_path
+			new_item.pipe_color_bridge = D.pipe_color_bridge
+			new_item.pipe_layer_bridge = D.pipe_layer_bridge
 		if(D.colorable)
 			new_item.color = pipe_color
 		else if (D.pipe_color != null)

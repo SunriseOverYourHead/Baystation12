@@ -3,6 +3,7 @@ import { useBackend } from 'tgui/backend';
 import {
   Box,
   Button,
+  Dropdown,
   Input,
   LabeledList,
   Section,
@@ -11,6 +12,13 @@ import {
 } from 'tgui-core/components';
 
 import type { PreferencesMenuData } from '../types';
+
+const SENSOR_LABELS: Record<number, string> = {
+  0: 'Off',
+  1: 'Binary',
+  2: 'Vitals',
+  3: 'Tracking',
+};
 
 const RECORD_FIELDS = [
   {
@@ -69,72 +77,91 @@ export function RecordsPage() {
   }
 
   const current = RECORD_FIELDS.find((f) => f.key === selected) ?? RECORD_FIELDS[0];
+  const currentSensor = data.sensor_setting ?? 0;
 
   return (
-    <Stack fill>
-      <Stack.Item width="110px">
-        <Stack vertical fill>
-          {RECORD_FIELDS.map((field) => (
-            <Stack.Item key={field.key}>
-              <Button
+    <Stack fill vertical>
+      <Stack.Item grow>
+        <Stack fill>
+          <Stack.Item width="110px">
+            <Stack vertical fill>
+              {RECORD_FIELDS.map((field) => (
+                <Stack.Item key={field.key}>
+                  <Button
+                    fluid
+                    selected={selected === field.key}
+                    onClick={() => switchField(field.key)}
+                  >
+                    {field.label}
+                  </Button>
+                </Stack.Item>
+              ))}
+            </Stack>
+          </Stack.Item>
+          <Stack.Item grow>
+            <Section
+              fill
+              title={current.label}
+              buttons={
+                <Button icon="save" onClick={save}>
+                  Save
+                </Button>
+              }
+            >
+              <Box italic mb={1} color="label">
+                {current.desc}
+              </Box>
+              <TextArea
+                key={selected}
                 fluid
-                selected={selected === field.key}
-                onClick={() => switchField(field.key)}
-              >
-                {field.label}
-              </Button>
-            </Stack.Item>
-          ))}
-          <Stack.Item mt={2}>
-            <Section title="Email" fitted>
-              <LabeledList>
-                <LabeledList.Item label="Address">
-                  <Input
-                    fluid
-                    value={emailAddr}
-                    placeholder="username"
-                    maxLength={24}
-                    onChange={(value: string) => setEmailAddr(value)}
-                    onBlur={saveEmail}
-                  />
-                </LabeledList.Item>
-                <LabeledList.Item label="Password">
-                  <Input
-                    fluid
-                    value={emailPass}
-                    placeholder="(random)"
-                    maxLength={16}
-                    onChange={(value: string) => setEmailPass(value)}
-                    onBlur={saveEmailPass}
-                  />
-                </LabeledList.Item>
-              </LabeledList>
+                height="calc(100% - 28px)"
+                value={localText}
+                maxLength={6144}
+                onChange={(value: string) => setLocalText(value)}
+                onBlur={save}
+              />
             </Section>
           </Stack.Item>
         </Stack>
       </Stack.Item>
-      <Stack.Item grow>
-        <Section
-          fill
-          title={current.label}
-          buttons={
-            <Button icon="save" onClick={save}>
-              Save
-            </Button>
-          }
-        >
-          <Box italic mb={1} color="label">
-            {current.desc}
-          </Box>
-          <TextArea
-            key={selected}
-            fluid
-            height="calc(100% - 28px)"
-            value={localText}
-            maxLength={6144}
-            onChange={(value: string) => setLocalText(value)}
-            onBlur={save}
-          />
+      <Stack.Item>
+        <Section title="Email &amp; Equipment" fitted>
+          <LabeledList>
+            <LabeledList.Item label="Address">
+              <Input
+                fluid
+                value={emailAddr}
+                placeholder="username"
+                maxLength={24}
+                onChange={(value: string) => setEmailAddr(value)}
+                onBlur={saveEmail}
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Password">
+              <Input
+                fluid
+                value={emailPass}
+                placeholder="(random)"
+                maxLength={16}
+                onChange={(value: string) => setEmailPass(value)}
+                onBlur={saveEmailPass}
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Suit Sensors">
+              <Dropdown
+                width="200px"
+                options={Object.entries(SENSOR_LABELS).map(([val, label]) => ({
+                  displayText: label,
+                  value: Number(val),
+                }))}
+                selected={currentSensor}
+                displayText={SENSOR_LABELS[currentSensor] ?? 'Off'}
+                onSelected={(val: number) =>
+                  act('set_sensor', { sensor: val })
+                }
+              />
+            </LabeledList.Item>
+          </LabeledList>
         </Section>
       </Stack.Item>
     </Stack>

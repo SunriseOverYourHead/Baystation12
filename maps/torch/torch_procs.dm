@@ -81,6 +81,12 @@
 	else
 		desc += "There were <b>no survivors</b>, <b>[offship_players] off-ship players</b>, (<b>[ghosts] ghosts</b>)."
 
+	// The only way to reach EVAC_COMPLETE with emergency_evacuation FALSE on the starship controller is a
+	// completed Return to Port bluespace jump, which always parks the Torch at HD 66161 first - see
+	// finish_evacuation() in code/controllers/evacuation/evacuation_pods.dm.
+	if(evacuation_controller.round_over() && !evacuation_controller.emergency_evacuation)
+		desc += "<br>The bluespace jump home concluded at <b>HD 66161</b>, near the SCGF Third Fleet Observatory."
+
 	return desc
 
 /datum/map/torch/do_interlude_teleport(atom/movable/target, atom/destination, duration = 30 SECONDS, precision, type)

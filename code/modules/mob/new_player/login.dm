@@ -10,7 +10,9 @@
 		mind.current = src
 
 	loc = null
-	GLOB.using_map.show_titlescreen(client)
+	// Claims the "lobbybrowser" pane for the TGUI Lobby window (lobby_tgui.dm) - superseded from
+	// GLOB.using_map.show_titlescreen(client), which pushed static HTML into the same pane.
+	initialize_lobby_screen()
 	my_client = client
 	set_sight(sight|SEE_TURFS)
 

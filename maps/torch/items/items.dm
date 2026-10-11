@@ -108,6 +108,11 @@ Weapons
 	name = "\improper Final Argument"
 	icon = 'maps/torch/icons/obj/uniques.dmi'
 	icon_state = "mosley"
+	colocated_sprites = FALSE
+	item_state_slots = list(
+		slot_l_hand_str = "revolver_l",
+		slot_r_hand_str = "revolver_r",
+	)
 	desc = "A shiny al-Maliki & Mosley Autococker automatic revolver, with black accents. Marketed as the 'Revolver for the Modern Era'. This one has 'To the Captain of SEV Torch' engraved."
 	fire_delay = 5.7 //Autorevolver. Also synced with the animation
 	fire_anim = "mosley_fire"

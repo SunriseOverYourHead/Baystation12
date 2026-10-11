@@ -38,6 +38,12 @@
 	var/max_pressure_protection // Set this variable if the item protects its wearer against high pressures below an upper bound. Keep at null to disable protection.
 	var/min_pressure_protection // Set this variable if the item protects its wearer against low pressures above a lower bound. Keep at null to disable protection. 0 represents protection against hard vacuum.
 
+	/// Shape category for the runtime clothing/item pixel remap system (CLOTHING_LEG_CATEGORY_* -- null means no
+	/// remap). Set on a shared parent type to cover a whole family of items at once (e.g. all jumpsuits = "pants")
+	/// rather than per-leaf-item. Lives on /obj/item (not /obj/item/clothing) since non-clothing worn items like
+	/// backpacks need it too. See code/modules/clothing/_leg_shape_remap.dm.
+	var/leg_remap_category = null
+
 	var/datum/action/item_action/action = null
 	var/action_button_name //It is also the text which gets displayed on the action button. If not set it defaults to 'Use [name]'. If it's not set, there'll be no button.
 	var/default_action_type = /datum/action/item_action // Specify the default type and behavior of the action button for this atom.
@@ -892,7 +898,62 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 	else
 		mob_icon = GLOB.default_onmob_icons[slot]
 
+	// use_spritesheet() has a permissive fallback: for any slot other than wear_suit/head, it returns true even
+	// when mob_state ISN'T actually a state in sprite_sheets[bodytype] (it assumes species art is comprehensive
+	// enough not to need checking). That's false for eg Unathi's onmob_feet_unathi.dmi, which doesn't cover every
+	// shoe (sandals included) -- so spritesheet was landing on TRUE with mob_icon pointed at a sheet that has no
+	// "sandal" state at all, rendering nothing. Re-check for real -- if the sheet doesn't actually have this
+	// state, that's not really species-specific art in use, fall back to the normal icon chain so this species
+	// still gets *something* (its generic sprite, remapped like any other species would use).
+	if(spritesheet && !(mob_state in icon_states(mob_icon)))
+		spritesheet = FALSE
+		if(item_icons && item_icons[slot])
+			mob_icon = item_icons[slot]
+		else
+			mob_icon = GLOB.default_onmob_icons[slot]
+
+	// Bulk-generated species sprites (tools/species_remap/generate_species_sprites.py, see
+	// code/modules/clothing/_generated_sprite_sheets.dm) -- a centralized fallback so hundreds of individual
+	// items don't each need their own sprite_sheets edit. Only consulted when this item has NO real coverage of
+	// its own at this point (not even a partial/stale one -- those already got the same "does it actually have
+	// this state" check above) for this bodytype, and only used if the generated sheet actually has this exact
+	// state; a category with generated coverage doesn't mean every single state in it was generated.
+	// Hand slots excluded for the same reason use_spritesheet() excludes them above: these sheets are generated
+	// from WORN-position reference art, so letting a held item resolve to one renders it as if it were being worn.
+	// Skipping it here also avoids an icon_states() scan of a very large sheet (the GAS suit one is 263 states)
+	// on every single hand-inventory update, which was a real chunk of the pickup lag.
+	if(!spritesheet && leg_remap_category && slot != slot_l_hand_str && slot != slot_r_hand_str)
+		var/list/generated_for_category = GLOB.generated_sprite_sheets[leg_remap_category]
+		var/generated_icon = generated_for_category ? generated_for_category[bodytype] : null
+		if(generated_icon && (mob_state in icon_states(generated_icon)))
+			mob_icon = generated_icon
+			spritesheet = TRUE
+
 	if(user_human)
+		// Not clothing-gated -- leg_remap_category lives on /obj/item now so non-clothing worn items (backpacks)
+		// can opt in too, not just /obj/item/clothing. Also skipped when a species-specific sprite_sheet is
+		// already in use (spritesheet == TRUE, mob_icon == sprite_sheets[bodytype]) -- that art is already
+		// hand-drawn to fit this species (eg Unathi's own onmob_under_solgov_unathi.dmi for solgov uniforms), so
+		// remapping it with a table built against the generic human sprite just crops the wrong positions out of
+		// an already-correct sheet. This is what made every solgov uniform (fleet coveralls included) look
+		// garbled/full of gaps on Unathi despite the reference-uniform pixel table itself being accurate -- it was
+		// being applied a second time, on top of art the remap was never meant to touch (2026-09-04 fix).
+		// Hand slots are excluded here -- leg_remap_category's whole table set (items_clothing.dm's
+		// CLOTHING_LEG_CATEGORY_* list) is built entirely from WORN-position reference art (SUIT/HELMET/PANTS/
+		// BOOTS/etc, keyed by body shape), there's no "held in hand" category at all, and it was never meant to
+		// apply there. Before this fix, holding (not wearing) an item with no dedicated in-hand species art fell
+		// through to this same remap path, so a held item could render identically to its WORN appearance (a real,
+		// player-visible bug, e.g. GAS holding a voidsuit looking like they were wearing it) -- and for a
+        // catastrophically slow first-computation-then-cached table like GAS's void suit remap, doing that
+		// unnecessarily on every single pickup (not just the first equip) was also the direct cause of a
+		// multi-second server stall on pickup (confirmed live: one such call cost ~294x a normal tick's budget).
+		var/is_hand_slot = (slot == slot_l_hand_str || slot == slot_r_hand_str)
+		var/shape_key = (leg_remap_category && !spritesheet && !is_hand_slot) ? user_human.get_body_shape_key() : null
+		if(shape_key)
+			var/icon/remapped = get_leg_remapped_icon(mob_icon, mob_state, shape_key)
+			if(remapped)
+				mob_icon = remapped
+				mob_state = ""
 		return user_human.species.get_offset_overlay_image(spritesheet, mob_icon, mob_state, color, slot)
 	return overlay_image(mob_icon, mob_state, color, RESET_COLOR)
 

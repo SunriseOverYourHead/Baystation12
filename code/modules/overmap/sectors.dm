@@ -27,6 +27,12 @@ GLOBAL_LIST_EMPTY(known_overmap_sectors)
 	/// null | num | list. If a num or a (num, num) list, the radius or random bounds for placing this sector near the main map's overmap icon.
 	var/list/place_near_main
 
+	/// If set before Initialize() runs (e.g. by a caller that just did `new(loc, ...)`), self-placement lands on
+	/// this z instead of GLOB.using_map.overmap_z - used to spawn content directly onto a specific star system's
+	/// own overmap grid (see /datum/star_system in code/modules/overmap/starmap/starmap.dm) rather than the
+	/// shared/home one.
+	var/target_overmap_z
+
 	var/blob_count = 0
 
 	// Gas mixture datum returned to exterior return_air. Set to assoc list of material to moles to initialize the gas datum.
@@ -59,7 +65,7 @@ GLOBAL_LIST_EMPTY(known_overmap_sectors)
 		else
 			start_x = start_x || rand(map_low, map_high)
 			start_y = start_y || rand(map_low, map_high)
-			home = locate(start_x, start_y, GLOB.using_map.overmap_z)
+			home = locate(start_x, start_y, target_overmap_z || GLOB.using_map.overmap_z)
 		forceMove(home)
 
 		for(var/obj/overmap/event/E in loc)

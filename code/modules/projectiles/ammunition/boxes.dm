@@ -275,15 +275,19 @@
 	max_ammo = 8
 
 /obj/item/ammo_magazine/proto_smg
-	name = "submachine gun magazine"
-	icon_state = PROJECTILE_PISTOL_FLECHETTE
+	name = "4x60mm submachine gun magazine"
+	icon = 'code/modules/projectiles/ammunition/lowCalSMGStickMagazine.dmi'
+	icon_state = "smg"
 	origin_tech = list(TECH_COMBAT = 4)
 	mag_type = MAGAZINE
 	caliber = PROJECTILE_PISTOL_FLECHETTE
 	matter = list(MATERIAL_STEEL = 2000)
 	ammo_type = /obj/item/ammo_casing/flechette
 	max_ammo = 40
-	multiple_sprites = 1
+
+/obj/item/ammo_magazine/proto_smg/on_update_icon()
+	..()
+	icon_state = length(stored_ammo) > 0 ? "smg-32" : "smg-0"
 
 /obj/item/ammo_magazine/gyrojet
 	name = "microrocket magazine"
@@ -415,3 +419,209 @@
 /obj/item/ammo_magazine/shotgunmag/beanbag
 	labels = list("beanbag")
 	ammo_type = /obj/item/ammo_casing/shotgun/beanbag
+
+// ---- Sol/SCG military magazines ----
+
+/obj/item/ammo_magazine/m19
+	name = "M19 magazine"
+	desc = "A 10-round magazine for the M19 service pistol."
+	icon = 'code/modules/projectiles/ammunition/lowcalPistols.dmi'
+	icon_state = "pistol"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_PISTOL
+	matter = list(MATERIAL_STEEL = 600)
+	ammo_type = /obj/item/ammo_casing/pistol
+	max_ammo = 10
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/m19/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/m22f
+	name = "M22 magazine"
+	desc = "A 10-round doublestack magazine for the M22 service pistol."
+	icon = 'code/modules/projectiles/ammunition/HighCalPistolMagazine.dmi'
+	icon_state = "magnum"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_PISTOL_BIG
+	matter = list(MATERIAL_STEEL = 750)
+	ammo_type = /obj/item/ammo_casing/pistol/big
+	max_ammo = 10
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/m22f/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/m25
+	name = "M25 magazine"
+	desc = "An 8-round magazine for the M25 heavy pistol."
+	icon = 'code/modules/projectiles/ammunition/50AEPistolMagazine.dmi'
+	icon_state = "kurtz"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_PISTOL_MASSIVE
+	matter = list(MATERIAL_STEEL = 700)
+	ammo_type = /obj/item/ammo_casing/pistol/massive
+	max_ammo = 8
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/m25/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/mp85
+	name = "MP85 magazine"
+	desc = "A 30-round magazine for the MP85 PDW."
+	icon = 'code/modules/projectiles/ammunition/lowCalSMGStickMagazine.dmi'
+	icon_state = "smg"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_PISTOL_SMALL
+	matter = list(MATERIAL_STEEL = 1000)
+	ammo_type = /obj/item/ammo_casing/pistol/small
+	max_ammo = 30
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/mp85/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/mp24
+	name = "MP24 magazine"
+	desc = "A 32-round stick magazine for the MP24 submachinegun."
+	icon = 'code/modules/projectiles/ammunition/lowCalSMGStickMagazine.dmi'
+	icon_state = "smg"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_PISTOL
+	matter = list(MATERIAL_STEEL = 1500)
+	ammo_type = /obj/item/ammo_casing/pistol
+	max_ammo = 32
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/mp24/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/mp24/drum
+	name = "MP24 drum magazine"
+	desc = "A 72-round drum magazine for the MP24 submachinegun."
+	icon = 'code/modules/projectiles/ammunition/lowCalSMGDrumMagazine.dmi'
+	icon_state = "ldrum"
+	max_ammo = 72
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/mp24/drum/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z9
+	name = "Z9-C magazine"
+	desc = "A 30-round magazine for the Z9-C bullpup carbine."
+	icon = 'code/modules/projectiles/ammunition/Rifle30Magazine.dmi'
+	icon_state = "lrifle_long"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE
+	matter = list(MATERIAL_STEEL = 1800)
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate
+	max_ammo = 30
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/z9/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z9/short
+	name = "Z9-C short magazine"
+	desc = "A compact 20-round magazine for the Z9-C bullpup carbine."
+	icon = 'code/modules/projectiles/ammunition/Rifle20ShortMagazine.dmi'
+	icon_state = "lrifle_short"
+	max_ammo = 20
+
+/obj/item/ammo_magazine/z9/short/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z9/drum
+	name = "Z9-C drum magazine"
+	desc = "A 50-round drum magazine for the Z9-C bullpup carbine."
+	icon = 'code/modules/projectiles/ammunition/Rifle50DrumMagazine.dmi'
+	icon_state = "rifle_drum"
+	max_ammo = 50
+
+/obj/item/ammo_magazine/z9/drum/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z9/drum/large
+	name = "Z9-C large drum magazine"
+	desc = "A 75-round drum magazine for the Z9-C bullpup carbine."
+	icon = 'code/modules/projectiles/ammunition/Rifle75DrumMagazine.dmi'
+	icon_state = "lrifle_drum"
+	max_ammo = 75
+
+/obj/item/ammo_magazine/z9/drum/large/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z10
+	name = "Z10-A magazine"
+	desc = "A 20-round magazine for the Z10-A assault rifle."
+	icon = 'code/modules/projectiles/ammunition/HeavyCalRifle20Magazine.dmi'
+	icon_state = "hrifle"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_BIG
+	matter = list(MATERIAL_STEEL = 1800)
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/big
+	max_ammo = 20
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/z10/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z11
+	name = "Z11-D box magazine"
+	desc = "A 100-round box magazine for the Z11-D squad automatic weapon."
+	icon = 'code/modules/projectiles/ammunition/LMG100BoxMagazine.dmi'
+	icon_state = "pk_box"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_RIFLE_FULL_SMALL
+	matter = list(MATERIAL_STEEL = 5000)
+	ammo_type = /obj/item/ammo_casing/rifle/full/small
+	max_ammo = 100
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/z11/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z8d
+	name = "Z8-D magazine"
+	desc = "A 20-round magazine for the Z8-D marksman rifle."
+	icon = 'code/modules/projectiles/ammunition/HeavyCalRifle20Magazine.dmi'
+	icon_state = "hrifle"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_RIFLE_FULL_SMALL
+	matter = list(MATERIAL_STEEL = 1200)
+	ammo_type = /obj/item/ammo_casing/rifle/full/small
+	max_ammo = 20
+
+/obj/item/ammo_magazine/z8d/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z9e
+	name = "Z9-E drum magazine"
+	desc = "A 36-round drum magazine for the Z9-E SOCOM bullpup rifle."
+	icon = 'code/modules/projectiles/ammunition/Hdrums.dmi'
+	icon_state = "hdrum"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_RIFLE_INTERMEDIATE_HUGE
+	matter = list(MATERIAL_STEEL = 2000)
+	ammo_type = /obj/item/ammo_casing/rifle/intermediate/huge
+	max_ammo = 36
+	multiple_sprites = 1
+
+/obj/item/ammo_magazine/z9e/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/z8g
+	name = "Z8-G drum magazine"
+	desc = "A 20-round drum magazine for the Z8-G automatic shotgun."
+	icon = 'code/modules/projectiles/ammunition/ShotgunDrum.dmi'
+	icon_state = "m12"
+	mag_type = MAGAZINE
+	caliber = PROJECTILE_SHOTGUN
+	matter = list(MATERIAL_STEEL = 1500)
+	ammo_type = /obj/item/ammo_casing/shotgun/pellet
+	max_ammo = 20
+
+/obj/item/ammo_magazine/z8g/empty
+	initial_ammo = 0

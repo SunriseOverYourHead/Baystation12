@@ -9,6 +9,7 @@
 	flags = RESTRICTED
 	syllables = list("hs","zt","kr","st","sh")
 	shorthand = "RT"
+	tag_icon = "rt"
 	machine_understands = FALSE
 
 /datum/language/diona/get_random_name()

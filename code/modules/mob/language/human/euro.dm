@@ -15,6 +15,7 @@
 	key = "1"
 	flags = WHITELISTED
 	shorthand = "ZAC"
+	tag_icon = "zac"
 	partial_understanding = list(
 		LANGUAGE_HUMAN_CHINESE = 5,
 		LANGUAGE_HUMAN_ARABIC = 5,

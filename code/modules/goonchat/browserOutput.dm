@@ -146,7 +146,7 @@ For the main html chat area
 /datum/chatOutput/proc/ehjax_send(client/C = owner, window = "browseroutput", data)
 	if(islist(data))
 		data = json_encode(data)
-	send_output(C, "[data]", "[window]:ehjaxCallback")
+	send_output(C, url_encode(url_encode("[data]")), "[window]:ehjaxCallback")
 
 
 //Sends client connection details to the chat to handle and save
@@ -274,6 +274,25 @@ For the main html chat area
 		to_chat_immediate(target, message, handle_whitespace, trailing_newline)
 		return
 	SSchat.queue(target, message, handle_whitespace, trailing_newline)
+
+
+/datum/chatOutput/proc/play_music(url, extra_data)
+	if(!loaded)
+		return
+	if(!findtext(url, GLOB.is_http_protocol))
+		return
+	var/list/payload = list()
+	if(length(extra_data) > 0)
+		for(var/key in extra_data)
+			payload[key] = extra_data[key]
+	payload["url"] = url
+	ehjax_send(data = list("playMusic" = payload))
+
+
+/datum/chatOutput/proc/stop_music()
+	if(!loaded)
+		return
+	ehjax_send(data = list("stopMusic" = TRUE))
 
 
 /datum/chatOutput/proc/swaptolightmode() //Dark mode light mode stuff. Yell at KMC if this breaks! (See darkmode.dm for documentation)

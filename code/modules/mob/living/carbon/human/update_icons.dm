@@ -6,6 +6,9 @@
 */
 var/global/list/human_icon_cache = list()
 var/global/list/tail_icon_cache = list() //key is [species.race_key][skin_color]
+var/global/list/tail_behind_icon_cache = list() //key is [species.race_key][skin_color], same as tail_icon_cache
+var/global/list/wings_icon_cache = list() //key is [icon_file][style][color]
+var/global/list/fluff_icon_cache = list() //key is [icon_file][style][color]
 
 GLOBAL_LIST_EMPTY(overlay_icon_cache)
 GLOBAL_LIST_EMPTY(species_icon_template_cache)
@@ -130,10 +133,10 @@ Please contact me on #coderbus IRC. ~Carn x
 #define HO_SKIN_LAYER       3
 #define HO_SURGERY_LAYER    4 //bs12 specific.
 #define HO_UNDERWEAR_LAYER  5
-#define HO_UNIFORM_LAYER    6
-#define HO_DAMAGE_LAYER     7
-#define HO_ID_LAYER         8
-#define HO_SHOES_LAYER      9
+#define HO_DAMAGE_LAYER     6
+#define HO_ID_LAYER         7
+#define HO_SHOES_LAYER      8 //drawn below HO_UNIFORM_LAYER (user request: /under/ clothing overlays on top of boots/shoes)
+#define HO_UNIFORM_LAYER    9
 #define HO_GLOVES_LAYER     10
 #define HO_BELT_LAYER       11
 #define HO_SUIT_LAYER       12
@@ -154,12 +157,33 @@ Please contact me on #coderbus IRC. ~Carn x
 #define HO_R_HAND_LAYER     27
 #define HO_FIRE_LAYER       28 //If you're on fire
 #define HO_EFFECTS_LAYER    29
-#define TOTAL_LAYERS        30
+// bs12 specific -- Breasts/Penis/Testicles/Vagina "front" content (get_chest_mutant_icon()/get_groin_mutant_icon()
+// in standard.dm, visible facing south, and additionally east/west for breasts) needs to draw above literally
+// everything in HO_BODY_LAYER, but below Fluff/Wings (explicit user-specified stacking: Wings above Fluff above
+// Breasts). This used to live inside HO_BODY_LAYER with a high .layer value, same idea as HO_WINGS_LAYER/
+// HO_FLUFF_LAYER's own art not fitting the chest compositing hook -- except unlike wings/fluff this content
+// genuinely does composite through chest/groin's own on_update_icon(), so the failure mode was silent: .layer
+// differences don't get respected for images stacked within the SAME overlays_standing[] bucket/list (only
+// insertion order does, confirmed live -- see get_chest_mutant_icon()'s header comment for the full story), so it
+// always rendered underneath the rest of HO_BODY_LAYER (arms, head, the limb's own base body art) no matter how
+// high a .layer was set. A dedicated bucket after everything else sidesteps the whole problem.
+#define HO_GENITAL_FRONT_LAYER 30
+#define HO_FLUFF_LAYER      31 //bs12 specific, same reasoning/approach as HO_WINGS_LAYER (oversized 45x34 art, no chest compositing fit)
+#define HO_WINGS_LAYER      32 //bs12 specific, appended rather than inserted so no existing indices shift
+#define TOTAL_LAYERS        33
 //////////////////////////////////
 
 /mob/living/carbon/human
 	var/list/overlays_standing[TOTAL_LAYERS]
 	var/previous_damage_appearance // store what the body last looked like, so we only have to update it if something changed
+	// The part of the tail (or other mutant organ, currently tail-only) that should render BEHIND the mob's own
+	// body/limb icons, e.g. a tail's south-facing art, which should be tucked behind the character rather than
+	// obscuring them. Applied via BYOND's native `underlays` (always draws under an atom's own icon and every one
+	// of its overlays, regardless of insertion order), not through overlays_standing -- that list has no slot that
+	// can render before HO_BODY_LAYER (index 1, the very first thing added), and mixing "sometimes behind, sometimes
+	// in front" into one flat image isn't possible since a single image has one fixed z-order for all 4 directions
+	// at once. Mirrors Bubberstation's own BODY_BEHIND_LAYER mechanism (see accessory_mutant_tail_anthro.dm).
+	var/image/tail_behind_overlay
 
 //UPDATES OVERLAYS FROM OVERLAYS_LYING/OVERLAYS_STANDING
 /mob/living/carbon/human/update_icons()
@@ -201,6 +225,12 @@ Please contact me on #coderbus IRC. ~Carn x
 		overlays_to_apply += auras
 
 	SetOverlays(overlays_to_apply)
+
+	if(!is_cloaked() && tail_behind_overlay)
+		tail_behind_overlay.transform = get_lying_offset(tail_behind_overlay)
+		underlays = list(tail_behind_overlay)
+	else if(length(underlays))
+		underlays = list()
 	var/list/scale = get_scale()
 	animate(
 		src,
@@ -373,6 +403,34 @@ var/global/list/damage_icon_parts = list()
 			overlays_standing[HO_BODY_LAYER] = new_limbs
 
 	update_tail_showing(0)
+	update_wings_showing(0)
+	update_fluff_showing(0)
+	update_genital_front_showing(0)
+
+	if(update_icons)
+		queue_icon_update()
+
+// See HO_GENITAL_FRONT_LAYER's header comment above -- pulls the already-correctly-built "front" image (real
+// content only for the directions that should show it, blank otherwise -- see get_icon_masked_to_dirs()) straight
+// out of chest/groin's own compositing procs and stores it in its own top-of-everything bucket instead of relying
+// on chest/groin's on_update_icon() to add it into HO_BODY_LAYER, which never actually worked. Runs unconditionally
+// every update_body(), same as update_wings_showing()/update_fluff_showing() -- not gated behind chest/groin's own
+// icon_render_keys cache, since this proc doesn't touch mob_overlays at all.
+/mob/living/carbon/human/proc/update_genital_front_showing(update_icons=1)
+	overlays_standing[HO_GENITAL_FRONT_LAYER] = null
+	var/list/fronts = list()
+	var/obj/item/organ/external/chest/C = organs_by_name[BP_CHEST]
+	if(istype(C))
+		var/list/render = C.get_chest_mutant_icon()
+		if(render && render[1])
+			fronts += render[1]
+	var/obj/item/organ/external/groin/G = organs_by_name[BP_GROIN]
+	if(istype(G))
+		var/list/render = G.get_groin_mutant_icon()
+		if(render && render[1])
+			fronts += render[1]
+	if(length(fronts))
+		overlays_standing[HO_GENITAL_FRONT_LAYER] = fronts
 
 	if(update_icons)
 		queue_icon_update()
@@ -496,6 +554,7 @@ var/global/list/damage_icon_parts = list()
 
 	if(update_icons)
 		queue_icon_update()
+	refresh_genital_visibility_if_needed()
 
 /mob/living/carbon/human/update_inv_wear_id(update_icons=1)
 	var/image/id_overlay
@@ -582,6 +641,13 @@ var/global/list/damage_icon_parts = list()
 	else
 		overlays_standing[HO_HEAD_LAYER]     = null
 		overlays_standing[HO_ALT_HEAD_LAYER] = null
+	// A themed helmet going on/off changes whether head-parented external organs (horns/ears/
+	// spines/frills/snout/xenodorsal/xenohead) should render with the cover pattern -- but that's
+	// baked into the HEAD LIMB's own icon (head.dm's get_hair_icon()), not this proc's overlay
+	// slots, so it needs an explicit update_body() to actually re-derive it. Same fix already
+	// applied elsewhere for the same "clothing change doesn't auto-retrigger a limb's icon" gap,
+	// see mutant_genitals_visibility.dm's own header comment.
+	update_body(0)
 	if(update_icons)
 		queue_icon_update()
 
@@ -600,17 +666,28 @@ var/global/list/damage_icon_parts = list()
 	if(wear_suit)
 		overlays_standing[HO_SUIT_LAYER]	= wear_suit.get_mob_overlay(src,slot_wear_suit_str)
 		update_tail_showing(0)
+		update_wings_showing(0)
+		update_fluff_showing(0)
 	else
 		overlays_standing[HO_SUIT_LAYER]	= null
 		update_tail_showing(0)
+		update_wings_showing(0)
+		update_fluff_showing(0)
 		update_inv_w_uniform(0)
 		update_inv_shoes(0)
 		update_inv_gloves(0)
+
+	// Regular external organs (arms/legs/hands/feet/chest/groin) now also react to the worn suit's own cover_theme
+	// (see get_cover_theme(), _external_icons.dm) -- unlike tail/wings/fluff above,
+	// those aren't refreshed by any of the update_*_showing() calls, since they live entirely inside update_body()'s
+	// own per-limb rebuild loop, gated by get_icon_key() (which now folds cover_theme in too).
+	update_body(0)
 
 	update_collar(0)
 
 	if(update_icons)
 		queue_icon_update()
+	refresh_genital_visibility_if_needed()
 
 /mob/living/carbon/human/update_inv_pockets(update_icons=1)
 	if(update_icons)
@@ -676,41 +753,207 @@ var/global/list/damage_icon_parts = list()
 	if(update_icons)
 		queue_icon_update()
 
+// Body shape key for the runtime clothing leg-remap system (code/modules/clothing/_leg_shape_remap.dm) -- null
+// means "no remap needed, render clothing as drawn". Extend this with more cases as more body shapes need their
+// own clothing silhouette. Order matters: check the most specific species type before a more general one it
+// inherits from (Monarch Queen before the general Nabber check, which would otherwise match first).
+//
+// "teshari" and "vox" shape keys have real mapping data in _leg_shape_remap.dm but deliberately have no branch
+// here yet -- Teshari isn't a playable species in this codebase yet, and the Vox mapping was drawn against a
+// different (NovaSector better_vox) art style meant for a future alternate-Vox port, not this codebase's current
+// Vox. Add a branch here once either actually needs to go live.
+/mob/living/carbon/human/proc/get_body_shape_key()
+	if(species?.appearance_flags & SPECIES_APPEARANCE_HAS_LEG_TYPE && leg_type == LEG_TYPE_DIGITIGRADE)
+		return "digitigrade"
+	if(istype(species, /singleton/species/unathi))
+		return "unathi"
+	if(istype(species, /singleton/species/nabber/monarch/queen))
+		return "msq"
+	if(istype(species, /singleton/species/nabber) && !istype(species, /singleton/species/nabber/monarch))
+		return "gas"
+	if(istype(species, /singleton/species/teshari))
+		return "teshari"
+	if(istype(species, /singleton/species/vox))
+		return "vox"
+	return null
+
+// Which mutant_cover_pattern.dmi state (if any) a chest-parented external organ (tail/wings/
+// fluff) should be masked with, based on the currently worn SUIT. Null = no themed space-proof
+// suit worn, render normally. See _accessory_mutant.dm's apply_mutant_cover_pattern() for what
+// this actually does to the icon, and spacesuits.dm/rig_pieces.dm for where suits declare a theme.
+/mob/living/carbon/human/proc/get_worn_cover_theme()
+	if(!istype(wear_suit, /obj/item/clothing/suit/space))
+		return null
+	var/obj/item/clothing/suit/space/S = wear_suit
+	return S.get_cover_theme()
+
+// Same idea as get_worn_cover_theme(), but for head-parented external organs (horns/ears/spines/
+// frills/snout/xenodorsal/xenohead), based on the currently worn HELMET instead of the suit.
+/mob/living/carbon/human/proc/get_worn_head_cover_theme()
+	if(!istype(head, /obj/item/clothing/head/helmet/space))
+		return null
+	var/obj/item/clothing/head/helmet/space/HL = head
+	return HL.get_cover_theme()
+
 /mob/living/carbon/human/proc/update_tail_showing(update_icons=1)
 	overlays_standing[HO_TAIL_LAYER] = null
+	tail_behind_overlay = null
 
 	var/species_tail = species.get_tail(src)
+	// A themed space-proof suit means the tail gets masked instead of hidden, even if HIDETAIL is
+	// set -- only w_uniform's own HIDETAIL, or a non-space-proof suit's, still hides it outright.
+	var/mask_theme = get_worn_cover_theme()
+	var/tail_hidden = (wear_suit?.flags_inv & HIDETAIL) || (w_uniform?.flags_inv & HIDETAIL)
 
-	if(species_tail && !(wear_suit?.flags_inv & HIDETAIL) && !(w_uniform?.flags_inv & HIDETAIL))
+	if(species_tail && (!tail_hidden || mask_theme))
 		var/icon/tail_s = get_tail_icon()
-		overlays_standing[HO_TAIL_LAYER] = image(tail_s, icon_state = "[species_tail]_s")
+		// "_static" (not "_s") -- tails.dmi's actual states are "[style]_static"/"[style]_idle0", never "[style]_s".
+		// This was previously "_s" (a state that never exists in any tail file) but got masked: animate_tail_reset()
+		// unconditionally overwrites this with the real "_idle0"/"_static" state immediately below, before the mob
+		// ever actually renders with the wrong one. Fixed anyway now that this whole area's being touched.
+		overlays_standing[HO_TAIL_LAYER] = image(tail_s, icon_state = "[species_tail]_static")
+		var/icon/tail_behind_s = get_tail_behind_icon()
+		if(tail_behind_s)
+			tail_behind_overlay = image(tail_behind_s, icon_state = "[species_tail]_static_behind")
 		animate_tail_reset(0)
 
 	if(update_icons)
 		queue_icon_update()
 
 /mob/living/carbon/human/proc/get_tail_icon()
-	var/icon_key = "[species.get_race_key(src)][skin_color][head_hair_color]"
+	var/obj/item/organ/internal/mutant/tail/T = internal_organs_by_name[BP_TAIL]
+	var/style = species.get_tail(src)
+	if(!style)
+		return null
+	var/tail_color = (T?.colors?[1]) || skin_color
+	var/mask_theme = get_worn_cover_theme()
+	var/icon_key = "[species.get_race_key(src)][style][T?.colors?.Join(",")][tail_color][head_hair_color][mask_theme]"
 	var/icon/tail_icon = tail_icon_cache[icon_key]
 	if(!tail_icon)
 		//generate a new one
 		var/species_tail_anim = species.get_tail_animation(src)
 		if(!species_tail_anim) species_tail_anim = 'icons/effects/species.dmi'
-		tail_icon = new/icon(species_tail_anim)
-		tail_icon.Blend(skin_color, species.tail_blend)
-		// The following will not work with animated tails.
+		var/icon/idle_icon
+		if(T?.sprite_datum)
+			tail_icon = T.sprite_datum.build_colored_icon_for_state("[style]_static", T.colors, tail_color, species_tail_anim, cover_theme = mask_theme)
+			idle_icon = T.sprite_datum.build_colored_icon_for_state("[style]_idle0", T.colors, tail_color, species_tail_anim, cover_theme = mask_theme)
+		else
+			// No organ/sprite_datum (species-level fixed tail, pre-organ-system convention, e.g. Sogtail's own
+			// species-var fallback) -- single-color only, matching this proc's pre-multi-region behavior exactly.
+			var/blend_mode = species.get_tail_blend(src)
+			tail_icon = icon(species_tail_anim, "[style]_static")
+			tail_icon.Blend(tail_color, blend_mode)
+			idle_icon = icon(species_tail_anim, "[style]_idle0")
+			idle_icon.Blend(tail_color, blend_mode)
+			if(mask_theme)
+				apply_mutant_cover_pattern(tail_icon, mask_theme)
+				apply_mutant_cover_pattern(idle_icon, mask_theme)
+		tail_icon.Insert(idle_icon, "[style]_idle0")
+		// The following will not work with animated tails. Unathi's own Sogtail-specific hair-tuft overlay,
+		// region-1-only (pre-existing limitation, not something multi-region support needed to solve).
 		var/use_species_tail = species.get_tail_hair(src)
 		if(use_species_tail)
-			var/icon/hair_icon = icon('icons/effects/species.dmi', "[species.get_tail(src)]_[use_species_tail]")
+			var/icon/hair_icon = icon('icons/effects/species.dmi', "[style]_[use_species_tail]")
 			hair_icon.Blend(head_hair_color, ICON_ADD)
 			tail_icon.Blend(hair_icon, ICON_OVERLAY)
 		tail_icon_cache[icon_key] = tail_icon
 
 	return tail_icon
 
+// The part of the tail that should render BEHIND the body (see tail_behind_overlay's declaration for why this is
+// a second, separate icon rather than a z-order flag on the one from get_tail_icon()). Built from the
+// "[style]_static_behind"/"[style]_idle0_behind" states -- see accessory_mutant_tail_anthro.dm's extraction notes.
+// Only organ-based (Bubberstation-ported) tails have this content; the legacy species-fixed-tail path (Sogtail
+// etc, pre-organ-system) has no behind art extracted for it, so this returns null there and those tails keep
+// their existing (unchanged) always-in-front behavior.
+/mob/living/carbon/human/proc/get_tail_behind_icon()
+	var/obj/item/organ/internal/mutant/tail/T = internal_organs_by_name[BP_TAIL]
+	if(!T?.sprite_datum)
+		return null
+	var/style = species.get_tail(src)
+	if(!style)
+		return null
+	var/tail_color = (T.colors?[1]) || skin_color
+	var/mask_theme = get_worn_cover_theme()
+	var/icon_key = "[species.get_race_key(src)][style][T.colors?.Join(",")][tail_color][head_hair_color][mask_theme]"
+	var/icon/tail_icon = tail_behind_icon_cache[icon_key]
+	if(!tail_icon)
+		var/species_tail_anim = species.get_tail_animation(src)
+		if(!species_tail_anim) species_tail_anim = 'icons/effects/species.dmi'
+		tail_icon = T.sprite_datum.build_colored_icon_for_state("[style]_static_behind", T.colors, tail_color, species_tail_anim, cover_theme = mask_theme)
+		var/icon/idle_icon = T.sprite_datum.build_colored_icon_for_state("[style]_idle0_behind", T.colors, tail_color, species_tail_anim, cover_theme = mask_theme)
+		tail_icon.Insert(idle_icon, "[style]_idle0_behind")
+		tail_behind_icon_cache[icon_key] = tail_icon
+
+	return tail_icon
+
+// Wings render as a plain mob-level overlay, same approach as tail, rather than through a chest-organ render hook
+// (BS12SOYH's chest, unlike head, has no equivalent of the internal_organs mutant-organ compositing loop, and the
+// wing art is oversized relative to a normal 32x32 limb tile anyway -- see accessory_mutant_wings_anthro.dm).
+/mob/living/carbon/human/proc/update_wings_showing(update_icons=1)
+	overlays_standing[HO_WINGS_LAYER] = null
+
+	var/species_wings = species.get_wings(src)
+
+	if(species_wings)
+		var/icon/wings_s = get_wings_icon()
+		overlays_standing[HO_WINGS_LAYER] = image(wings_s, icon_state = "[species_wings]_s")
+
+	if(update_icons)
+		queue_icon_update()
+
+/mob/living/carbon/human/proc/get_wings_icon()
+	var/obj/item/organ/internal/mutant/wings/W = internal_organs_by_name[BP_WINGS]
+	if(!W?.sprite_datum)
+		return null
+	var/fallback_color = skin_color
+	var/mask_theme = get_worn_cover_theme()
+	var/icon_key = "[W.sprite_datum.icon][W.sprite_datum.icon_state][W.colors.Join(",")][fallback_color][mask_theme]"
+	var/icon/wings_icon = wings_icon_cache[icon_key]
+	if(!wings_icon)
+		wings_icon = W.sprite_datum.build_colored_icon(W.colors, fallback_color, cover_theme = mask_theme)
+		wings_icon_cache[icon_key] = wings_icon
+
+	return wings_icon
+
+// Fluff and Moth Markings render the same way as Wings (mob-level overlay, not through chest's own compositing
+// loop) for the same reason: their source art is 45x34, not the standard 32x32 every other chest-parented mutant-
+// organ category (Head Accessory, Neck Accessory) uses, so they don't fit standard.dm's chest compositing hook.
+/mob/living/carbon/human/proc/update_fluff_showing(update_icons=1)
+	overlays_standing[HO_FLUFF_LAYER] = null
+
+	var/species_fluff = species.get_fluff(src)
+
+	if(species_fluff)
+		var/icon/fluff_s = get_fluff_icon()
+		overlays_standing[HO_FLUFF_LAYER] = image(fluff_s, icon_state = "[species_fluff]_s")
+
+	if(update_icons)
+		queue_icon_update()
+
+/mob/living/carbon/human/proc/get_fluff_icon()
+	var/obj/item/organ/internal/mutant/fluff/F = internal_organs_by_name[BP_FLUFF]
+	if(!F?.sprite_datum)
+		return null
+	// "#FFFFFF" (not skin_color) -- Fluff's source art is pre-colored per style, not a tintable grayscale mask,
+	// so the correct "no override chosen" default is a no-op multiply, matching get_mutant_fallback_color()'s
+	// chargen-time default for BP_FLUFF (preferences_tgui.dm).
+	var/fallback_color = "#FFFFFF"
+	var/mask_theme = get_worn_cover_theme()
+	var/icon_key = "[F.sprite_datum.icon][F.sprite_datum.icon_state][F.colors.Join(",")][fallback_color][mask_theme]"
+	var/icon/fluff_icon = fluff_icon_cache[icon_key]
+	if(!fluff_icon)
+		fluff_icon = F.sprite_datum.build_colored_icon(F.colors, fallback_color, cover_theme = mask_theme)
+		fluff_icon_cache[icon_key] = fluff_icon
+
+	return fluff_icon
+
 
 /mob/living/carbon/human/proc/set_tail_state(t_state)
 	var/image/tail_overlay = overlays_standing[HO_TAIL_LAYER]
+
+	if(tail_behind_overlay && species.get_tail_animation(src))
+		tail_behind_overlay.icon_state = "[t_state]_behind"
 
 	if(tail_overlay && species.get_tail_animation(src))
 		tail_overlay.icon_state = t_state
@@ -720,7 +963,7 @@ var/global/list/damage_icon_parts = list()
 //Not really once, since BYOND can't do that.
 //Update this if the ability to flick() images or make looping animation start at the first frame is ever added.
 /mob/living/carbon/human/proc/animate_tail_once(update_icons=1)
-	var/t_state = "[species.get_tail(src)]_once"
+	var/t_state = "[species.get_tail(src)]_idle0"
 
 	var/image/tail_overlay = overlays_standing[HO_TAIL_LAYER]
 	if(tail_overlay && tail_overlay.icon_state == t_state)
@@ -737,20 +980,20 @@ var/global/list/damage_icon_parts = list()
 		queue_icon_update()
 
 /mob/living/carbon/human/proc/animate_tail_start(update_icons=1)
-	set_tail_state("[species.get_tail(src)]_slow[rand(0,9)]")
+	set_tail_state("[species.get_tail(src)]_idle0")
 
 	if(update_icons)
 		queue_icon_update()
 
 /mob/living/carbon/human/proc/animate_tail_fast(update_icons=1)
-	set_tail_state("[species.get_tail(src)]_loop[rand(0,9)]")
+	set_tail_state("[species.get_tail(src)]_idle0")
 
 	if(update_icons)
 		queue_icon_update()
 
 /mob/living/carbon/human/proc/animate_tail_reset(update_icons=1)
 	if(!is_dead())
-		set_tail_state("[species.get_tail(src)]_idle[rand(0,9)]")
+		set_tail_state("[species.get_tail(src)]_idle0")
 	else
 		set_tail_state("[species.get_tail(src)]_static")
 
@@ -846,4 +1089,6 @@ var/global/list/damage_icon_parts = list()
 #undef HO_L_HAND_LAYER
 #undef HO_R_HAND_LAYER
 #undef HO_FIRE_LAYER
+#undef HO_WINGS_LAYER
+#undef HO_FLUFF_LAYER
 #undef TOTAL_LAYERS

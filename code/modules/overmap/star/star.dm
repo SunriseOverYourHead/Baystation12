@@ -50,12 +50,10 @@
 
 
 /obj/overmap/visitable/star/get_scan_data(mob/user)
-	return {"\
-		[..()]<br>\
-		Solar radii: [star_scale]R☉.<br>\
-		Solar mass: [star_scale * 2]M☉<br>\
-		Luminosity: [star_luminosity]L☉<br>\
-	"}
+	. = ..()
+	. += "Solar radii: [star_scale]R☉."
+	. += "Solar mass: [star_scale * 2]M☉"
+	. += "Luminosity: [star_luminosity]L☉"
 
 
 /singleton/star_class

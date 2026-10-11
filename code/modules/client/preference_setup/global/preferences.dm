@@ -123,6 +123,13 @@ var/global/list/_client_preferences_by_type
 	description = "Play announcement sound effects"
 	key = "SOUND_ANNOUNCEMENT"
 	options = list(GLOB.PREF_YES, GLOB.PREF_NO)
+
+// Listener-side control for other characters' vocal chirps (vocal_chirps.dm). Unlike the chirp settings on your
+// own character -- which are a physical trait fixed at spawn -- this is an OOC audio setting and applies live.
+/datum/client_preference/hear_vocal_chirps
+	description = "Hear vocal chirps"
+	key = "SOUND_VOCAL_CHIRPS"
+	options = list(GLOB.PREF_MED, GLOB.PREF_LOW, GLOB.PREF_HIGH, GLOB.PREF_OFF)
 /datum/client_preference/ghost_ears
 	description = "Ghost ears"
 	key = "CHAT_GHOSTEARS"
@@ -313,9 +320,13 @@ var/global/list/_client_preferences_by_type
 
 /datum/client_preference/floating_messages
 	description = "Floating chat messages"
-	key = "FLOATING_CHAT"
+	// Key deliberately renamed from the original "FLOATING_CHAT" when this flipped to being on by default.
+	// sanitize_preferences() (05_settings.dm) only writes a default for keys ABSENT from the savefile, and then
+	// prunes keys with no matching datum -- so renaming is what actually drops everyone's stored "Hide" and lets
+	// the new default apply. Without the rename, flipping default_value would only affect brand-new savefiles.
+	key = "FLOATING_CHAT_V2"
 	options = list(GLOB.PREF_HIDE, GLOB.PREF_SHOW)
-	default_value = GLOB.PREF_HIDE
+	default_value = GLOB.PREF_SHOW
 
 
 GLOBAL_CONST(PREF_VA_NOTIFY, "Start Notify")

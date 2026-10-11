@@ -125,6 +125,12 @@ h1.alert, h2.alert		{color: #000080;}
 .spacer					{color: #9c660b;}
 .selenian       {color: #22228b;}
 
+/* Surviving natural languages of Earth -- tinted near their constructed descendants (english/euro,
+   spanish/iberian, mandarin/chinese) so related tongues read as related in chat, but distinguishable. */
+.english				{color: #3a6ea5;}
+.spanish				{color: #cc4400;}
+.mandarin				{color: #b8860b;}
+
 .interface				{color: #330033;}
 
 .good                   {color: #4f7529; font-weight: bold;}

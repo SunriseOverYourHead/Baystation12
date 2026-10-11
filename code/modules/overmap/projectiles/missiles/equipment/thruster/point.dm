@@ -17,7 +17,7 @@
 		to_chat(user, SPAN_NOTICE("The targeting computer display lets you know that's an invalid target."))
 		return TRUE
 
-	var/turf/tgt = locate(target_x, target_y, GLOB.using_map.overmap_z)
+	var/turf/tgt = locate(target_x, target_y, user.z)
 	if (!tgt)
 		to_chat(user, SPAN_NOTICE("The targeting computer display indicates that the target wasn't valid."))
 		return TRUE

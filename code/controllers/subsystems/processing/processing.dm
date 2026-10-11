@@ -28,9 +28,11 @@ SUBSYSTEM_DEF(processing)
 		datum = queue[i]
 		if (QDELETED(datum) || !datum.is_processing)
 			processing -= datum
-		else if (datum.Process(wait, times_fired, src) == PROCESS_KILL)
-			datum?.is_processing = null
-			processing -= datum
+		// No living player anywhere on this datum's connected z-levels; leave it queued (it wakes up on its own once someone arrives) but skip the tick.
+		else if (!istype(datum, /atom) || config.run_empty_levels || SSpresence.population_group(get_z(datum)))
+			if (datum.Process(wait, times_fired, src) == PROCESS_KILL)
+				datum?.is_processing = null
+				processing -= datum
 		if (no_mc_tick)
 			if (i % 5)
 				continue

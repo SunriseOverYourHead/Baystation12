@@ -39,6 +39,10 @@ SUBSYSTEM_DEF(machines)
 	init_order = SS_INIT_MACHINES
 	priority = SS_PRIORITY_MACHINERY
 	flags = SS_KEEP_TIMING
+	// Was the unoverridden base default (20 deciseconds = 2.0s) - dropped to 0.5s per explicit request, to speed
+	// up atmos pipe/heat-exchanger processing (he_pipes.dm, heat_exchanger.dm, circulator icon updates all run off
+	// this subsystem's Process() calls). Affects every machine on SSmachines, not just atmos ones.
+	wait = 0.5 SECONDS
 	var/static/current_step = SSMACHINES_PIPENETS
 	var/static/cost_pipenets = 0
 	var/static/cost_machinery = 0
@@ -124,10 +128,18 @@ SUBSYSTEM_DEF(machines)
 		atmos_machines += machine
 	report_progress("Initializing atmos machinery")
 	for (var/obj/machinery/atmospherics/machine as anything in atmos_machines)
+		// CHECK_TICK below yields, and one machine's atmos_init() can delete an overlapping duplicate elsewhere
+		// in this same list (e.g. two pipes placed on the same tile in map/ruin data) before that duplicate's own
+		// turn comes up -- skip anything already gone rather than calling atmos_init() on a destroyed atom with a
+		// null loc (was spamming "deleted before initalization" / "Cannot execute null.is_plating()" at boot).
+		if(QDELETED(machine))
+			continue
 		machine.atmos_init()
 		CHECK_TICK
 	report_progress("Initializing pipe networks")
 	for (var/obj/machinery/atmospherics/machine as anything in atmos_machines)
+		if(QDELETED(machine))
+			continue
 		machine.build_network()
 		CHECK_TICK
 
@@ -179,6 +191,15 @@ SUBSYSTEM_DEF(machines)
 			if (machine)
 				machine.is_processing = null
 			processing -= machine
+			continue
+
+		if (!config.run_empty_levels && !SSpresence.population_group(machine.z))
+			// No living player anywhere on this machine's connected z-levels; skip the tick, stays queued for when someone returns.
+			if (no_mc_tick)
+				CHECK_TICK
+			else if (MC_TICK_CHECK)
+				queue.Cut(i)
+				return
 			continue
 
 		if(machine.processing_flags & MACHINERY_PROCESS_COMPONENTS)

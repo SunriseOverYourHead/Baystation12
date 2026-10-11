@@ -10,6 +10,7 @@
 	key = "|"
 	flags = RESTRICTED
 	shorthand = "KV"
+	tag_icon = "kv"
 	machine_understands = FALSE
 	var/list/can_speak_properly = list(
 		SPECIES_NABBER,
@@ -58,9 +59,12 @@
 	exclaim_verb = "flares"
 	flags = RESTRICTED | NO_STUTTER | SIGNLANG
 	shorthand = "KNV"
+	tag_icon = "knv"
 
 #define MANTID_SCRAMBLE_CACHE_LEN 20
-/datum/language/mantid/nonvocal/scramble(var/input)
+// Renders as coloured asterisks rather than fake words, so there is nothing for partial comprehension to act on --
+// known_languages and base_understanding are accepted to match the parent signature and deliberately ignored.
+/datum/language/mantid/nonvocal/scramble(var/input, list/known_languages, base_understanding = 0)
 	if(input in scramble_cache)
 		var/n = scramble_cache[input]
 		scramble_cache -= input
@@ -95,6 +99,7 @@
 	exclaim_verb = "flares"
 	flags = RESTRICTED | NO_STUTTER | NONVERBAL | HIVEMIND 
 	shorthand = "KB"
+	tag_icon = "kb"
 
 /datum/language/mantid/worldnet/check_special_condition(var/mob/living/carbon/other)
 	if(istype(other, /mob/living/silicon/robot/flying/ascent))

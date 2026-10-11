@@ -29,8 +29,11 @@
 	health_hud_intensity = 2
 	hunger_factor = DEFAULT_HUNGER_FACTOR * 2
 
-	min_age = 18
-	max_age = 260
+	min_age = 22
+	max_age = 200
+
+	force_male_sheath_mode = "Slit"
+	default_genital_color = "#D73F44"
 
 	body_temperature = null // cold-blooded, implemented the same way nabbers do it
 
@@ -89,7 +92,16 @@
 		BP_LIVER =    /obj/item/organ/internal/liver,
 		BP_KIDNEYS =  /obj/item/organ/internal/kidneys,
 		BP_EYES =   /obj/item/organ/internal/eyes/unathi,
-		BP_BRAIN =  /obj/item/organ/internal/brain/unathi
+		BP_BRAIN =  /obj/item/organ/internal/brain/unathi,
+		BP_TAIL =   /obj/item/organ/internal/mutant/tail/lizard,
+		BP_HORNS =  /obj/item/organ/internal/mutant/horns,
+		BP_FRILLS = /obj/item/organ/internal/mutant/frills,
+		BP_SPINES = /obj/item/organ/internal/mutant/spines,
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 
 	descriptors = list(
@@ -171,3 +183,6 @@
 
 /singleton/species/unathi/get_bodytype(mob/living/carbon/human/H)
 	return SPECIES_UNATHI
+
+/singleton/species/unathi/is_mutant_organ_mandatory(organ_tag)
+	return organ_tag == BP_TAIL

@@ -91,6 +91,8 @@ var/global/list/moving_levels = list()
 		return GLOB.sun_angle
 	var/obj/overmap/visitable/star/closest_star
 	for (var/obj/overmap/visitable/star/iterator_star in GLOB.map_stars)
+		if (iterator_star.z != sector.z)
+			continue // different star system's grid entirely - not a real distance comparison
 		if (!closest_star || get_dist(sector, iterator_star) < get_dist(sector, closest_star))
 			closest_star = iterator_star
 	if (!closest_star)
@@ -110,6 +112,8 @@ var/global/list/moving_levels = list()
 	var/star_dist = 100 // The void consumes
 	var/obj/overmap/visitable/star/closest_star
 	for (var/obj/overmap/visitable/star/iterator_star in GLOB.map_stars)
+		if (iterator_star.z != sector.z)
+			continue // different star system's grid entirely - not a real distance comparison
 		if (!closest_star || get_dist(sector, iterator_star) < star_dist)
 			star_dist = get_dist(sector, iterator_star)
 			closest_star = iterator_star

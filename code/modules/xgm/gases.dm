@@ -229,11 +229,44 @@
 	id = GAS_AMMONIA
 	name = "Ammonia"
 
-	specific_heat = 20	// J/(mol*K)
+	// Bumped up from the old value of 20 for use as a secondary reactor coolant loop fluid (see
+	// code/modules/power/reactor/) - real ammonia's reputation as an industrial refrigerant (R-717) comes from a
+	// high latent heat of vaporization this gas-only model can't represent, so specific_heat is raised instead as
+	// the nearest available stand-in. Kept below NaK's, since it's meant to be the lesser of the two reactor
+	// coolants, and below hydrogen's since real ammonia's molar heat capacity isn't actually unusual.
+	specific_heat = 90	// J/(mol*K)
 	molar_mass = 0.017	// kg/mol
+	// Real ammonia is genuinely flammable (4NH3 + 3O2 -> 2N2 + 6H2O), just over a narrower 16-25% air-mix band
+	// than most fuel gases - the fire system here doesn't model per-gas flammability ranges, so it's just flagged
+	// as fuel like anything else. Burns to water vapor, same as hydrogen below (the other N2 byproduct is inert
+	// and already the most common gas in the mix, not worth tracking separately).
+	flags = XGM_GAS_FUEL
+	burn_product = GAS_STEAM
 	breathed_product = /datum/reagent/ammonia
 	symbol_html = "NH<sub>3</sub>"
 	symbol = "NH3"
+
+/singleton/xgm_gas/nak
+	id = GAS_NAK
+	name = "Sodium-Potassium Alloy"
+
+	// NaK-78 eutectic - the real coolant of choice for several fast-neutron reactor designs (EBR-II, various SNAP
+	// reactors) thanks to a low melting point and, above all, thermal conductivity far beyond any molecular gas.
+	// This gas model has no separate conductivity property, so specific_heat stands in for it and is pushed
+	// well above everything else in this file - NaK's real molar heat capacity is unremarkable (~30 J/(mol*K)),
+	// this is a deliberate gameplay exaggeration, same liberty already taken with hydrogen's value below.
+	specific_heat = 150	// J/(mol*K), gamified - see above
+	molar_mass = 0.034	// kg/mol - real weighted average of the Na/K eutectic composition
+	// Genuinely pyrophoric - NaK is more dangerous than pure sodium precisely because it's already liquid at room
+	// temperature, so unlike sodium (which has to melt first) it ignites on contact with air with no delay, and
+	// reacts violently with water/moisture too (releasing hydrogen, which can itself ignite). No burn_product is
+	// set: it oxidizes to solid Na/K oxide residue, not another gas, same modeling choice as methane's no-product
+	// combustion above.
+	flags = XGM_GAS_FUEL | XGM_GAS_CONTAMINANT	// alkali metal vapor: toxic and corrosive to breathe, too
+	breathed_product = /datum/reagent/toxin
+	tile_color = "#c7c9d1"
+	symbol_html = "NaK"
+	symbol = "NaK"
 
 /singleton/xgm_gas/carbon_monoxide
 	id = GAS_CO

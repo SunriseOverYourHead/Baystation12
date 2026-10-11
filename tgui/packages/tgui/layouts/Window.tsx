@@ -12,9 +12,8 @@ import {
   useLayoutEffect,
   useState,
 } from 'react';
-import { type Box, KeyListener } from 'tgui-core/components';
+import type { Box } from 'tgui-core/components';
 import { UI_DISABLED, UI_INTERACTIVE } from 'tgui-core/constants';
-import { KEY_ALT } from 'tgui-core/keycodes';
 import { type BooleanLike, classes } from 'tgui-core/react';
 import { decodeHtmlEntities } from 'tgui-core/string';
 import { useBackend } from '../backend';
@@ -156,10 +155,16 @@ type ContentProps = Partial<{
 
 function WindowContent(props: ContentProps) {
   const { className, fitted, children, ...rest } = props;
-  const [altDown, setAltDown] = useState(false);
 
+  // Checks the mouse event's own live altKey flag rather than a separately-tracked "is alt currently held" state.
+  // A tracked-state version (set on keydown, cleared on keyup) can get permanently stuck true if the keyup is ever
+  // missed - e.g. focus leaving the webview while Alt is still physically held, which happens easily under Wine/X11
+  // window managers that like to intercept Alt themselves. Once stuck, EVERY mousedown anywhere in the window
+  // content - including on interactive children like a Slider, whose own mousedown handler doesn't stop
+  // propagation - would trigger a window drag instead of/alongside whatever it was clicked for. event.altKey always
+  // reflects the browser's actual current modifier state, so it can't desync like that.
   function dragStartIfAltHeld(event: React.MouseEvent<HTMLDivElement>): void {
-    if (altDown) {
+    if (event.altKey) {
       dragStartHandler(event);
     }
   }
@@ -175,18 +180,6 @@ function WindowContent(props: ContentProps) {
       className={classes(['Window__content', className])}
       {...rest}
     >
-      <KeyListener
-        onKeyDown={(evt) => {
-          if (KEY_ALT === evt.code) {
-            setAltDown(true);
-          }
-        }}
-        onKeyUp={(evt) => {
-          if (KEY_ALT === evt.code) {
-            setAltDown(false);
-          }
-        }}
-      />
       {fitted ? (
         children
       ) : (

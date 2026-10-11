@@ -281,6 +281,14 @@ var/global/list/additional_antag_types = list()
 	command_announcement.Announce("The presence of [pick(reasons)] in the region is tying up all available local emergency resources; emergency response teams cannot be called at this time, and post-evacuation recovery efforts will be substantially delayed.","Emergency Transmission")
 
 /datum/game_mode/proc/check_finished()
+	// While the self-destruct is actively counting down (timing == 1; 0 is idle/disarmed, -1 is exploded/exploding),
+	// nothing else is allowed to end the round out from under it - most importantly, evac completing while
+	// self-destruct is still ticking should NOT end the round early. Once it resolves (goes off - station_was_nuked
+	// is already set by then - or gets disarmed), this gate clears and whatever already happened (e.g. evac having
+	// already completed) can immediately end the round on the very next check.
+	var/obj/machinery/nuclearbomb/station/self_destruct = locate(/obj/machinery/nuclearbomb/station) in world
+	if(self_destruct?.timing > 0)
+		return 0
 	if(evacuation_controller.round_over() || station_was_nuked)
 		return 1
 	if(end_on_antag_death && antag_templates && length(antag_templates))

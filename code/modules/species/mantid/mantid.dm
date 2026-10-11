@@ -9,6 +9,7 @@
 	new frontiers and new planets to exploit. They were largely not expecting to have entire expeditions lost \
 	amid reports of highly advanced, astonishingly violent mantid-cephlapodean sentients with particle cannons."
 
+	preview_icon =            'icons/mob/human_races/species/ascent/alate/preview.dmi'
 	icobase =                 'icons/mob/human_races/species/ascent/alate/body.dmi'
 	deform =                  'icons/mob/human_races/species/ascent/alate/body.dmi'
 	damage_overlays =         'icons/mob/human_races/species/ascent/alate/damage_mask.dmi'
@@ -39,6 +40,8 @@
 
 	min_age =                18
 	max_age =                38
+	// Same human-equivalent scaling as Gyne (default "linear") -- "quadruple" (GAS's rate) was tried and
+	// rejected: it puts an 18-year-old (the youngest playable) Alate at human-equivalent 72, clearly wrong.
 	slowdown =               0.5
 	rarity_value =            3
 	gluttonous =              2
@@ -48,6 +51,9 @@
 	breath_type =             GAS_METHYL_BROMIDE
 	exhale_type =             GAS_METHANE
 	poison_types =            list(GAS_PHORON)
+
+	force_male_sheath_mode =  "Slit"
+	default_genital_color =  "#FFE400"
 
 	genders =                 list(MALE)
 
@@ -70,9 +76,9 @@
 		/datum/unarmed_attack/bite/sharp
 	)
 
+	// BP_GROIN moved after the legs -- see species.dm's has_limbs comment.
 	has_limbs = list(
-		BP_CHEST =  list("path" = /obj/item/organ/external/chest/insectoid),
-		BP_GROIN =  list("path" = /obj/item/organ/external/groin/insectoid/mantid),
+		BP_CHEST =  list("path" = /obj/item/organ/external/chest/insectoid/mantid),
 		BP_HEAD =   list("path" = /obj/item/organ/external/head/insectoid),
 		BP_L_ARM =  list("path" = /obj/item/organ/external/arm/insectoid),
 		BP_L_HAND = list("path" = /obj/item/organ/external/hand/insectoid),
@@ -80,6 +86,7 @@
 		BP_R_HAND = list("path" = /obj/item/organ/external/hand/right/insectoid),
 		BP_R_LEG =  list("path" = /obj/item/organ/external/leg/right/insectoid),
 		BP_L_LEG =  list("path" = /obj/item/organ/external/leg/insectoid),
+		BP_GROIN =  list("path" = /obj/item/organ/external/groin/insectoid/mantid),
 		BP_L_FOOT = list("path" = /obj/item/organ/external/foot/insectoid),
 		BP_R_FOOT = list("path" = /obj/item/organ/external/foot/right/insectoid)
 	)
@@ -92,7 +99,12 @@
 		BP_KIDNEYS =           /obj/item/organ/internal/kidneys/insectoid,
 		BP_BRAIN =             /obj/item/organ/internal/brain/insectoid,
 		BP_EYES =              /obj/item/organ/internal/eyes/insectoid,
-		BP_SYSTEM_CONTROLLER = /obj/item/organ/internal/controller
+		BP_SYSTEM_CONTROLLER = /obj/item/organ/internal/controller,
+		BP_BREASTS =           /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =             /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES =         /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =             /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 	)
 
 	force_cultural_info = list(
@@ -133,6 +145,7 @@
 	spawn_flags =             SPECIES_CAN_JOIN | SPECIES_IS_WHITELISTED | SPECIES_NO_FBP_CONSTRUCTION | SPECIES_NO_FBP_CHARGEN
 
 	genders =                 list(FEMALE)
+	preview_icon =            'icons/mob/human_races/species/ascent/gyne/preview.dmi'
 	icobase =                 'icons/mob/human_races/species/ascent/gyne/body.dmi'
 	deform =                  'icons/mob/human_races/species/ascent/gyne/body.dmi'
 	icon_template =           'icons/mob/human_races/species/ascent/gyne/template.dmi'
@@ -144,6 +157,9 @@
 	rarity_value =           10
 	min_age =                18
 	max_age =               500
+	// Closer to Unathi than to Alate -- explicit user direction (overrides Alate's own "quadruple" back to the
+	// default linear stretch, since a plain proc override can't express "fall back to grandparent behavior").
+	human_equivalent_age_formula = "linear"
 	blood_volume =         1200
 	spawns_with_stack =       0
 
@@ -157,6 +173,7 @@
 
 	override_limb_types = list(
 		BP_HEAD = /obj/item/organ/external/head/insectoid/mantid,
+		BP_CHEST = /obj/item/organ/external/chest/insectoid/mantid/gyne,
 		BP_GROIN = /obj/item/organ/external/groin/insectoid/mantid/gyne
 	)
 
@@ -215,6 +232,18 @@
 	name_plural = "Monarch Serpentid Workers"
 	hidden_from_codex = FALSE
 	spawn_flags = SPECIES_CAN_JOIN | SPECIES_IS_WHITELISTED | SPECIES_NO_FBP_CONSTRUCTION | SPECIES_NO_FBP_CHARGEN
+	icobase = 'icons/mob/human_races/species/nabber/body_msw.dmi'
+	deform = 'icons/mob/human_races/species/nabber/body_msw.dmi'
+	// Previously inherited plain GAS's preview_icon (nabber/preview.dmi) -- split out to its own file (a
+	// placeholder copy of it, for now) so uploading a dedicated Monarch Worker preview doesn't also change GAS's.
+	preview_icon = 'icons/mob/human_races/species/nabber/preview_msw.dmi'
+	// Only the Grey base skin fits Monarch Worker's art -- explicit user decision.
+	base_skin_colours = list("Grey" = "")
+	// Inherits Kharmaan Gyne's aging (range + "linear" formula) rather than plain GAS's ("quadruple") -- explicit
+	// user direction; Monarch Queen (below) inherits this in turn, having no age override of its own.
+	min_age = 18
+	max_age = 500
+	human_equivalent_age_formula = "linear"
 	has_organ = list(
 		BP_BRAIN =             /obj/item/organ/internal/brain/insectoid/nabber,
 		BP_EYES =              /obj/item/organ/internal/eyes/insectoid/nabber,
@@ -222,7 +251,15 @@
 		BP_HEART =             /obj/item/organ/internal/heart/open,
 		BP_LIVER =             /obj/item/organ/internal/liver/insectoid/nabber,
 		BP_STOMACH =           /obj/item/organ/internal/stomach/insectoid,
-		BP_SYSTEM_CONTROLLER = /obj/item/organ/internal/controller
+		BP_SYSTEM_CONTROLLER = /obj/item/organ/internal/controller,
+		// Monarch Worker redeclares has_organ wholesale (a full replacement, not a merge) so it never picked up
+		// the genital organs added to base /singleton/species/nabber in an earlier pass -- flagged at the time as
+		// a subspecies needing its own follow-up, done now alongside the pixel-offset work.
+		BP_BREASTS =           /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =             /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES =         /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =             /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 	)
 
 	force_cultural_info = list(
@@ -240,3 +277,34 @@
 	name_plural = "Monarch Serpentid Queens"
 	hidden_from_codex = FALSE
 	spawn_flags = SPECIES_CAN_JOIN | SPECIES_IS_WHITELISTED | SPECIES_NO_FBP_CONSTRUCTION | SPECIES_NO_FBP_CHARGEN
+	preview_icon = 'icons/mob/human_races/species/nabber/msq/preview.dmi'
+	icobase = 'icons/mob/human_races/species/nabber/msq/body.dmi'
+	deform = 'icons/mob/human_races/species/nabber/msq/body.dmi'
+	// MSQ's body art (nabber/msq/body.dmi) is a standard 32x32-tile sprite, unlike Worker/base GAS's 32x40 --
+	// without this override it silently inherits Worker's icon_template = template_tall.dmi (32x40), a real
+	// canvas/art mismatch found while deriving MSQ's mutant-organ pixel offsets (see nabber_camo.dm/
+	// nabber_threat.dm's monarch_queen subclasses + baystation12soyh_genitals_port_plan memory).
+	icon_template = 'icons/mob/human_races/species/template.dmi'
+	// Only the Grey base skin fits Monarch Queen's art -- explicit user decision.
+	base_skin_colours = list("Grey" = "")
+	// Without this override, Queen inherits Worker's has_organ list wholesale, which points BP_EYES at the
+	// shared Nabber/GAS eye organ (eyes/insectoid/nabber) instead of the dedicated eyes/insectoid/msq type
+	// that already exists in nabber.dm -- same dormant-since-2020 pattern as the earlier icobase/deform bug.
+	has_organ = list(
+		BP_BRAIN =             /obj/item/organ/internal/brain/insectoid/nabber,
+		BP_EYES =              /obj/item/organ/internal/eyes/insectoid/msq,
+		BP_TRACH =             /obj/item/organ/internal/lungs/insectoid/nabber,
+		BP_HEART =             /obj/item/organ/internal/heart/open,
+		BP_LIVER =             /obj/item/organ/internal/liver/insectoid/nabber,
+		BP_STOMACH =           /obj/item/organ/internal/stomach/insectoid,
+		BP_SYSTEM_CONTROLLER = /obj/item/organ/internal/controller,
+		BP_BREASTS =           /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =             /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES =         /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =             /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
+	)
+	override_limb_types = list(
+		BP_CHEST = /obj/item/organ/external/chest/insectoid/nabber/monarch_queen,
+		BP_GROIN = /obj/item/organ/external/groin/insectoid/nabber/monarch_queen
+	)

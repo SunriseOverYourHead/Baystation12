@@ -27,6 +27,7 @@
 	icon_state = "dress_rd"
 	item_state = "lb_suit"
 	worn_state = "dress_rd"
+	leg_remap_category = null // dress-shaped
 	armor = list(
 		bio = ARMOR_BIO_MINOR
 		)

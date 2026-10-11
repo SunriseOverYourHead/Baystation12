@@ -13,8 +13,19 @@
 	antaghud_offset_y = 8
 
 	assisted_langs = list(LANGUAGE_GUTTER, LANGUAGE_UNATHI_SINTA, LANGUAGE_SKRELLIAN, LANGUAGE_HUMAN_EURO, LANGUAGE_EAL, LANGUAGE_HUMAN_RUSSIAN)
-	min_age = 8
+	min_age = 5
 	max_age = 40
+	// A 5 year old (min_age) GAS is a human-equivalent 20; by 40 (max_age) they're 75 -- steeper than a
+	// straight quadruple scaling (5*4=20 checks out, but 40*4=160, nowhere near 75).
+	human_equivalent_age_formula = "two_point"
+	human_equivalent_age_point1_raw = 5
+	human_equivalent_age_point1_human = 20
+	human_equivalent_age_point2_raw = 40
+	human_equivalent_age_point2_human = 75
+
+	// Inherited by Monarch Worker/Queen (mantid.dm) too, unless they override it.
+	force_male_sheath_mode = "Slit"
+	default_genital_color = "#D73F44"
 
 	skin_material = MATERIAL_SKIN_CHITIN
 	bone_material = null
@@ -89,12 +100,18 @@
 		BP_STOMACH =  /obj/item/organ/internal/stomach,
 		BP_PHORON =   /obj/item/organ/internal/phoron,
 		BP_ACETONE =  /obj/item/organ/internal/acetone,
-		BP_VOICE =    /obj/item/organ/internal/voicebox/nabber
+		BP_VOICE =    /obj/item/organ/internal/voicebox/nabber,
+		BP_BREASTS =  /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =    /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =    /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 
+	// BP_GROIN moved after the legs -- see species.dm's has_limbs comment for why (genitals render in front of
+	// the upper legs, matching update_body()'s icon-compositing stack order).
 	has_limbs = list(
 		BP_CHEST =  list("path" = /obj/item/organ/external/chest/insectoid/nabber),
-		BP_GROIN =  list("path" = /obj/item/organ/external/groin/insectoid/nabber),
 		BP_HEAD =   list("path" = /obj/item/organ/external/head/insectoid/nabber),
 		BP_L_ARM =  list("path" = /obj/item/organ/external/arm/insectoid),
 		BP_L_HAND = list("path" = /obj/item/organ/external/hand/insectoid),
@@ -102,6 +119,7 @@
 		BP_R_HAND = list("path" = /obj/item/organ/external/hand/right/insectoid),
 		BP_R_LEG =  list("path" = /obj/item/organ/external/leg/right/insectoid),
 		BP_L_LEG =  list("path" = /obj/item/organ/external/leg/insectoid),
+		BP_GROIN =  list("path" = /obj/item/organ/external/groin/insectoid/nabber),
 		BP_L_FOOT = list("path" = /obj/item/organ/external/foot/insectoid),
 		BP_R_FOOT = list("path" = /obj/item/organ/external/foot/right/insectoid)
 		)

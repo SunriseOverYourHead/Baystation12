@@ -8,13 +8,6 @@
 	usable_emotes = sortAssoc(usable_emotes)
 
 // Specific defines follow.
-/singleton/species/slime/default_emotes = list(
-	/singleton/emote/visible/bounce,
-	/singleton/emote/visible/jiggle,
-	/singleton/emote/visible/lightup,
-	/singleton/emote/visible/vibrate
-)
-
 /singleton/species/unathi/default_emotes = list(
 	/singleton/emote/human/swish,
 	/singleton/emote/human/wag,

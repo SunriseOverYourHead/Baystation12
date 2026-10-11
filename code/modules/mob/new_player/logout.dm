@@ -3,6 +3,10 @@
 
 	// see login.dm
 	if(my_client)
+		var/datum/tgui/ui = SStgui.get_open_ui(src, src)
+		if(ui)
+			ui.close(can_be_suspended = FALSE)
+		lobby_window = null
 		GLOB.using_map.hide_titlescreen(my_client)
 		my_client = null
 

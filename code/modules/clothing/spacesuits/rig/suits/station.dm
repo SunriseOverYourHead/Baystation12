@@ -68,6 +68,7 @@
 	head_light_range = 5
 	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
+	cover_theme = "engineering"
 
 /obj/item/clothing/suit/space/rig/industrial
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
@@ -82,6 +83,7 @@
 		/obj/item/rcd,
 		/obj/item/rpd
 	)
+	cover_theme = "engineering"
 
 /obj/item/clothing/shoes/magboots/rig/industrial
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
@@ -229,6 +231,7 @@
 		SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_head_unathi.dmi',
 		SPECIES_SKRELL = 'icons/mob/species/skrell/onmob_head_skrell.dmi'
 	)
+	cover_theme = "engineering"
 /obj/item/clothing/suit/space/rig/ce
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
 	sprite_sheets = list(
@@ -283,6 +286,7 @@
 	light_overlay = "helmet_light_dual"
 	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
+	cover_theme = "science"
 
 /obj/item/clothing/suit/space/rig/hazmat
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
@@ -303,6 +307,7 @@
 		/obj/item/pickaxe/xeno,
 		/obj/item/storage/bag/fossils
 	)
+	cover_theme = "science"
 
 /obj/item/clothing/shoes/magboots/rig/hazmat
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
@@ -351,6 +356,7 @@
 		SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_head_unathi.dmi',
 		SPECIES_SKRELL = 'icons/mob/species/skrell/onmob_head_skrell.dmi',
 	)
+	cover_theme = "medical"
 
 /obj/item/clothing/suit/space/rig/medical
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL, SPECIES_UNATHI, SPECIES_IPC)
@@ -365,6 +371,7 @@
 		/obj/item/auto_cpr,
 		/obj/item/inflatable_dispenser
 	)
+	cover_theme = "medical"
 
 /obj/item/clothing/shoes/magboots/rig/medical
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL, SPECIES_UNATHI, SPECIES_IPC)
@@ -414,6 +421,7 @@
 	light_overlay = "helmet_light_dual"
 	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI, SPECIES_IPC)
+	cover_theme = "security"
 
 /obj/item/clothing/suit/space/rig/hazard
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI, SPECIES_IPC)
@@ -427,6 +435,7 @@
 		/obj/item/device/suit_cooling_unit,
 		/obj/item/melee/baton
 	)
+	cover_theme = "security"
 
 /obj/item/clothing/shoes/magboots/rig/hazard
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI, SPECIES_IPC)

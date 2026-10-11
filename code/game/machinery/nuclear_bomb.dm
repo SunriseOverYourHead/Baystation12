@@ -495,6 +495,9 @@ var/global/bomb_set
 		return
 
 /obj/machinery/nuclearbomb/station/start_bomb()
+	if(SSstarmap.jumping)
+		to_chat(usr, SPAN_WARNING("The ship's systems are consumed by an active bluespace jump. Self-destruct cannot be armed until it resolves."))
+		return
 	for(var/inserter in inserters)
 		var/obj/machinery/self_destruct/sd = inserter
 		if(!istype(sd) || !sd.armed)

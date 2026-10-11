@@ -225,6 +225,7 @@
 	item_state = "b_suit"
 	worn_state = "schoolgirl"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
+	leg_remap_category = null // skirt-shaped
 
 /obj/item/clothing/under/overalls
 	name = "laborer's overalls"
@@ -263,6 +264,7 @@
 	item_state = "kilt"
 	worn_state = "kilt"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|FEET
+	leg_remap_category = null // skirt-shaped
 
 /obj/item/clothing/under/sexymime
 	name = "sexy mime outfit"
@@ -287,6 +289,7 @@
 	icon_state = "dress_fire"
 	worn_state = "dress_fire"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
+	leg_remap_category = null // dress-shaped
 
 /obj/item/clothing/under/dress/dress_fire
 	name = "flame dress"
@@ -365,6 +368,7 @@
 //wedding stuff
 /obj/item/clothing/under/wedding
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS
+	leg_remap_category = null // gown-shaped
 
 /obj/item/clothing/under/wedding/bride_orange
 	name = "orange wedding dress"
@@ -414,6 +418,7 @@
 	item_state = "bl_suit"
 	worn_state = "sundress"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
+	leg_remap_category = null // dress-shaped
 
 /obj/item/clothing/under/sundress_white
 	name = "white sundress"
@@ -422,6 +427,7 @@
 	item_state = "sundress_white"
 	worn_state = "sundress_white"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO
+	leg_remap_category = null // dress-shaped
 
 /obj/item/clothing/under/blackjumpskirt
 	name = "black jumpskirt"
@@ -429,6 +435,7 @@
 	icon_state = "blackjumpskirt"
 	item_state = "bl_suit"
 	worn_state = "blackjumpskirt"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 
 /obj/item/clothing/under/shortjumpskirt
 	name = "short jumpskirt"
@@ -436,6 +443,7 @@
 	icon_state = "shortjumpskirt"
 	item_state = "w_suit"
 	worn_state = "shortjumpskirt"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 
 /obj/item/clothing/under/captainformal
 	name = "captain's formal uniform"
@@ -524,6 +532,7 @@
 	item_state = "mai_yang"
 	worn_state = "mai_yang"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS
+	leg_remap_category = null // dress-shaped
 
 /obj/item/clothing/under/abaya
 	name = "abaya"
@@ -532,6 +541,7 @@
 	item_state = "abaya"
 	worn_state = "abaya"
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS
+	leg_remap_category = null // robe-shaped
 
 /obj/item/clothing/under/blazer
 	name = "blue blazer"

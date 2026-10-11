@@ -83,6 +83,18 @@
 	canister_color = "lightblue"
 	can_label = 0
 
+/obj/machinery/portable_atmospherics/canister/nak
+	name = "\improper Canister \[NaK\]"
+	icon_state = "grey"
+	canister_color = "grey"
+	can_label = 0
+
+/obj/machinery/portable_atmospherics/canister/ammonia
+	name = "\improper Canister \[Ammonia\]"
+	icon_state = "yellow"
+	canister_color = "yellow"
+	can_label = 0
+
 /obj/machinery/portable_atmospherics/canister/air/airlock
 	start_pressure = 3 * ONE_ATMOSPHERE
 
@@ -318,6 +330,18 @@
 /obj/machinery/portable_atmospherics/canister/hydrogen/New()
 	..()
 	src.air_contents.adjust_gas(GAS_HYDROGEN, MolesForPressure())
+	src.update_icon()
+	return 1
+
+/obj/machinery/portable_atmospherics/canister/nak/New()
+	..()
+	src.air_contents.adjust_gas(GAS_NAK, MolesForPressure(10000))
+	src.update_icon()
+	return 1
+
+/obj/machinery/portable_atmospherics/canister/ammonia/New()
+	..()
+	src.air_contents.adjust_gas(GAS_AMMONIA, MolesForPressure(90000))
 	src.update_icon()
 	return 1
 

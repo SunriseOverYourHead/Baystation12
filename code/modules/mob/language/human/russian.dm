@@ -4,6 +4,7 @@
 	colour = "russian"
 	key = "r"
 	shorthand = "Slav"
+	tag_icon = "slav"
 	partial_understanding = list(
 		LANGUAGE_HUMAN_EURO = 5,
 		LANGUAGE_HUMAN_SELENIAN = 10,

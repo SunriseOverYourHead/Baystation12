@@ -10,6 +10,7 @@
 	colour = "indian"
 	key = "3"
 	shorthand = "Dehv"
+	tag_icon = "dehv"
 	space_chance = 30
 	partial_understanding = list(
 		LANGUAGE_HUMAN_EURO = 5,

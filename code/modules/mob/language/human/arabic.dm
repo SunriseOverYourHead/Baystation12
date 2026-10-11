@@ -5,6 +5,7 @@
 	colour = "arabic"
 	key = "4"
 	shorthand = "PSA"
+	tag_icon = "psa"
 	space_chance = 35
 	partial_understanding = list(
 		LANGUAGE_HUMAN_EURO = 5,

@@ -36,6 +36,22 @@ GLOBAL_LIST_EMPTY(facial_hair_styles_list) //stores /datum/sprite_accessory/faci
 
 var/global/list/skin_styles_female_list = list()		//unused
 GLOBAL_LIST_EMPTY(body_marking_styles_list)		//stores /datum/sprite_accessory/marking indexed by name
+GLOBAL_LIST_EMPTY(mutant_tail_styles_list)		//stores /datum/sprite_accessory/mutant/tail indexed by name
+GLOBAL_LIST_EMPTY(mutant_horn_styles_list)		//stores /datum/sprite_accessory/mutant/horns indexed by name
+GLOBAL_LIST_EMPTY(mutant_frill_styles_list)		//stores /datum/sprite_accessory/mutant/frills indexed by name
+GLOBAL_LIST_EMPTY(mutant_spine_styles_list)		//stores /datum/sprite_accessory/mutant/spines indexed by name
+GLOBAL_LIST_EMPTY(mutant_ear_styles_list)		//stores /datum/sprite_accessory/mutant/ears indexed by name
+GLOBAL_LIST_EMPTY(mutant_xenodorsal_styles_list)		//stores /datum/sprite_accessory/mutant/xenodorsal indexed by name
+GLOBAL_LIST_EMPTY(mutant_xenohead_styles_list)		//stores /datum/sprite_accessory/mutant/xenohead indexed by name
+GLOBAL_LIST_EMPTY(mutant_wing_styles_list)		//stores /datum/sprite_accessory/mutant/wings indexed by name
+GLOBAL_LIST_EMPTY(mutant_snout_styles_list)		//stores /datum/sprite_accessory/mutant/snout indexed by name
+GLOBAL_LIST_EMPTY(mutant_moth_antennae_styles_list)		//stores /datum/sprite_accessory/mutant/moth_antennae indexed by name
+GLOBAL_LIST_EMPTY(mutant_fluff_styles_list)		//stores /datum/sprite_accessory/mutant/fluff indexed by name
+GLOBAL_LIST_EMPTY(mutant_breast_styles_list)		//stores /datum/sprite_accessory/mutant/breasts indexed by name
+GLOBAL_LIST_EMPTY(mutant_penis_styles_list)		//stores /datum/sprite_accessory/mutant/penis indexed by name
+GLOBAL_LIST_EMPTY(mutant_testicles_styles_list)		//stores /datum/sprite_accessory/mutant/testicles indexed by name
+GLOBAL_LIST_EMPTY(mutant_vagina_styles_list)		//stores /datum/sprite_accessory/mutant/vagina indexed by name
+GLOBAL_LIST_AS(marking_limb_slots, list(BP_L_ARM, BP_R_ARM, BP_L_LEG, BP_R_LEG, BP_L_HAND, BP_R_HAND, BP_L_FOOT, BP_R_FOOT, BP_CHEST, BP_HEAD, BP_GROIN))
 
 GLOBAL_TYPED_NEW(underwear, /datum/category_collection/underwear)
 
@@ -121,6 +137,141 @@ var/global/list/string_slot_flags = list(
 		M = new path()
 		GLOB.body_marking_styles_list[M.name] = M
 
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/tail into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/tail) - /datum/sprite_accessory/mutant/tail
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/tail/T = path
+		if (!initial(T.name))
+			continue
+		T = new path()
+		GLOB.mutant_tail_styles_list[T.name] = T
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/horns into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/horns) - /datum/sprite_accessory/mutant/horns
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/horns/HN = path
+		if (!initial(HN.name))
+			continue
+		HN = new path()
+		GLOB.mutant_horn_styles_list[HN.name] = HN
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/frills into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/frills) - /datum/sprite_accessory/mutant/frills
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/frills/FR = path
+		if (!initial(FR.name))
+			continue
+		FR = new path()
+		GLOB.mutant_frill_styles_list[FR.name] = FR
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/spines into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/spines) - /datum/sprite_accessory/mutant/spines
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/spines/SP = path
+		if (!initial(SP.name))
+			continue
+		SP = new path()
+		GLOB.mutant_spine_styles_list[SP.name] = SP
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/ears into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/ears) - /datum/sprite_accessory/mutant/ears
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/ears/EA = path
+		if (!initial(EA.name))
+			continue
+		EA = new path()
+		GLOB.mutant_ear_styles_list[EA.name] = EA
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/xenodorsal into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/xenodorsal) - /datum/sprite_accessory/mutant/xenodorsal
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/xenodorsal/XD = path
+		if (!initial(XD.name))
+			continue
+		XD = new path()
+		GLOB.mutant_xenodorsal_styles_list[XD.name] = XD
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/xenohead into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/xenohead) - /datum/sprite_accessory/mutant/xenohead
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/xenohead/XH = path
+		if (!initial(XH.name))
+			continue
+		XH = new path()
+		GLOB.mutant_xenohead_styles_list[XH.name] = XH
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/wings into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/wings) - /datum/sprite_accessory/mutant/wings
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/wings/WI = path
+		if (!initial(WI.name))
+			continue
+		WI = new path()
+		GLOB.mutant_wing_styles_list[WI.name] = WI
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/snout into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/snout) - /datum/sprite_accessory/mutant/snout
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/snout/SN = path
+		if (!initial(SN.name))
+			continue
+		SN = new path()
+		GLOB.mutant_snout_styles_list[SN.name] = SN
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/moth_antennae into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/moth_antennae) - /datum/sprite_accessory/mutant/moth_antennae
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/moth_antennae/MA = path
+		if (!initial(MA.name))
+			continue
+		MA = new path()
+		GLOB.mutant_moth_antennae_styles_list[MA.name] = MA
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/fluff into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/fluff) - /datum/sprite_accessory/mutant/fluff
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/fluff/FL = path
+		if (!initial(FL.name))
+			continue
+		FL = new path()
+		GLOB.mutant_fluff_styles_list[FL.name] = FL
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/breasts into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/breasts) - /datum/sprite_accessory/mutant/breasts
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/breasts/BR = path
+		if (!initial(BR.name))
+			continue
+		BR = new path()
+		GLOB.mutant_breast_styles_list[BR.name] = BR
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/penis into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/penis) - /datum/sprite_accessory/mutant/penis
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/penis/PE = path
+		if (!initial(PE.name))
+			continue
+		PE = new path()
+		GLOB.mutant_penis_styles_list[PE.name] = PE
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/testicles into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/testicles) - /datum/sprite_accessory/mutant/testicles
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/testicles/TE = path
+		if (!initial(TE.name))
+			continue
+		TE = new path()
+		GLOB.mutant_testicles_styles_list[TE.name] = TE
+
+	//Mutant organ styles - Initialise all /datum/sprite_accessory/mutant/vagina into a list indexed by style name
+	paths = typesof(/datum/sprite_accessory/mutant/vagina) - /datum/sprite_accessory/mutant/vagina
+	for(var/path in paths)
+		var/datum/sprite_accessory/mutant/vagina/VA = path
+		if (!initial(VA.name))
+			continue
+		VA = new path()
+		GLOB.mutant_vagina_styles_list[VA.name] = VA
+
 	//Languages and species.
 	paths = typesof(/datum/language)-/datum/language
 	for(var/T in paths)
@@ -129,8 +280,16 @@ var/global/list/string_slot_flags = list(
 
 	for (var/language_name in all_languages)
 		var/datum/language/L = all_languages[language_name]
-		if(!(L.flags & NONGLOBAL))
-			language_keys[lowertext(L.key)] = L
+		if(L.flags & NONGLOBAL)
+			continue
+		// Regional variants of one tongue share a prefix, so the group registers its key once, against its primary
+		// variant; resolve_spoken_variant() then swaps in whichever variant the speaker actually knows. Without
+		// this, whichever variant happened to be instantiated last would silently win the key.
+		if(L.language_group && !L.is_group_primary)
+			continue
+		language_keys[lowertext(L.key)] = L
+
+	wire_language_groups()
 
 	//Grabs
 	paths = typesof(/datum/grab) - /datum/grab

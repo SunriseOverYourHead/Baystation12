@@ -4,6 +4,7 @@
 	colour = "selenian"
 	key = "7"
 	shorthand = "Sel"
+	tag_icon = "sel"
 	space_chance = 100
 	partial_understanding = list(
 		LANGUAGE_HUMAN_EURO = 85,

@@ -112,6 +112,59 @@
 #define slot_s_store_str	"slot_s_store"
 #define slot_tie_str		"slot_tie"
 
+// Leg-shape categories for the runtime clothing pixel-remap system (see code/modules/clothing/_leg_shape_remap.dm) --
+// one rule per category per body shape key (e.g. "digitigrade"), reused by every clothing item in that category
+// instead of needing hand-drawn art per item. Add one #define per new category as they're built.
+#define CLOTHING_LEG_CATEGORY_PANTS "pants"
+#define CLOTHING_LEG_CATEGORY_SHORTS "shorts"
+#define CLOTHING_LEG_CATEGORY_BOOTS "boots"
+// Skirts get PANTS applied too (get_leg_remapped_icon adds the two rule sets together) -- SKIRT only holds the
+// extra pixels a jumpskirt needs beyond its jumpsuit counterpart (2026-09-03, supersedes the earlier "no category
+// of their own" decision now that dedicated reference-skirt authoring data exists).
+#define CLOTHING_LEG_CATEGORY_SKIRT "skirt"
+// Despite the "LEG" naming (kept for consistency with the categories above -- the mechanism itself isn't leg-
+// specific, get_mob_overlay() in items.dm applies it to any /obj/item), these two cover chest-pinned solgov
+// accessories: INSIGNIA for the whole solgov/department subtree, RANK for the whole solgov/rank subtree. Set on
+// each subtree's shared parent type, not the individual leaf item the reference art was extracted from, so one
+// rule covers every department/every rank tier at once (2026-09-03).
+#define CLOTHING_LEG_CATEGORY_INSIGNIA "insignia"
+#define CLOTHING_LEG_CATEGORY_RANK "rank"
+// Ties. reference-tie/teshari-tie/gas-tie existed in reference.dmi since the same authoring batch as INSIGNIA/RANK
+// above, but this category itself was never actually created -- reported 2026-09-04 as "ties aren't being applied
+// despite me making them". Only set on the accessory leaves that use the plain "tie" icon_state (blue/red/black/
+// navy -- see ties.dm) -- the table was extracted against that shape specifically, and applying it to the other
+// tie leaves (long/bluecliptie/horribletie/the corptie clip-tie family, all different icon_states/shapes) would
+// reproduce the exact wrong-position bug already fixed elsewhere for cross-shape reuse.
+#define CLOTHING_LEG_CATEGORY_TIE "tie"
+// Back-slot bags -- leg_remap_category moved from /obj/item/clothing to /obj/item specifically to let these opt in
+// (backpacks are /obj/item/storage/backpack, not clothing). Each of these six is its own category, not one shared
+// "bag" category, because reference.dmi has separate reference-<name> art per shape (a rucksack and a dufflebag
+// don't share a footprint). Set one per family's own shared parent, NOT on /obj/item/storage/backpack itself --
+// rucksack/satchel/dufflebag/messenger are all backpack subtypes but each needs its own category, and pocketbook
+// (a satchel subtype) overrides SATCHEL with its own POCKETBOOK in turn (2026-09-03). Only Teshari has offsets for
+// these so far -- no other shape_key branches exist yet.
+#define CLOTHING_LEG_CATEGORY_BACKPACK "backpack"
+#define CLOTHING_LEG_CATEGORY_RUCKSACK "rucksack"
+#define CLOTHING_LEG_CATEGORY_SATCHEL "satchel"
+#define CLOTHING_LEG_CATEGORY_POCKETBOOK "pocketbook"
+#define CLOTHING_LEG_CATEGORY_MESSENGERBAG "messengerbag"
+#define CLOTHING_LEG_CATEGORY_DUFFLEBAG "dufflebag"
+// Next wave of the sprite_sheets -> remap migration (2026-09-04): gloves, ear-worn radios, suits (wear_suit slot),
+// and helmets. reference-gloves/-radio/-suit/-helmet exist in reference.dmi now as canvases to paint species
+// variants into, same as every category above. Extracted from the plain human baseline -- lgloves/headset for
+// gloves/radio, but SUIT and HELMET deliberately use the solgov engineering-alt voidsuit/helmet (rig-
+// engineeringalt/engalt_helm, maps/torch/icons/mob/onmob_{suit,head}_solgov.dmi) instead of a plain labcoat/
+// helmet: biggest sprites in their respective sheets (981px/281px), so the reference pixel coverage is as large as
+// possible -- wrong department art is fine here, this is purely a coverage/shape reference, not meant to be worn
+// as-is (2026-09-04, corrected from an earlier security-voidsuit pick per explicit user direction). NOT wired to
+// any real item's leg_remap_category yet, and no shape_key branches exist in get_leg_remap_pixels() for them --
+// these four species (Vox/Unathi/Nabber all currently use sprite_sheets for all four slots) still render exactly
+// as before until species-specific reference art exists to extract from.
+#define CLOTHING_LEG_CATEGORY_GLOVES "gloves"
+#define CLOTHING_LEG_CATEGORY_RADIO "radio"
+#define CLOTHING_LEG_CATEGORY_SUIT "suit"
+#define CLOTHING_LEG_CATEGORY_HELMET "helmet"
+
 // Bitflags for clothing parts.
 #define HEAD        FLAG_01
 #define FACE        FLAG_02

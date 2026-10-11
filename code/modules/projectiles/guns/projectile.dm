@@ -157,6 +157,7 @@
 		. = TRUE
 		var/obj/item/ammo_magazine/AM = A
 		if (((istext(caliber) && caliber != AM.caliber) || (islist(caliber) && !is_type_in_list(AM.caliber, caliber))))
+			to_chat(user, SPAN_WARNING("\The [A] won't fit into [src]: wrong caliber."))
 			return //incompatible
 		else if (load_method == SINGLE_CASING && AM.mag_type == SPEEDLOADER && world.time >= recentload)
 			if (length(AM.stored_ammo))
@@ -175,6 +176,7 @@
 			update_icon()
 			return
 		else if (!(load_method & AM.mag_type))
+			to_chat(user, SPAN_WARNING("\The [A] won't fit into [src]."))
 			return //incompatible
 
 		switch(AM.mag_type)

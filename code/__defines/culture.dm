@@ -165,6 +165,12 @@
 
 #define RELIGION_VOX           "Auralis Reverence"
 
+// Teshari cultures. Placeholder content only -- real lore TODO.
+#define CULTURE_TESHARI        "Teshari Culture"
+#define HOME_SYSTEM_TESHARI    "Teshari Homeworld"
+#define FACTION_TESHARI        "Teshari Faction"
+#define RELIGION_TESHARI       "Teshari Religion"
+
 // IPC cultures.
 #define CULTURE_POSITRONICS_GEN1   "First Generation"
 #define CULTURE_POSITRONICS_GEN2   "Second Generation"

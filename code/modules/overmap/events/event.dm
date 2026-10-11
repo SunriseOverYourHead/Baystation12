@@ -328,6 +328,18 @@ var/global/singleton/overmap_event_handler/overmap_event_handler = new()
 	opacity = 0
 	colors = list("#9e5bd1", "#9339d8", "#9121e7")
 
+/// Purely decorative - fills a vessel's private transit overmap grid (see get_transit_overmap_z() in
+/// code/modules/overmap/starmap/starmap.dm) for the length of a bluespace jump. events is deliberately empty:
+/// start_hazard() iterates it to spawn actual /datum/event instances, so an empty list means nothing mechanical
+/// ever happens - same sprites as the ion cloud, just recolored deep blue instead of cyan.
+/obj/overmap/event/bluespace_tunnel
+	name = "bluespace tunnel"
+	desc = "The churning, ever-shifting non-space of a bluespace transit corridor."
+	events = list()
+	event_icon_states = list("ion1", "ion2", "ion3", "ion4")
+	opacity = 0
+	colors = list("#0a1a6b", "#132a8c", "#1c3aad")
+
 //These now are basically only used to spawn hazards. Will be useful when we need to spawn group of moving hazards
 /datum/overmap_event
 	var/name = "map event"

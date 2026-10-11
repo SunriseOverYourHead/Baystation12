@@ -18,6 +18,14 @@
 		TAG_CULTURE = CULTURE_ALIUM
 	)
 
+	override_organ_types = list(
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
+	)
+
 	exertion_effect_chance = 10
 	exertion_hydration_scale = 1
 	exertion_reagent_scale = 5

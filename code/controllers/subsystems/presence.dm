@@ -50,3 +50,9 @@ SUBSYSTEM_DEF(presence)
 	return 1
 
 #endif
+
+/// 0, or the number of living players across every z-level connected to `level` (multiz ships/planets should stay active if a player is on any linked deck)
+/datum/controller/subsystem/presence/proc/population_group(level)
+	. = 0
+	for (var/z in GetConnectedZlevels(level))
+		. += population(z)

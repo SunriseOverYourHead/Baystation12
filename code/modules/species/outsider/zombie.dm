@@ -73,6 +73,14 @@ GLOBAL_LIST_AS(zombie_species, list(
 	move_intents = list(/singleton/move_intent/zombie)
 	var/heal_rate = 0.5 // Regen.
 
+	override_organ_types = list(
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
+	)
+
 /singleton/species/zombie/handle_post_spawn(mob/living/carbon/human/H)
 	H.mutations |= MUTATION_CLUMSY
 	H.mutations |= MUTATION_FERAL
@@ -301,7 +309,10 @@ GLOBAL_LIST_AS(zombie_species, list(
 	name = LANGUAGE_ZOMBIE
 	desc = "A crude form of feral communication utilized by the shuffling horrors. The living only hear guttural wails of agony."
 	colour = "cult"
-	key = "a"
+	// Was "a", which collided with Spanish -- language_keys is a flat map, so one of the two silently overwrote the
+	// other and lost its prefix entirely. Zombies are the safe side to move: they are given this language and
+	// nothing else, so they always reach it through default_language and never type the prefix at all.
+	key = "9"
 	speech_verb = "growls"
 	exclaim_verb = "wails"
 	partial_understanding = list(

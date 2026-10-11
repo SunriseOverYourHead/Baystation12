@@ -469,11 +469,11 @@ function LoadoutPreviewSection() {
       }
     >
       <Stack vertical fill>
-        <Stack.Item grow align="center">
+        <Stack.Item grow align="center" style={{ minHeight: 0 }}>
           <CharacterPreview height="100%" id={data.character_preview_view} />
         </Stack.Item>
         <Stack.Divider />
-        <Stack.Item align="center">
+        <Stack.Item align="center" shrink={0}>
           <Stack>
             <Stack.Item>
               <Button

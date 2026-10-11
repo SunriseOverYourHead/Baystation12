@@ -3,18 +3,37 @@ var/global/list/valid_bloodtypes = list("A+", "A-", "B+", "B-", "AB+", "AB-", "O
 /datum/preferences
 	var/species = SPECIES_HUMAN
 	var/gender = MALE					//gender of character (well duh)
+	// Only meaningful (and only ever shown/settable) when gender == PLURAL ("Trans") -- picks whether the torso
+	// renders with the male or female body sprite (ORGAN_FLAG_GENDERED_ICON, _external_icons.dm), independent of
+	// the Trans identity itself. Male/Female genders don't need this -- their body already matches.
+	var/trans_body_type = MALE
 	var/pronouns = PRONOUNS_THEY_THEM
 	var/b_type = "A+"					//blood type (not-chooseable)
 	var/head_hair_style = "Bald"				//Hair type
-	var/head_hair_color = "#000000"
+	var/head_hair_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 	var/facial_hair_style = "Shaved"				//Face hair type
-	var/facial_hair_color = "#000000"
-	var/eye_color = "#000000"
+	var/facial_hair_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
+	var/eye_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 	var/skin_tone = 0
-	var/skin_color = "#000000"
+	var/skin_color = "#CCCCCC" // explicit user decision -- full black default looked bad
 	var/base_skin = ""
+	// Only meaningful for species with SPECIES_APPEARANCE_HAS_LEG_TYPE (Anthro) -- see get_digitigrade_icon_override()
+	// in the leg/foot organs. Defaults to digitigrade per user direction (that's the default leg type for Anthro,
+	// not an opt-in) -- players can still switch to LEG_TYPE_NORMAL.
+	var/leg_type = LEG_TYPE_DIGITIGRADE
 	var/list/body_markings = list()
+	var/list/mutant_organs = list()
 	var/list/body_descriptors = list()
+
+	// ERP/genital-preference gating (penis/testicles/vagina/breasts mutant organs -- see preferences_tgui.dm's
+	// get_all_mutant_organ_tags()/get_mutant_category_meta() "is_erp" entries) -- "Enable Sexual Content" in the
+	// UI. Used to be two separate toggles (master_erp_preferences + a genitals-specific allow_genitals sub-toggle);
+	// merged into this one var since ERP-off already implied no genitals, making the second toggle redundant.
+	var/master_erp_preferences = FALSE
+	// Bypasses every genital/marking style's species_allowed/subspecies_allowed restriction (get_mutant_styles(),
+	// species.dm) entirely, letting a character take shapes/markings that don't canonically belong to their
+	// species (e.g. a Skrell with breasts). Spawn-time only, same as master_erp_preferences -- see copy_to().
+	var/allow_noncanon_bodyparts = FALSE
 
 	// maps each organ to either null(intact), "cyborg" or "amputated"
 	// will probably not be able to do this for head and torso ;)
@@ -35,6 +54,9 @@ var/global/list/valid_bloodtypes = list("A+", "A-", "B+", "B-", "AB+", "AB-", "O
 		pref.species = "human"
 	pref.age = R.read("age")
 	pref.gender = R.read("gender")
+	pref.trans_body_type = R.read("trans_body_type")
+	if(pref.trans_body_type != FEMALE)
+		pref.trans_body_type = MALE
 	pref.pronouns = R.read("pronouns")
 	if(R.get_version() < 3 && !(pref.pronouns))
 		switch (pref.gender)
@@ -68,11 +90,28 @@ var/global/list/valid_bloodtypes = list("A+", "A-", "B+", "B-", "AB+", "AB-", "O
 	pref.body_descriptors = R.read("body_descriptors")
 	pref.picked_traits = R.read("traits")
 	pref.picked_traits = sanitize_trait_prefs(pref.picked_traits)
+	// mutant_organs (tail/horns/genitals/etc picks) had no persistence at all before -- every pick was silently
+	// lost on reconnect. Fixing that here rather than leaving genitals (this pass's whole point) just as broken.
+	pref.mutant_organs = R.read("mutant_organs")
+	if(!islist(pref.mutant_organs))
+		pref.mutant_organs = list()
+	pref.master_erp_preferences = R.read("master_erp_preferences")
+	pref.allow_noncanon_bodyparts = R.read("allow_noncanon_bodyparts")
+	// tgui_sanitize_mutant_organs() (preferences_tgui.dm) used to only ever run on a live species SWITCH -- a
+	// loaded character just trusted its savefile's mutant_organs wholesale. A style/sheath_mode saved under an
+	// older or since-tightened rule (a canon restriction added after the pick was made, a P. Sheath alias that
+	// no longer exists, non-canon toggled off since the save, ...) then never got the chance to self-heal unless
+	// the player happened to switch species again -- live-confirmed: a character stuck in exactly this state had
+	// invisible genitals no rendering fix could touch, and a brand new character (never carrying that stale data)
+	// worked immediately. Sanitizing right after load, same as a switch would, means loading is never worse than
+	// switching species back to the one already selected.
+	pref.tgui_sanitize_mutant_organs()
 
 
 /datum/category_item/player_setup_item/physical/body/save_character(datum/pref_record_writer/W)
 	W.write("species", pref.species)
 	W.write("gender", pref.gender)
+	W.write("trans_body_type", pref.trans_body_type)
 	W.write("pronouns", pref.pronouns)
 	W.write("age", pref.age)
 	W.write("head_hair_color", pref.head_hair_color)
@@ -90,6 +129,9 @@ var/global/list/valid_bloodtypes = list("A+", "A-", "B+", "B-", "AB+", "AB-", "O
 	W.write("body_markings", pref.body_markings)
 	W.write("body_descriptors", pref.body_descriptors)
 	W.write("traits", pref.picked_traits)
+	W.write("mutant_organs", pref.mutant_organs)
+	W.write("master_erp_preferences", pref.master_erp_preferences)
+	W.write("allow_noncanon_bodyparts", pref.allow_noncanon_bodyparts)
 
 
 /datum/category_item/player_setup_item/physical/body/load_slot(datum/pref_record_reader/R, datum/preferences_slot/slot)
@@ -123,10 +165,19 @@ var/global/list/valid_bloodtypes = list("A+", "A-", "B+", "B-", "AB+", "AB-", "O
 	if(!istype(pref.organ_data)) pref.organ_data = list()
 	if(!istype(pref.rlimb_data)) pref.rlimb_data = list()
 	if (!istype(pref.picked_traits)) pref.picked_traits = list()
-	if(!istype(pref.body_markings))
+	if(!islist(pref.body_markings))
 		pref.body_markings = list()
 	else
-		pref.body_markings &= GLOB.body_marking_styles_list
+		for(var/limb_slot in pref.body_markings.Copy())
+			var/list/limb_markings = pref.body_markings[limb_slot]
+			if(!(limb_slot in GLOB.marking_limb_slots) || !islist(limb_markings))
+				pref.body_markings -= limb_slot
+				continue
+			limb_markings &= GLOB.body_marking_styles_list
+			for(var/M in limb_markings.Copy())
+				var/list/entry = limb_markings[M]
+				if(!islist(entry) || length(entry) < 2)
+					limb_markings -= M
 
 	sanitize_organs()
 
@@ -372,13 +423,16 @@ var/global/list/valid_bloodtypes = list("A+", "A-", "B+", "B-", "AB+", "AB-", "O
 			ResetAllHair()
 
 			//reset hair colour and skin colour
-			pref.head_hair_color = "#000000"
+			pref.head_hair_color = "#CCCCCC" // no more #000000 defaults -- full black looked bad
 			pref.skin_tone = 0
 			pref.age = max(min(pref.age, mob_species.max_age), mob_species.min_age)
 
 			reset_limbs() // Safety for species with incompatible manufacturers; easier than trying to do it case by case.
 			pref.body_markings.Cut() // Basically same as above.
 			pref.picked_traits.Cut()
+			pref.tgui_sanitize_mutant_organs() // clears any tail/ears/fluff/etc style left over from the previous species -- see its own header comment
+
+
 
 			prune_occupation_prefs()
 			pref.skills_allocated = pref.sanitize_skills(pref.skills_allocated)
@@ -492,7 +546,7 @@ var/global/list/valid_bloodtypes = list("A+", "A-", "B+", "B-", "AB+", "AB-", "O
 
 		var/new_marking = input(user, "Choose a body marking:", CHARACTER_PREFERENCE_INPUT_TITLE)  as null|anything in usable_markings
 		if(new_marking && CanUseTopic(user))
-			pref.body_markings[new_marking] = "#000000" //New markings start black
+			pref.body_markings[new_marking] = "#CCCCCC" //New markings start grey -- no more #000000 defaults
 			return TOPIC_REFRESH_UPDATE_PREVIEW
 
 	else if(href_list["marking_remove"])

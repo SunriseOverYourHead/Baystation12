@@ -82,6 +82,7 @@ var/global/list/datum/dna/gene/dna_genes = list()
 	var/species = SPECIES_HUMAN
 	var/base_skin = ""
 	var/list/body_markings = list()
+	var/list/mutant_organs = list()
 
 // Make a copy of this strand.
 // USE THIS WHEN COPYING STUFF OR YOU'LL GET CORRUPTION!
@@ -92,6 +93,7 @@ var/global/list/datum/dna/gene/dna_genes = list()
 	new_dna.real_name=real_name
 	new_dna.species=species
 	new_dna.body_markings=body_markings.Copy()
+	new_dna.mutant_organs=mutant_organs.Copy()
 	new_dna.base_skin = base_skin
 	for(var/b=1;b<=DNA_SE_LENGTH;b++)
 		new_dna.SE[b]=SE[b]
@@ -165,6 +167,12 @@ var/global/list/datum/dna/gene/dna_genes = list()
 		E.base_skin = base_skin
 		if(length(E.markings))
 			body_markings[E.organ_tag] = E.markings.Copy()
+
+	mutant_organs.Cut()
+	for(var/obj/item/organ/internal/mutant/M in character.internal_organs)
+		if(!M.sprite_datum)
+			continue
+		mutant_organs[M.organ_tag] = list("style" = M.sprite_datum.name, "colors" = M.colors.Copy())
 
 	UpdateUI()
 

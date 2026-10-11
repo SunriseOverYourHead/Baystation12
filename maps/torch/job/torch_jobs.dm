@@ -1,23 +1,13 @@
 /datum/map/torch
-	species_to_job_whitelist = list(
-		/singleton/species/adherent = list(/datum/job/ai, /datum/job/cyborg, /datum/job/assistant, /datum/job/janitor, /datum/job/chef, /datum/job/cargo_tech,
-										/datum/job/engineer, /datum/job/roboticist, /datum/job/chemist, /datum/job/scientist_assistant, /datum/job/scientist, /datum/job/nt_pilot,
-										/datum/job/mining),
-		/singleton/species/nabber = list(/datum/job/ai, /datum/job/cyborg, /datum/job/janitor, /datum/job/scientist_assistant, /datum/job/chemist,
-									 /datum/job/roboticist, /datum/job/cargo_tech, /datum/job/chef, /datum/job/engineer, /datum/job/doctor),
-		/singleton/species/vox = list(/datum/job/ai, /datum/job/cyborg),
-		/singleton/species/human/mule = list(/datum/job/ai, /datum/job/cyborg, /datum/job/merchant)
-	)
+	// Every species can ready up for every Torch role except Captain (explicit user decision, 2026-09-02) --
+	// Captain stays Human-only via job_to_species_whitelist below instead of a per-species blacklist, so it
+	// applies uniformly and automatically covers any species added later too, without needing its own entry here.
+	species_to_job_whitelist = list()
+	species_to_job_blacklist = list()
 
-#define HUMAN_ONLY_JOBS /datum/job/captain, /datum/job/hop, /datum/job/cmo, /datum/job/chief_engineer, /datum/job/hos, /datum/job/representative, /datum/job/sea, /datum/job/pathfinder, /datum/job/rd
-	species_to_job_blacklist = list(
-		/singleton/species/unathi  = list(HUMAN_ONLY_JOBS, /datum/job/liaison, /datum/job/warden), //Other jobs unavailable via branch restrictions,
-		/singleton/species/unathi/yeosa = list(HUMAN_ONLY_JOBS, /datum/job/liaison, /datum/job/warden),
-		/singleton/species/skrell  = list(HUMAN_ONLY_JOBS),
-		/singleton/species/machine = list(HUMAN_ONLY_JOBS, /datum/job/liaison, /datum/job/psychiatrist, /datum/job/bridgeofficer, /datum/job/senior_engineer, /datum/job/warden, /datum/job/qm, /datum/job/senior_scientist, /datum/job/chief_steward),
-		/singleton/species/diona   = list(HUMAN_ONLY_JOBS, /datum/job/officer, /datum/job/liaison, /datum/job/warden, /datum/job/doctor, /datum/job/medical_trainee),	//Other jobs unavailable via branch restrictions,
+	job_to_species_whitelist = list(
+		/datum/job/captain = list(/singleton/species/human)
 	)
-#undef HUMAN_ONLY_JOBS
 
 	allowed_jobs = list(
 		/datum/job/captain, /datum/job/hop, /datum/job/bridgeofficer, /datum/job/representative, /datum/job/sea,
@@ -39,19 +29,6 @@
 		ACCESS_REGION_SUPPLY = list(access_change_ids),
 		ACCESS_REGION_SERVICE = list(access_change_ids)
 	)
-
-/datum/map/torch/setup_job_lists()
-	for(var/job_type in allowed_jobs)
-		var/datum/job/job = SSjobs.get_by_path(job_type)
-		// Most species are restricted from SCG security and command roles
-		if(job && (job.department_flag & COM) && length(job.allowed_branches) && !(/datum/mil_branch/civilian in job.allowed_branches))
-			for(var/species_name in list(SPECIES_IPC, SPECIES_SKRELL, SPECIES_UNATHI))
-				var/singleton/species/S = GLOB.species_by_name[species_name]
-				var/species_blacklist = species_to_job_blacklist[S.type]
-				if(!species_blacklist)
-					species_blacklist = list()
-					species_to_job_blacklist[S.type] = species_blacklist
-				species_blacklist |= job.type
 
 // Some jobs for nabber grades defined here due to map-specific job datums.
 /singleton/cultural_info/culture/nabber/New()

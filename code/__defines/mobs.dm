@@ -209,6 +209,49 @@
 #define BP_PHORON   "phoron filter"
 #define BP_ACETONE  "acetone reactor"
 
+#define BP_TAIL     "tail"
+#define BP_HORNS    "horns"
+#define BP_FRILLS   "frills"
+#define BP_SPINES   "spines"
+#define BP_EARS     "ears"
+#define BP_XENODORSAL "xenodorsal"
+#define BP_XENOHEAD "xenohead"
+#define BP_WINGS    "wings"
+#define BP_SNOUT    "snout"
+#define BP_MOTH_ANTENNAE "moth antennae"
+#define BP_FLUFF    "fluff"
+
+#define BP_PUSSY    "vagina"
+#define BP_PENIS    "penis"
+#define BP_TESTICLES   "testicles"
+#define BP_BREASTS   "breasts"
+#define BP_WOMB    "womb"
+#define BP_ANUS    "anus"
+
+// Genital sprite visibility -- matches Bubberstation's own GENITAL_ALWAYS_SHOW/HIDDEN_BY_CLOTHES/NEVER_SHOW enum
+// exactly (modular_skyrat/.../genitals.dm), ported as the same 3-way choice rather than reinvented. See
+// /mob/living/carbon/human/verb/toggle_genitals() (mutant_genitals_visibility.dm) and get_chest_mutant_icon()/
+// get_groin_mutant_icon() (standard.dm) for where this is actually enforced.
+#define GENITAL_ALWAYS_SHOW 1
+#define GENITAL_HIDDEN_BY_CLOTHES 2
+#define GENITAL_NEVER_SHOW 3
+
+#define MEDIA_URL_REJECTED_MESSAGE "That link isn't supported. It must be a direct https:// link to a .jpg, .jpeg, or .png image, hosted on Catbox, Imgbox, Gyazo, Lensdump, or F-List."
+
+// Size-slider ranges for the genital categories whose ported art has a baked per-size state range (see
+// /datum/sprite_accessory/mutant/build_colored_icon()'s `size` param and preferences_tgui.dm's
+// get_mutant_category_meta() "size_key" entries). Bounds match exactly what's been extracted from the source art
+// so far -- extend these only alongside porting more size states, not independently of the actual content.
+#define BREASTS_MIN_SIZE 0
+#define BREASTS_MAX_SIZE 16
+#define BREASTS_DEFAULT_SIZE 8
+#define TESTICLES_MIN_SIZE 0
+#define TESTICLES_MAX_SIZE 8
+#define TESTICLES_DEFAULT_SIZE 4
+#define PENIS_MIN_SIZE 1
+#define PENIS_MAX_SIZE 7
+#define PENIS_DEFAULT_SIZE 4
+
 // Vox bits.
 #define BP_HINDTONGUE "hindtongue"
 
@@ -371,6 +414,9 @@
 #define SPECIES_MANTID_GYNE    "Kharmaan Gyne"
 #define SPECIES_MONARCH_WORKER "Monarch Serpentid Worker"
 #define SPECIES_MONARCH_QUEEN  "Monarch Serpentid Queen"
+#define SPECIES_ANTHRO      "Anthro" // Working name, likely to be renamed later -- only ever reference this
+                                      // define, never the literal string, so a rename stays a one-line change.
+#define SPECIES_TESHARI     "Teshari"
 
 #define UNRESTRICTED_SPECIES list(SPECIES_HUMAN, SPECIES_DIONA, SPECIES_IPC, SPECIES_UNATHI, SPECIES_YEOSA, SPECIES_SKRELL, SPECIES_TRITONIAN, SPECIES_SPACER, SPECIES_VATGROWN, SPECIES_GRAVWORLDER, SPECIES_MULE)
 #define RESTRICTED_SPECIES   list(SPECIES_VOX, SPECIES_ALIEN, SPECIES_GOLEM, SPECIES_MANTID_GYNE, SPECIES_MANTID_ALATE, SPECIES_MONARCH_WORKER, SPECIES_MONARCH_QUEEN)
@@ -452,6 +498,8 @@
 #define MARKING_TARGET_SKIN 0 // Draw a datum/sprite_accessory/marking to the mob's body, eg. tattoos
 #define MARKING_TARGET_HAIR 1 // Draw a datum/sprite_accessory/marking to the mob's hair, eg. color fades
 #define MARKING_TARGET_HEAD 2 // Draw a datum/sprite_accessory/marking to the mob's head after their hair, eg. ears, horns
+
+#define MAX_MARKINGS_PER_LIMB 3
 
 // used in /mob/living/carbon/human/can_inject, and by various callers of that proc
 #define CAN_INJECT 1

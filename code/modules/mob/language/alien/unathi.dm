@@ -21,6 +21,7 @@
 		"a",  "a",  "e",  "e",  "i",  "i",  "o",  "o",  "u",  "u",  "s",  "s"
 	)
 	shorthand = "UT"
+	tag_icon = "ut"
 	has_written_form = TRUE
 
 /datum/language/yeosa
@@ -47,4 +48,5 @@
 		"a",  "a",  "e",  "e",  "i",  "i",  "o",  "o",  "u",  "u",  "s",  "s"
 	)
 	shorthand = "YU"
+	tag_icon = "yu"
 	has_written_form = TRUE

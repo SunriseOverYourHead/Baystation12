@@ -76,9 +76,12 @@ GLOBAL_VAR(planet_repopulation_disabled)
 	var/singleton/state/weather/initial_weather_state = /singleton/state/weather/calm
 	var/list/banned_weather_conditions
 
-/obj/overmap/visitable/sector/exoplanet/New(nloc, max_x, max_y)
+/obj/overmap/visitable/sector/exoplanet/New(nloc, max_x, max_y, target_z)
 	if (!GLOB.using_map.use_overmap)
 		return
+
+	if (target_z)
+		target_overmap_z = target_z
 
 	maxx = max_x ? max_x : world.maxx
 	maxy = max_y ? max_y : world.maxy

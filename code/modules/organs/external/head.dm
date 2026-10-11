@@ -113,6 +113,19 @@
 	var/obj/item/organ/internal/eyes/eyes = owner.internal_organs_by_name[owner.species.vision_organ ? owner.species.vision_organ : BP_EYES]
 	if(eyes)
 		. += "[rgb(eyes.eye_colour[1], eyes.eye_colour[2], eyes.eye_colour[3])]"
+	// No separate helmet-theme append needed here -- the base proc's own "-cover_[get_cover_theme()]" (above, via
+	// ..()) already covers it, since get_cover_theme() is overridden below to return the helmet's theme for this
+	// organ specifically.
+
+// The head is helmet-covered, not suit-covered -- see the base proc's header comment in _external_icons.dm for
+// the suit-vs-helmet split this preserves, and for why this paints the whole limb rather than diffing.
+/obj/item/organ/external/head/get_cover_theme()
+	if(!owner || !istype(owner.head, /obj/item/clothing/head/helmet/space))
+		return null
+	var/obj/item/clothing/head/helmet/space/HL = owner.head
+	if(!HAS_FLAGS(HL.body_parts_covered, body_part))
+		return null
+	return HL.get_cover_theme()
 
 /obj/item/organ/external/head/on_update_icon()
 	..()
@@ -166,7 +179,8 @@
 			for (var/E in markings)
 				var/datum/sprite_accessory/marking/M = E
 				if (M.draw_target == MARKING_TARGET_HAIR)
-					var/color = markings[E]
+					var/list/mark_data = markings[E]
+					var/color = mark_data[1]
 					var/icon/I = icon(M.icon, M.icon_state)
 					if(istype(M, /datum/sprite_accessory/marking/hair_fade))
 						I.Blend(HI, ICON_AND)
@@ -177,11 +191,25 @@
 			//TODO : Add emissive blocker here if hair should block it. Else, leave as is
 			res.AddOverlays(HI)
 
+	var/list/sorted_head_organs = list()
+	for(var/obj/item/organ/internal/mutant/MO in internal_organs)
+		if(!MO.sprite_datum)
+			continue
+		ADD_SORTED(sorted_head_organs, list(list(MO.sprite_datum.draw_order, MO)), GLOBAL_PROC_REF(cmp_marking_order))
+	// A themed space-proof helmet (see get_worn_head_cover_theme()) masks these instead of
+	// letting them stick out from under it -- same technique as tail/wings/fluff use for suits.
+	var/mask_theme = owner?.get_worn_head_cover_theme()
+	for(var/entry in sorted_head_organs)
+		var/obj/item/organ/internal/mutant/MO = entry[2]
+		var/icon/organ_icon = MO.sprite_datum.build_colored_icon(MO.colors, owner.head_hair_color, cover_theme = mask_theme)
+		res.AddOverlays(organ_icon)
+
 	var/list/sorted_head_markings = list()
 	for (var/E in markings)
 		var/datum/sprite_accessory/marking/M = E
 		if (M.draw_target == MARKING_TARGET_HEAD)
-			var/color = markings[E]
+			var/list/mark_data = markings[E]
+			var/color = mark_data[1]
 			var/icon/I = icon(M.icon, M.icon_state)
 			if ((M.do_coloration & DO_COLORATION_AUTO) && owner.head_hair_style)
 				var/datum/sprite_accessory/hair/H = GLOB.hair_styles_list[owner.head_hair_style]

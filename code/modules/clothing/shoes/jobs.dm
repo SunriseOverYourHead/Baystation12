@@ -15,6 +15,10 @@
 	desc = "Tall synthleather boots with an artificial shine."
 	icon_state = "jackboots"
 	item_state = "jackboots"
+	// Unathi specifically allowed (unlike the base shoes species_restricted list this would otherwise inherit) --
+	// "jackboots" is already a real state in onmob_feet_unathi.dmi, so this renders correctly via that spritesheet
+	// with no remap needed, same as the dedicated toe-less variant below (2026-09-04, explicit user request).
+	species_restricted = list("exclude", SPECIES_NABBER, SPECIES_VOX)
 	force = 3
 	armor = list(
 		melee = ARMOR_MELEE_RESISTANT,
@@ -39,6 +43,7 @@
 	item_state = "digiboots"
 	icon_state = "digiboots"
 	species_restricted = null
+	leg_remap_category = null // already Unathi-tailored art, doesn't need a remap on top
 
 /obj/item/clothing/shoes/workboots
 	name = "workboots"

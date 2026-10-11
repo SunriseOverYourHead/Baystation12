@@ -19,6 +19,17 @@
 			If it <b>still</b> doesn't work, use the bug report button at the top right of the window.
 		</div>
 	</div>
+	<div id="nowPlaying" style="display: none;">
+		<div id="nowPlayingInfo">
+			<div id="nowPlayingTitle">Nothing playing</div>
+			<div id="nowPlayingArtist"></div>
+		</div>
+		<div id="nowPlayingControls">
+			<input type="range" id="nowPlayingVolume" min="0" max="1" step="0.01" title="Volume">
+			<a href="#" id="nowPlayingStop" title="Stop"><i class="fas fa-stop"></i></a>
+		</div>
+		<audio id="nowPlayingAudio" preload="auto"></audio>
+	</div>
 	<div id="messages">
 
 	</div>

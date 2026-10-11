@@ -58,10 +58,12 @@
 
 	var/display_message = message
 
-	if (!(language?.flags & INNATE) && !say_understands(speaker, language))
+	var/comprehension = (language?.flags & INNATE) ? LANGUAGE_COMPREHENSION_FULL : get_speech_comprehension(speaker, language)
+
+	if (comprehension < LANGUAGE_COMPREHENSION_FULL)
 		if (!istype(speaker, /mob/living/simple_animal))
 			if (language)
-				display_message = language.scramble(display_message, languages)
+				display_message = language.scramble(display_message, languages, comprehension)
 			else
 				do_stars = TRUE
 
@@ -105,7 +107,7 @@
 			if (GLOB.PREF_FULL)
 				display_verb = "[verb] in [language.name]"
 			if (GLOB.PREF_SHORTHAND)
-				display_verb = "[verb] ([language.shorthand])"
+				display_verb = "[verb] [language.get_chat_tag(client)]"
 		display_message = language.format_message(display_message, display_verb)
 
 	if (teleop)
@@ -142,7 +144,8 @@
 			message = stars(message)
 
 	if(!(language && (language.flags & INNATE))) // skip understanding checks for INNATE languages
-		if(!say_understands(speaker,language))
+		var/comprehension = get_speech_comprehension(speaker, language)
+		if(comprehension < LANGUAGE_COMPREHENSION_FULL)
 			if(istype(speaker,/mob/living/simple_animal))
 				var/mob/living/M = speaker
 				var/datum/say_list/S = M.say_list
@@ -152,7 +155,7 @@
 					return
 			else
 				if(language)
-					message = language.scramble(message, languages)
+					message = language.scramble(message, languages, comprehension)
 				else
 					message = stars(message)
 
@@ -243,7 +246,7 @@
 					if (GLOB.PREF_FULL)
 						nverb = "[verb] in [language.name]"
 					if(GLOB.PREF_SHORTHAND)
-						nverb = "[verb] ([language.shorthand])"
+						nverb = "[verb] [language.get_chat_tag(client)]"
 					if(GLOB.PREF_OFF)
 						nverb = verb
 		formatted = language.format_message_radio(message, nverb)
@@ -286,7 +289,7 @@
 			if(GLOB.PREF_FULL) // Full language name
 				nverb = "[verb] in [language.name]"
 			if(GLOB.PREF_SHORTHAND) //Shorthand codes
-				nverb = "[verb] ([language.shorthand])"
+				nverb = "[verb] [language.get_chat_tag(client)]"
 			if(GLOB.PREF_OFF)//Regular output
 				nverb = verb
 		message = "<B>[speaker]</B> [nverb], \"[message]\""

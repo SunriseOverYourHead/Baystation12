@@ -1,10 +1,9 @@
-// THIS IS A NOVA SECTOR UI FILE
 import { type ReactNode, useState } from 'react';
-import { Button, ByondUi, Section, Stack } from 'tgui-core/components';
+import { Box, Button, Section, Stack, Tabs } from 'tgui-core/components';
 
-import { resolveAsset } from '../../assets';
 import { useBackend } from '../../backend';
 import { Window } from '../../layouts';
+import { CharacterPreview } from '../common/CharacterPreview';
 import type { ExaminePanelData } from './data';
 
 function formatURLs(text: string) {
@@ -36,199 +35,167 @@ function formatURLs(text: string) {
   return <div>{parts}</div>;
 }
 
+type UpperTab = 'flavor_text' | 'nsfw' | 'custom_species';
+type LowerTab = 'ooc_notes' | 'character_ad';
+
 export function ExaminePanel(props) {
   const { data } = useBackend<ExaminePanelData>();
   const {
     character_name,
-    assigned_map,
+    character_preview_view,
+    headshot_url,
+    headshot_nsfw_url,
+    art_reference_url,
+    art_ref_nsfw,
     flavor_text,
     flavor_text_nsfw,
-    ooc_notes,
-    ooc_notes_nsfw,
     custom_species,
     custom_species_lore,
-    headshot,
-    nova_star_status,
-    ideal_antag_optin_status,
-    current_antag_optin_status,
-    opt_in_colors,
+    ooc_notes,
+    character_ad,
   } = data;
-  const [oocNotesIndex, setOocNotesIndex] = useState('SFW');
-  const [flavorTextIndex, setFlavorTextIndex] = useState('SFW');
+
+  const [page, setPage] = useState<'main' | 'image'>('main');
+  const [upperTab, setUpperTab] = useState<UpperTab>('flavor_text');
+  const [lowerTab, setLowerTab] = useState<LowerTab>('ooc_notes');
+
+  const showingNsfw = upperTab === 'nsfw';
+  const effectiveHeadshotUrl = showingNsfw
+    ? headshot_nsfw_url || headshot_url
+    : headshot_url;
+
+  if (page === 'image') {
+    return (
+      <Window title={character_name} width={700} height={600}>
+        <Window.Content>
+          <Box height="100%" style={{ position: 'relative' }}>
+            <img
+              src={art_reference_url}
+              style={{
+                maxHeight: '600px',
+                width: '100%',
+                objectFit: 'contain',
+              }}
+            />
+            <Button
+              icon="arrow-left"
+              style={{ position: 'absolute', bottom: '10px', right: '10px' }}
+              onClick={() => setPage('main')}
+            >
+              Back
+            </Button>
+          </Box>
+        </Window.Content>
+      </Window>
+    );
+  }
+
   return (
-    <Window title={character_name} width={900} height={670} theme="ntos">
+    <Window title={character_name} width={700} height={610}>
       <Window.Content>
-        <Stack fill>
-          <Stack.Item width="30%">
-            {!headshot ? (
-              <Section fill title="Character Preview">
-                <ByondUi
-                  height="100%"
-                  width="100%"
-                  className="ExaminePanel__map"
-                  params={{
-                    id: assigned_map,
-                    type: 'map',
-                  }}
-                />
-              </Section>
-            ) : (
-              <>
-                <Section height="310px" title="Character Preview">
-                  <ByondUi
-                    height="260px"
-                    width="100%"
-                    className="ExaminePanel__map"
-                    params={{
-                      id: assigned_map,
-                      type: 'map',
-                    }}
-                  />
-                </Section>
-                <Section height="310px" title="Headshot">
-                  <img
-                    src={resolveAsset(headshot)}
-                    height="250px"
-                    width="250px"
-                  />
-                </Section>
-              </>
-            )}
-          </Stack.Item>
-          <Stack.Item grow>
-            <Stack fill vertical>
-              <Stack.Item grow>
-                <Section
-                  scrollable
-                  fill
-                  preserveWhitespace
-                  title="Flavor Text"
-                  buttons={
-                    <>
-                      <Button
-                        selected={flavorTextIndex === 'SFW'}
-                        bold={flavorTextIndex === 'SFW'}
-                        onClick={() => setFlavorTextIndex('SFW')}
-                        textAlign="center"
-                        width="150px"
-                      >
-                        SFW
-                      </Button>
-                      <Button
-                        selected={flavorTextIndex === 'NSFW'}
-                        disabled={!flavor_text_nsfw}
-                        bold={flavorTextIndex === 'NSFW'}
-                        onClick={() => setFlavorTextIndex('NSFW')}
-                        textAlign="center"
-                        width="150px"
-                      >
-                        NSFW
-                      </Button>
-                    </>
-                  }
-                >
-                  {flavorTextIndex === 'SFW' && formatURLs(flavor_text)}
-                  {flavorTextIndex === 'NSFW' && formatURLs(flavor_text_nsfw)}
-                </Section>
-              </Stack.Item>
-              <Stack.Item grow>
-                <Stack fill>
-                  <Stack.Item grow basis={0}>
-                    <Section
-                      scrollable
-                      fill
-                      title="OOC Notes"
-                      preserveWhitespace
-                      buttons={
-                        <>
-                          <Button
-                            selected={oocNotesIndex === 'SFW'}
-                            bold={oocNotesIndex === 'SFW'}
-                            onClick={() => setOocNotesIndex('SFW')}
-                            textAlign="center"
-                            minWidth="60px"
-                          >
-                            SFW
-                          </Button>
-                          <Button
-                            selected={oocNotesIndex === 'NSFW'}
-                            disabled={!ooc_notes_nsfw}
-                            bold={oocNotesIndex === 'NSFW'}
-                            onClick={() => setOocNotesIndex('NSFW')}
-                            textAlign="center"
-                            minWidth="60px"
-                          >
-                            NSFW
-                          </Button>
-                        </>
-                      }
-                    >
-                      {!!nova_star_status && (
-                        <Stack.Item mb="8px">
-                          <span
-                            style={{
-                              color: 'gold',
-                              fontWeight: 'bold',
-                            }}
-                          >
-                            Nova Star! ⭐
-                          </span>
-                        </Stack.Item>
-                      )}
-                      {oocNotesIndex === 'SFW' && (
-                        <Stack.Item>
-                          {ideal_antag_optin_status && (
-                            <Stack.Item>
-                              Current Antag Opt-In Status:{' '}
-                              <span
-                                style={{
-                                  fontWeight: 'bold',
-                                  color:
-                                    opt_in_colors[current_antag_optin_status],
-                                }}
-                              >
-                                {current_antag_optin_status}
-                              </span>
-                              {'\n'}
-                              Antag Opt-In Status {'(Preferences)'}:{' '}
-                              <span
-                                style={{
-                                  color:
-                                    opt_in_colors[ideal_antag_optin_status],
-                                }}
-                              >
-                                {ideal_antag_optin_status}
-                              </span>
-                              {'\n\n'}
-                            </Stack.Item>
-                          )}
-                          {formatURLs(ooc_notes)}
-                        </Stack.Item>
-                      )}
-                      {oocNotesIndex === 'NSFW' && formatURLs(ooc_notes_nsfw)}
+        <Box height="100%" style={{ position: 'relative' }}>
+          <Stack fill>
+            <Stack.Item width="30%">
+              <Stack fill vertical>
+                <Stack.Item grow>
+                  <Section fill title="Character Preview">
+                    <CharacterPreview
+                      width="100%"
+                      height="100%"
+                      id={character_preview_view}
+                    />
+                  </Section>
+                </Stack.Item>
+                {!!effectiveHeadshotUrl && (
+                  <Stack.Item grow>
+                    <Section fill title="Headshot">
+                      <img
+                        src={effectiveHeadshotUrl}
+                        style={{ maxWidth: '100%', maxHeight: '100%' }}
+                      />
                     </Section>
                   </Stack.Item>
-                  <Stack.Item grow basis={0}>
-                    <Section
-                      scrollable
-                      fill
-                      preserveWhitespace
-                      title={
-                        custom_species
-                          ? `Species: ${custom_species}`
-                          : 'No Custom Species!'
-                      }
-                    >
-                      {custom_species
-                        ? formatURLs(custom_species_lore)
-                        : 'Just a normal space dweller.'}
-                    </Section>
-                  </Stack.Item>
-                </Stack>
-              </Stack.Item>
-            </Stack>
-          </Stack.Item>
-        </Stack>
+                )}
+              </Stack>
+            </Stack.Item>
+            <Stack.Item grow>
+              <Stack fill vertical>
+                <Stack.Item grow>
+                  <Section
+                    fill
+                    scrollable
+                    preserveWhitespace
+                    title="Flavor Text"
+                    buttons={
+                      <Tabs>
+                        <Tabs.Tab
+                          selected={upperTab === 'flavor_text'}
+                          onClick={() => setUpperTab('flavor_text')}
+                        >
+                          Flavor Text
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                          selected={upperTab === 'nsfw'}
+                          onClick={() => setUpperTab('nsfw')}
+                        >
+                          NSFW (Warning)
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                          selected={upperTab === 'custom_species'}
+                          onClick={() => setUpperTab('custom_species')}
+                        >
+                          {custom_species || 'Unnamed Species'}
+                        </Tabs.Tab>
+                      </Tabs>
+                    }
+                  >
+                    {upperTab === 'flavor_text' && formatURLs(flavor_text)}
+                    {upperTab === 'nsfw' && formatURLs(flavor_text_nsfw)}
+                    {upperTab === 'custom_species' &&
+                      formatURLs(custom_species_lore)}
+                  </Section>
+                </Stack.Item>
+                <Stack.Item grow>
+                  <Section
+                    fill
+                    scrollable
+                    preserveWhitespace
+                    title="Notes"
+                    buttons={
+                      <Tabs>
+                        <Tabs.Tab
+                          selected={lowerTab === 'ooc_notes'}
+                          onClick={() => setLowerTab('ooc_notes')}
+                        >
+                          OOC Notes
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                          selected={lowerTab === 'character_ad'}
+                          onClick={() => setLowerTab('character_ad')}
+                        >
+                          Character Advert
+                        </Tabs.Tab>
+                      </Tabs>
+                    }
+                  >
+                    {lowerTab === 'ooc_notes' && formatURLs(ooc_notes)}
+                    {lowerTab === 'character_ad' && formatURLs(character_ad)}
+                  </Section>
+                </Stack.Item>
+              </Stack>
+            </Stack.Item>
+          </Stack>
+          {!!art_reference_url && (
+            <Button
+              icon="image"
+              color={art_ref_nsfw ? 'pink' : 'green'}
+              style={{ position: 'absolute', bottom: '10px', right: '10px' }}
+              onClick={() => setPage('image')}
+            >
+              Art Reference
+            </Button>
+          )}
+        </Box>
       </Window.Content>
     </Window>
   );

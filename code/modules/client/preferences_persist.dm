@@ -1,4 +1,6 @@
-#define PREF_SER_VERSION 3
+// 4: languages gained CEFR proficiency levels. The flat "language" name list became the assoc "language_levels"
+//    map; see /datum/category_item/player_setup_item/background/languages/load_character.
+#define PREF_SER_VERSION 4
 
 /datum/preferences/proc/get_path(ckey, record_key, extension="json")
 	return "data/player_saves/[copytext_char(ckey,1,2)]/[ckey]/[record_key].[extension]"

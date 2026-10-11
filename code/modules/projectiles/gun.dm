@@ -49,6 +49,10 @@
 		slot_r_hand_str = 'icons/mob/onmob/items/righthand_guns.dmi',
 		)
 	item_state = "gun"
+	/// When TRUE, on_update_icon() uses the co-located sprite convention:
+	/// [icon_state]_l / [icon_state]_r for held and [icon_state]_l_wielded / [icon_state]_r_wielded when wielded.
+	/// Requires item_icons to point to the gun's own DMI for the hand slots.
+	var/colocated_sprites = FALSE
 	obj_flags =  OBJ_FLAG_CONDUCTIBLE
 	slot_flags = SLOT_BELT|SLOT_HOLSTER
 	matter = list(MATERIAL_STEEL = 2000)
@@ -97,6 +101,10 @@
 	var/list/dispersion = list(0)
 	var/one_hand_penalty
 	var/wielded_item_state
+	/// When TRUE, on_update_icon() switches to an empty icon state when the magazine is empty.
+	var/empty_icon = FALSE
+	/// When TRUE, draw a bullet-count indicator overlay while held.
+	var/ammo_indicator = FALSE
 	/// Whether it creates hotspot when fired.
 	var/combustion
 	var/next_fire_time = 0
@@ -144,7 +152,12 @@
 	var/mob/living/M = loc
 	ClearOverlays()
 	if(istype(M))
-		if(wielded_item_state)
+		if(colocated_sprites)
+			var/prefix = initial(icon_state)
+			var/is_wielded = M.can_wield_item(src) && src.is_held_twohanded(M)
+			item_state_slots[slot_l_hand_str] = is_wielded ? "[prefix]_l_wielded" : "[prefix]_l"
+			item_state_slots[slot_r_hand_str] = is_wielded ? "[prefix]_r_wielded" : "[prefix]_r"
+		else if(wielded_item_state)
 			if(M.can_wield_item(src) && src.is_held_twohanded(M))
 				item_state_slots[slot_l_hand_str] = wielded_item_state
 				item_state_slots[slot_r_hand_str] = wielded_item_state

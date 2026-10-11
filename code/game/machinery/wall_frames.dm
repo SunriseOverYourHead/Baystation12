@@ -105,7 +105,7 @@
 	refund_amt = 3
 
 /obj/item/frame/supermatter_alarm
-	name = "supermatter alarm frame"
+	name = "nuclear reactor alarm frame"
 	icon = 'icons/obj/structures/lighting.dmi'
 	icon_state = "bulb-construct-item"
 	refund_amt = 1

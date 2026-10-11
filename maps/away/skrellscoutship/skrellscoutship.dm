@@ -206,10 +206,6 @@
 	. = ..()
 	reagents.add_reagent(/datum/reagent/ethanol/qokkhrona, 100)
 
-/obj/item/gun/energy/pulse_rifle/skrell/vesta
-	name = "VT-3 carbine"
-	desc = "The Vuu'Xqu*ix T-3, known as 'VT-3' by SolGov. Rarely seen out in the wild by anyone outside of a Skrellian SDTF."
-
 /obj/item/storage/belt/holster/skrell
 	name = "skrellian holster belt"
 	desc = "Can hold security gear like handcuffs and flashes. This one has a convenient holster especially designed to accomodate the XV-5."
@@ -310,52 +306,6 @@
 	active_force = 30
 	active_throwforce = 20
 
-/obj/item/gun/energy/gun/skrell/vesta
-	name = "XV-5 handgun"
-
-/obj/item/gun/magnetic/railgun/flechette/skrell/vesta
-	name = "ZT-8 rifle"
-	desc = "The Zquiv*Tzuuli-8, or ZT-8, is a railgun rarely seen by anyone other than those within Skrellian SDTF ranks. \
-			The rotary magazine houses a cylinder with individual chambers, that press against the barrel when loaded."
-
-/obj/item/gun/projectile/automatic/skrell
-	name = "QX-2 Miniaturized Railgun"
-	desc = "Modeled after VT-3, the Qerr Xira-2 or, as refered in Sol, QX-2, is a miniaturized railgun popular with SDTF squadrons. An internal microfusion cell and a sizeable ammo capacity both guarantee reliability even on prolonged engagements."
-	icon = 'icons/obj/guns/skrell_shotgun.dmi'
-	icon_state = "skrellshotgun"
-	item_state = "skrellshotgun"
-	safety_icon = "safety"
-	move_delay = 2
-	one_hand_penalty = 5
-	fire_delay = 5
-	wielded_item_state = "skrellshotgun-wielded"
-	w_class = ITEM_SIZE_HUGE
-	force = 10
-	slot_flags = SLOT_BACK
-	load_method = MAGAZINE
-	obj_flags =  OBJ_FLAG_CONDUCTIBLE
-	caliber = CALIBER_SKRELL_SHOTGUN
-	ammo_type = /obj/item/ammo_casing/skrell_shotgun
-	magazine_type = /obj/item/ammo_magazine/skrell_shotgun
-	allowed_magazines = /obj/item/ammo_magazine/skrell_shotgun
-	bulk = GUN_BULK_RIFLE
-	handle_casings = CLEAR_CASINGS
-	firemodes = list()
-
-/obj/item/gun/projectile/automatic/skrell/on_update_icon()
-	..()
-	if(ammo_magazine)
-		icon_state = "skrellshotgun"
-	else
-		icon_state = "skrellshotgun-e"
-
-/obj/item/ammo_casing/skrell_shotgun
-	name = "QX-2 flechette slug"
-	desc = "A compact flechette slug designed for the skrellian QX-2 miniaturized railgun."
-	caliber = CALIBER_SKRELL_SHOTGUN
-	projectile_type = /obj/item/projectile/bullet/flechette
-	icon_state = "skrellflechette"
-	spent_icon = "skrellflechette-spent"
 
 /obj/item/ammo_magazine/skrell_shotgun
 	name = "QX-2 flechette magazine"

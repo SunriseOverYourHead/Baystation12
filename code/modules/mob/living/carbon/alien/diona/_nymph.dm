@@ -68,7 +68,11 @@
 
 	species = GLOB.species_by_name[SPECIES_DIONA]
 	add_language(LANGUAGE_ROOTGLOBAL)
-	add_language(LANGUAGE_HUMAN_EURO, 0)
+	// The trailing 0 that used to sit here was copy-pasted from /mob/living/silicon/add_language(), whose second
+	// argument is a "can use the speech synthesizer" flag. A nymph is not a silicon, so the base proc ignored it --
+	// until the base proc's second argument became a proficiency level, at which point it would have meant "knows
+	// no Sol Common at all" and left nymphs hearing gibberish.
+	add_language(LANGUAGE_HUMAN_EURO)
 
 	eyes = image(icon = icon, icon_state = "eyes_[icon_state]")
 	eyes.layer = EYE_GLOW_LAYER

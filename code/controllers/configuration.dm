@@ -56,6 +56,9 @@
 	/// Allows admins with relevant permissions to have their own ooc colour
 	var/static/allow_admin_ooccolor = FALSE
 
+	/// Server-wide opt-out for ERP/genital character preferences (master_erp_preferences toggle in preferences_tgui.dm)
+	var/static/disable_erp_preferences = FALSE
+
 	/// allow votes to restart
 	var/static/allow_vote_restart = FALSE
 
@@ -210,6 +213,8 @@
 	var/static/discord_url
 
 	var/static/issue_url
+
+	var/static/invoke_youtubedl
 
 	var/static/list/chat_markup
 
@@ -595,6 +600,8 @@
 				no_click_cooldown = TRUE
 			if ("allow_admin_ooccolor")
 				allow_admin_ooccolor = TRUE
+			if ("disable_erp_preferences")
+				disable_erp_preferences = TRUE
 			if ("allow_vote_restart")
 				allow_vote_restart = TRUE
 			if ("allow_vote_mode")
@@ -687,6 +694,8 @@
 				issue_url = value
 			if ("discord_url")
 				discord_url = value
+			if ("invoke_youtubedl")
+				invoke_youtubedl = value
 			if ("ghosts_can_possess_animals")
 				ghosts_can_possess_animals = TRUE
 			if ("guest_jobban")

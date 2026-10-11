@@ -73,8 +73,8 @@
 		if(!(underwear_metadata in pref.all_underwear))
 			pref.all_underwear_metadata -= underwear_metadata
 
-	if(!pref.backpack || !(pref.backpack.name in backpacks_by_name))
-		pref.backpack = get_default_outfit_backpack()
+	if(!pref.backpack || !pref.backpack.path || !(pref.backpack.name in backpacks_by_name))
+		pref.backpack = get_default_outfit_backpack() // backpack is mandatory -- a pathless entry like "Nothing" doesn't count
 
 	if(!istype(pref.backpack_metadata))
 		pref.backpack_metadata = list()

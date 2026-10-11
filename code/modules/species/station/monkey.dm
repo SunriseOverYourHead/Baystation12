@@ -42,6 +42,14 @@
 
 	pass_flags = PASS_FLAG_TABLE
 	holder_type = /obj/item/holder
+
+	override_organ_types = list(
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
+	)
 	override_limb_types = list(BP_HEAD = /obj/item/organ/external/head/no_eyes)
 
 	descriptors = list(

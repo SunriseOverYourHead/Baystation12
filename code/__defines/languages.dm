@@ -7,6 +7,21 @@
 #define LANGUAGE_HUMAN_RUSSIAN   "Pan-Slavic"
 #define LANGUAGE_HUMAN_SELENIAN  "Selenian"
 
+//Human, surviving real-world languages. The languages above are the setting's own constructed descendants of
+//Earth speech (Zurich Accord Common, Yangyu, Iberian and so on); these are the older tongues they grew out of,
+//still spoken on Earth and in diaspora communities. Both sets coexist deliberately.
+//Each of these is a group of regional variants rather than a single language -- see /datum/language/var/language_group.
+//Variants within a group understand each other at LANGUAGE_GROUP_UNDERSTANDING and share one speech prefix.
+#define LANGUAGE_HUMAN_ENGLISH   "English"
+#define LANGUAGE_HUMAN_SPANISH   "Spanish"
+#define LANGUAGE_HUMAN_MANDARIN  "Mandarin"
+
+#define LANGUAGE_HUMAN_ENGLISH_GB  "English (Britain)"
+#define LANGUAGE_HUMAN_ENGLISH_US  "English (America)"
+#define LANGUAGE_HUMAN_SPANISH_ES  "Spanish (Spain)"
+#define LANGUAGE_HUMAN_SPANISH_AR  "Spanish (Argentina)"
+#define LANGUAGE_HUMAN_SPANISH_MX  "Spanish (Mexico)"
+
 //Human misc
 #define LANGUAGE_GUTTER         "Gutter"
 #define LANGUAGE_SPACER         "Spacer"
@@ -53,3 +68,23 @@
 
 // Misc
 #define MAX_LANGUAGES 3
+
+// Proficiency levels, borrowing the CEFR scale. A character's entry in mob.languages maps the language datum to
+// one of these. NONE is never stored -- not knowing a language means having no entry at all -- but it is what the
+// accessors return for an unknown language, so it is defined for comparison.
+#define LANGUAGE_LEVEL_NONE 0
+#define LANGUAGE_LEVEL_A1   1
+#define LANGUAGE_LEVEL_A2   2
+#define LANGUAGE_LEVEL_B1   3
+#define LANGUAGE_LEVEL_B2   4
+#define LANGUAGE_LEVEL_C1   5
+#define LANGUAGE_LEVEL_C2   6
+
+#define LANGUAGE_LEVEL_MIN LANGUAGE_LEVEL_A1
+#define LANGUAGE_LEVEL_MAX LANGUAGE_LEVEL_C2
+
+/// Full comprehension. Speech at this value is passed through verbatim without a trip through scramble().
+#define LANGUAGE_COMPREHENSION_FULL 100
+
+/// Mutual intelligibility between regional variants of the same tongue (see /datum/language/var/language_group).
+#define LANGUAGE_GROUP_UNDERSTANDING 95

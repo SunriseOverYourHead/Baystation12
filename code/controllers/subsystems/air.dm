@@ -66,6 +66,11 @@ SUBSYSTEM_DEF(air)
 	priority = SS_PRIORITY_AIR
 	init_order = SS_INIT_AIR
 	flags = SS_POST_FIRE_TIMING
+	// Was the unoverridden base default (20 deciseconds = 2.0s) - dropped to 0.5s per explicit request, alongside
+	// SSmachines (code/controllers/subsystems/machines.dm), to speed up the core zone-based gas simulation.
+	// Affects the whole game's atmospherics (breathing, fires, decompression, room mixing), not just pipe
+	// networks - reconsider if this turns out to be a real server performance cost.
+	wait = 0.5 SECONDS
 
 	//Geometry lists
 	var/list/zones = list()

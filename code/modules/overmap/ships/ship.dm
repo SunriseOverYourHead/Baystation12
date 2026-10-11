@@ -24,6 +24,11 @@
 
 	var/list/navigation_viewers // list of weakrefs to people viewing the overmap via this ship
 
+	/// For FTL-drive-capable vessels only: a private overmap grid this ship's blip is parked on for the duration
+	/// of a bluespace jump, so it isn't just frozen at its old coordinates while "moving." Lazily allocated by
+	/// SSstarmap.get_transit_overmap_z() (code/modules/overmap/starmap/starmap.dm) the first time it's needed.
+	var/transit_overmap_z
+
 	var/list/engines = list()
 	var/engines_state = 0 //global on/off toggle for all engines
 	var/thrust_limit = 1  //global thrust limit for all engines, 0..1

@@ -1,3 +1,18 @@
+/mob/living/carbon/human
+	var/tmp/shift_examine_headshot = FALSE
+
+// Shift-click shows the target's headshot inline in the resulting examine text (Bubberstation-style); a plain
+// click/look examine does not. Base /atom/proc/ShiftClick (click.dm) just calls examinate(user, src) -- mirrored
+// here, with a one-shot flag instead of a new examinate()/examine() parameter so every OTHER /atom's examine()
+// override (most of which don't declare the base's full argument list) is untouched.
+/mob/living/carbon/human/ShiftClick(mob/user)
+	if(user.client && user.client.eye == user)
+		shift_examine_headshot = TRUE
+		examinate(user, src)
+		shift_examine_headshot = FALSE
+		return TRUE
+	return FALSE
+
 /mob/living/carbon/human/examine(mob/user, distance)
 	. = TRUE
 	var/skipgloves = 0
@@ -350,6 +365,23 @@
 	if (age_diff)
 		msg += "<br />[SPAN_NOTICE(age_diff)]"
 
+	// Same "AI Generated?" gate as the Examine Closer... panel (examine_panel.dm's ui_data()) -- this is a
+	// completely separate code path (reads src.headshot_url directly, not through the TGUI panel's data), so it
+	// needed its own copy of the check. viewer_wants_ai is read live off the VIEWER's (user's) own preferences,
+	// same reasoning as examine_panel.dm: it's the viewer's setting, not the target's, and has no reason to be
+	// spawn-locked. Defaults permissive (TRUE) if user.client is somehow absent, matching the var's own default.
+	var/viewer_wants_ai = user?.client ? user.client.prefs.view_ai_generated_headshots : TRUE
+	if(shift_examine_headshot && length(headshot_url) && (!headshot_ai_generated || viewer_wants_ai))
+		// transform-origin:bottom left keeps the BOTTOM-left corner fixed while scaling, so the hover zoom grows
+		// up and to the right (toward the top right) instead of down and to the right.
+		// html_encode_attribute() here is defense in depth, not the primary defense -- is_valid_media_url()
+		// (05_identity_media.dm) already rejects any character outside a strict URL-safe allowlist, but this is a
+		// hand-built HTML string with no other sanitization between it and the chat client's innerHTML, so it
+		// shouldn't rely on the validator alone never changing.
+		msg += {"<br><style>.examine-headshot img{width:48px;height:48px;object-fit:cover;border-radius:4px;vertical-align:middle;transition:transform 0.15s ease;transform-origin:bottom left;position:relative;z-index:1;}.examine-headshot img:hover{transform:scale(4);z-index:999;}</style><span class="examine-headshot"><img src="[html_encode_attribute(headshot_url)]"></span>"}
+
+	msg += "<br /><a href='byond://?src=\ref[src];examine_closer=1'>Examine Closer...</a>"
+
 	to_chat(user, SPAN_INFO(jointext(msg, null)))
 
 //Helper procedure. Called by /mob/living/carbon/human/examine() and /mob/living/carbon/human/Topic() to determine HUD access to security and medical records.
@@ -389,44 +421,3 @@
 	else
 		pose =  sanitize(input(usr, "This is [src]. [P.He]...", "Pose", null)  as text)
 
-/mob/living/carbon/human/verb/set_flavor()
-	set name = "Set Flavour Text"
-	set desc = "Sets an extended description of your character's features."
-	set category = "IC"
-
-	var/list/HTML = list()
-	HTML += "<body>"
-	HTML += "<tt><center>"
-	HTML += "<b>Update Flavour Text</b> <hr />"
-	HTML += "<br></center>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=general'>General:</a> "
-	HTML += TextPreview(flavor_texts["general"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=head'>Head:</a> "
-	HTML += TextPreview(flavor_texts["head"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=face'>Face:</a> "
-	HTML += TextPreview(flavor_texts["face"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=eyes'>Eyes:</a> "
-	HTML += TextPreview(flavor_texts["eyes"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=torso'>Body:</a> "
-	HTML += TextPreview(flavor_texts["torso"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=arms'>Arms:</a> "
-	HTML += TextPreview(flavor_texts["arms"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=hands'>Hands:</a> "
-	HTML += TextPreview(flavor_texts["hands"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=legs'>Legs:</a> "
-	HTML += TextPreview(flavor_texts["legs"])
-	HTML += "<br>"
-	HTML += "<a href='byond://?src=\ref[src];flavor_change=feet'>Feet:</a> "
-	HTML += TextPreview(flavor_texts["feet"])
-	HTML += "<br>"
-	HTML += "<hr />"
-	HTML +="<a href='byond://?src=\ref[src];flavor_change=done'>\[Done\]</a>"
-	HTML += "<tt>"
-	show_browser(src, jointext(HTML,null), "window=flavor_changes;size=430x300")

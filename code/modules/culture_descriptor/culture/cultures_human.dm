@@ -12,6 +12,15 @@
 		LANGUAGE_HUMAN_INDIAN,
 		LANGUAGE_HUMAN_IBERIAN,
 		LANGUAGE_HUMAN_RUSSIAN,
+		// Old Earth tongues, offered alongside their constructed descendants rather than replacing them.
+		// English and Spanish are listed per regional variant -- character setup collapses each group back into a
+		// single entry with a variant picker, so this reads as two choices rather than five.
+		LANGUAGE_HUMAN_ENGLISH_GB,
+		LANGUAGE_HUMAN_ENGLISH_US,
+		LANGUAGE_HUMAN_SPANISH_ES,
+		LANGUAGE_HUMAN_SPANISH_AR,
+		LANGUAGE_HUMAN_SPANISH_MX,
+		LANGUAGE_HUMAN_MANDARIN,
 		LANGUAGE_SPACER,
 		LANGUAGE_SIGN
 	)

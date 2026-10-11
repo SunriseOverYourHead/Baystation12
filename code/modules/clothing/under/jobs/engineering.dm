@@ -41,4 +41,5 @@
 	name = "roboticist's jumpskirt"
 	icon_state = "roboticsf"
 	worn_state = "roboticsf"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 	gender_icons = 1

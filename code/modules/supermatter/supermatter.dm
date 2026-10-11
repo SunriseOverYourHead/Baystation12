@@ -664,9 +664,12 @@
 
 
 //Warning lights
+// Rewired to watch the nuclear reactor (code/modules/power/reactor/reactor_process.dm) instead of the
+// supermatter, which this map/config is replacing it with - name/desc updated to match, but the underlying type
+// path is left alone so existing map placements, the frame item below, and the construction chain keep working.
 /obj/machinery/rotating_alarm/supermatter
-	name = "supermatter alarm"
-	desc = "An industrial rotating alarm light. This one is used to monitor supermatter engines."
+	name = "nuclear reactor alarm"
+	desc = "An industrial rotating alarm light. This one is used to monitor nuclear reactors."
 
 	frame_type = /obj/item/frame/supermatter_alarm
 	construct_state = /singleton/machine_construction/default/item_chassis
@@ -677,16 +680,24 @@
 
 /obj/machinery/rotating_alarm/supermatter/Initialize()
 	. = ..()
-	GLOB.supermatter_status.register_global(src, PROC_REF(check_supermatter))
+	GLOB.reactor_status.register_global(src, PROC_REF(check_reactor))
 
 /obj/machinery/rotating_alarm/supermatter/Destroy()
-	GLOB.supermatter_status.unregister_global(src, PROC_REF(check_supermatter))
+	GLOB.reactor_status.unregister_global(src, PROC_REF(check_reactor))
 	. = ..()
 
-/obj/machinery/rotating_alarm/supermatter/proc/check_supermatter(obj/machinery/power/supermatter/SM, danger)
-	if (SM)
-		if (SM.z in GetConnectedZlevels(src.z))
-			if (danger && !on)
-				set_on()
-			else if (!danger && on)
+/obj/machinery/rotating_alarm/supermatter/proc/check_reactor(obj/machinery/atmospherics/omni/reactor/R, danger)
+	if (R)
+		if (R.z in GetConnectedZlevels(src.z))
+			if (danger)
+				if (!on)
+					set_on()
+			else if (on)
 				set_off()
+			// Defensive: set_off() (code/game/machinery/rotating_alarm.dm) bails out immediately if `on` is
+			// already FALSE, which would leave a leaked sound_loop reference looping forever with no way to stop
+			// it - light and sound are meant to always toggle together, but if they were ever reported to have
+			// desynced (light off, sound still playing), this guarantees the loop gets torn down on the very
+			// next "danger cleared" event regardless of what `on` claims.
+			else if (sound_loop)
+				QDEL_NULL(sound_loop)

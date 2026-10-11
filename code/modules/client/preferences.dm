@@ -267,9 +267,18 @@
 	character.fully_replace_character_name(real_name)
 
 	character.gender = gender
+	character.trans_body_type = trans_body_type
 	character.pronouns = pronouns
 	character.age = age
 	character.b_type = b_type
+
+	// Vocal chirps (vocal_chirps.dm) -- a physical trait, so this copy at spawn is the ONLY path onto the mob.
+	// Deliberately not part of the live-sync helpers in preferences_tgui.dm: editing these mid-round should do
+	// nothing until the next spawn.
+	character.vocal_chirp_id = vocal_chirp_id
+	character.vocal_chirp_speed = vocal_chirp_speed
+	character.vocal_chirp_pitch = vocal_chirp_pitch
+	character.vocal_chirp_variance = vocal_chirp_variance
 
 	character.eye_color = eye_color
 
@@ -283,6 +292,7 @@
 
 	character.skin_tone = skin_tone
 	character.base_skin = base_skin
+	character.leg_type = leg_type
 
 	// Replace any missing limbs.
 	for(var/name in BP_ALL_LIMBS)
@@ -355,14 +365,116 @@
 		var/obj/item/organ/external/O = character.organs_by_name[N]
 		O.markings.Cut()
 
-	for(var/M in body_markings)
-		var/datum/sprite_accessory/marking/mark_datum = GLOB.body_marking_styles_list[M]
-		var/mark_color = "[body_markings[M]]"
+	for(var/limb_slot in body_markings)
+		var/list/limb_markings = body_markings[limb_slot]
+		for(var/M in limb_markings)
+			var/datum/sprite_accessory/marking/mark_datum = GLOB.body_marking_styles_list[M]
+			if(!mark_datum)
+				continue
+			var/list/mark_data = limb_markings[M]
 
-		for(var/BP in mark_datum.body_parts)
-			var/obj/item/organ/external/O = character.organs_by_name[BP]
-			if (O)
-				O.markings[mark_datum] = mark_color
+			for(var/BP in mark_datum.body_parts)
+				var/obj/item/organ/external/O = character.organs_by_name[BP]
+				if (O)
+					O.markings[mark_datum] = mark_data.Copy()
+
+	for(var/obj/item/organ/internal/mutant/organ in character.internal_organs.Copy())
+		// The preview mannequin (get_mannequin(), 05_preview.dm) is a single long-lived mob reused across every
+		// preview refresh, so this loop's `organ` can be the SAME instance copy_to() touched last time -- unlike a
+		// fresh round-start spawn, is_aroused (internal/_mutant.dm) can already be TRUE here from a previous
+		// "Naked (Aroused)" preview. Resetting it unconditionally means the style/underlying_sprite_datum resolved
+		// a few lines down (and this proc's own update_body() calls further below) are never briefly computed
+		// against a stale arousal state -- apply_preview_arousal() (05_preview.dm), which runs right after copy_to()
+		// returns, is solely responsible for setting it back to TRUE when the "Naked (Aroused)" preview is active.
+		// A no-op for a real spawn, where organs are freshly created and already default FALSE.
+		organ.is_aroused = FALSE
+		var/list/choice = mutant_organs[organ.organ_tag]
+		var/organ_enabled = islist(choice) && choice["enabled"]
+		// Safety net for stale saved data (e.g. Body Type changed after a mismatched category was already
+		// enabled) -- Male never gets Breasts/Vagina, Female never gets Penis/Testicles, matching the same
+		// organ_category_matches_gender() gate the TGUI editor itself already enforces.
+		if(organ_enabled && organ.is_genital && !organ_category_matches_gender(organ.organ_tag))
+			organ_enabled = FALSE
+		// A mandatory organ (e.g. a Unathi's tail) is never opt-in, and never loses its default style to a
+		// missing/"None" choice -- see is_mutant_organ_mandatory() (species_getters.dm) for why.
+		var/mandatory = character.species.is_mutant_organ_mandatory(organ.organ_tag)
+		if(!organ_enabled && !mandatory)
+			if(is_preview_copy)
+				organ.sprite_datum = null
+				// BP_PENIS-specific state (underlying_sprite_datum/underlying_size) is only ever cleared by the
+				// sheath-override block further down, which this branch skips entirely -- without this, a stale
+				// value from an earlier enabled+aroused state lingers on the reused preview mannequin, confusing
+				// anything that inspects the organ (e.g. get_effective_sprite_datum()) while it's disabled.
+				if(organ.organ_tag == BP_PENIS)
+					var/obj/item/organ/internal/mutant/penis/penis_organ = organ
+					penis_organ.underlying_sprite_datum = null
+					penis_organ.underlying_size = null
+			else
+				qdel(organ) // player never opted in via this category's toggle -- they don't gain the organ at all
+			continue
+		if(islist(choice))
+			var/list/style_list = character.species.get_mutant_styles(organ.organ_tag, allow_noncanon_bodyparts)
+			var/datum/sprite_accessory/mutant/resolved_style = (islist(style_list) && choice["style"]) ? style_list[choice["style"]] : null
+			if(mandatory)
+				if(!resolved_style && islist(style_list) && organ.default_style_name)
+					resolved_style = style_list[organ.default_style_name]
+				if(resolved_style)
+					organ.sprite_datum = resolved_style
+			else if(!resolved_style && organ_enabled && organ.is_genital && choice["style"] != "None")
+				// The player's saved style choice is no longer valid for their current species/gender/canon
+				// settings (e.g. a species restriction added after they picked it, or Body Type changed) --
+				// falls back to a sensible default instead of silently clearing sprite_datum to null, which
+				// would make an enabled category just stop rendering entirely rather than showing *something*.
+				// Deliberately NOT requiring choice["style"] to be truthy here (only excluding the literal "None"
+				// case) -- tgui_sanitize_mutant_organs() clears an invalid style to null, not to an invalid string,
+				// so a null choice["style"] on an enabled genital organ means "needs a default", same as any other
+				// unresolvable value. Missing this was the actual bug behind organs going invisible on a loaded
+				// (not freshly-created) character: sanitize correctly nulled the stale style, but this fallback's
+				// old truthy check then skipped recovering it, leaving sprite_datum null with no way to self-heal.
+				var/fallback_style_name = pick_default_genital_style(organ.organ_tag, style_list)
+				organ.sprite_datum = fallback_style_name ? style_list[fallback_style_name] : null
+			else
+				organ.sprite_datum = resolved_style // null (eg "None", or an invalid cross-species style) clears the organ's style
+			if(islist(choice["colors"]))
+				organ.colors = choice["colors"].Copy()
+			if(!isnull(choice["size"]))
+				organ.size = choice["size"]
+			else
+				// Player enabled this category without ever touching its size slider -- fall back to the
+				// category's own default rather than leaving organ.size null, which would make
+				// build_colored_icon() look for a bare "[icon_state]_s" state that doesn't exist for any
+				// size-driven category (only "[icon_state][N]_s" states are baked into these .dmi files).
+				var/list/meta = get_mutant_category_meta(organ.organ_tag)
+				if(meta && !isnull(meta["size_default"]))
+					organ.size = meta["size_default"]
+			// "Penis Sheath" (Penis only): overrides the normally-resolved shape+size entirely with the fixed
+			// Sheath/Slit sprite when active, regardless of which shape is otherwise selected -- matches the
+			// original pasted design's separate penis_sheath preference, not a shape choice (see
+			// [[baystation12soyh_genitals_port_plan]]). Looked up directly from the raw GLOB registry, not
+			// species.get_mutant_styles(), since Sheath/Slit (and species-specific aliases like Teshari's
+			// "Cloaca") are hidden_from_picker there on purpose. force_male_sheath_mode (species.dm) overrides
+			// whatever the player picked when this species requires it for males -- e.g. Unathi/GAS/Vox/Skrell
+			// males are always Slit -- unless Allow Non-Canon Bodyparts is on.
+			if(organ.organ_tag == BP_PENIS)
+				var/obj/item/organ/internal/mutant/penis/penis_organ = organ
+				var/effective_sheath_mode = islist(choice) ? choice["sheath_mode"] : null
+				if(!allow_noncanon_bodyparts && character.species.force_male_sheath_mode && character.gender == MALE)
+					effective_sheath_mode = character.species.force_male_sheath_mode
+				var/datum/sprite_accessory/mutant/sheath_style = effective_sheath_mode ? GLOB.mutant_penis_styles_list[effective_sheath_mode] : null
+				if(sheath_style)
+					// Preserve the shape+size just resolved above (before overwriting it) so
+					// get_effective_sprite_datum() (_mutant.dm/mutant_penis.dm) can reveal it once fully
+					// aroused -- matches Bubberstation's own real behavior of dropping the sheath/slit sprite
+					// entirely at full arousal in favor of the underlying shape's own erect state.
+					penis_organ.underlying_sprite_datum = organ.sprite_datum
+					penis_organ.underlying_size = organ.size
+					organ.sprite_datum = sheath_style
+					organ.size = null
+				else
+					// Not in Sheath/Slit mode (any more) -- clear any stale reference from a previous copy_to()
+					// call so get_effective_sprite_datum() doesn't reveal a shape that's no longer relevant.
+					penis_organ.underlying_sprite_datum = null
+					penis_organ.underlying_size = null
 
 	character.force_update_limbs()
 	character.update_mutations(0)
@@ -378,23 +490,52 @@
 		character.set_cultural_value(token, cultural_info[token], defer_language_update = TRUE)
 	character.update_languages()
 	for(var/lang in alternate_languages)
-		character.add_language(lang)
-
-	character.flavor_texts["general"] = flavor_texts["general"]
-	character.flavor_texts["head"] = flavor_texts["head"]
-	character.flavor_texts["face"] = flavor_texts["face"]
-	character.flavor_texts["eyes"] = flavor_texts["eyes"]
-	character.flavor_texts["torso"] = flavor_texts["torso"]
-	character.flavor_texts["arms"] = flavor_texts["arms"]
-	character.flavor_texts["hands"] = flavor_texts["hands"]
-	character.flavor_texts["legs"] = flavor_texts["legs"]
-	character.flavor_texts["feet"] = flavor_texts["feet"]
+		character.add_language(lang, alternate_languages[lang])
 
 	character.public_record = public_record
 	character.med_record = med_record
 	character.sec_record = sec_record
 	character.gen_record = gen_record
 	character.exploit_record = exploit_record
+
+	character.headshot_url = headshot_url
+	character.headshot_nsfw_url = headshot_nsfw_url
+	character.art_reference_url = art_reference_url
+	character.art_ref_nsfw = art_ref_nsfw
+	character.headshot_ai_generated = headshot_ai_generated
+	character.headshot_nsfw_ai_generated = headshot_nsfw_ai_generated
+	character.art_reference_ai_generated = art_reference_ai_generated
+	character.ooc_notes = ooc_notes
+
+	character.master_erp_preferences = master_erp_preferences
+	character.show_in_directory = show_in_directory
+	// Dating Preferences are locked to their nearest "off" value when Enable Sexual Content is off, matching the
+	// same spawn-time-only semantics as the genital organs above (never mutates the player's own saved pref.*
+	// fields -- only what gets written onto the spawned mob -- so re-enabling later restores whatever they'd set).
+	var/erp_on = !config.disable_erp_preferences && master_erp_preferences
+	character.attraction = erp_on ? attraction : "Unset"
+	character.display_gender = display_gender
+	character.emote_length = erp_on ? emote_length : "No Preference"
+	character.approach_pref = erp_on ? approach_pref : "Unset"
+	character.furry_pref = erp_on ? furry_pref : "No ERP"
+	character.scalie_pref = erp_on ? scalie_pref : "No ERP"
+	character.other_pref = erp_on ? other_pref : "No ERP"
+	character.demihuman_pref = erp_on ? demihuman_pref : "No ERP"
+	character.human_pref = erp_on ? human_pref : "No ERP"
+	character.character_ad = character_ad
+	character.erp_status = erp_on ? erp_status : "No"
+	character.erp_status_nc = erp_on ? erp_status_nc : "No"
+	character.erp_status_v = erp_on ? erp_status_v : "No"
+	character.erp_status_hypno = erp_on ? erp_status_hypno : "No"
+	character.erp_free_use = erp_on ? erp_free_use : FALSE
+	character.can_knot_partners = erp_on ? can_knot_partners : FALSE
+	character.mechanical_erp = erp_on ? mechanical_erp : FALSE
+	character.custom_species = custom_species
+	character.custom_species_lore = custom_species_lore
+	character.character_flavor_text = character_flavor_text
+	character.flavor_text = character_flavor_text
+	character.flavor_text_nsfw = flavor_text_nsfw
+	character.show_nsfw_flavor_text = erp_on ? show_nsfw_flavor_text : "Never"
 
 	if(LAZYLEN(picked_traits))
 		for (var/picked_type as anything in picked_traits)

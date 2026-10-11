@@ -56,6 +56,7 @@ GLOBAL_LIST_EMPTY(mob_ref_to_species_name)
 
 	var/list/hair_styles
 	var/list/facial_hair_styles
+	var/list/mutant_styles // organ_tag -> (style name -> /datum/sprite_accessory/mutant), see get_mutant_styles()
 
 	var/organs_icon		//species specific internal organs icons
 
@@ -84,6 +85,15 @@ GLOBAL_LIST_EMPTY(mob_ref_to_species_name)
 
 	var/min_age = 17
 	var/max_age = 70
+
+	// Canon genital defaults -- see copy_to() (preferences.dm) and get_mutant_fallback_color() (preferences_tgui.dm).
+	// force_male_sheath_mode names a hidden_from_picker penis style (e.g. "Slit", or Teshari's "Cloaca" alias) that
+	// male characters of this species are always forced into regardless of what they picked, unless the player has
+	// Allow Non-Canon Bodyparts on. Null (the default) means no forcing -- males pick P. Sheath freely like anyone.
+	var/force_male_sheath_mode
+	// Fallback tint for genital organs left at their default (blank) color slot, in place of skin_color -- null
+	// (the default) keeps the skin-tone fallback every species had before this var existed.
+	var/default_genital_color
 
 	// Speech vars.
 	var/assisted_langs = list()               // The languages the species can't speak without an assisted organ.
@@ -212,14 +222,19 @@ GLOBAL_LIST_EMPTY(mob_ref_to_species_name)
 
 	var/list/skin_overlays = list()
 
+	// Declaration order here is update_body()'s (update_icons.dm) icon-compositing stack order -- later entries
+	// draw on top of earlier ones. BP_GROIN deliberately comes AFTER the legs: genitals need to render in front
+	// of the upper legs (most visible on digitigrade's distinct leg art, but true of any leg sprite), not tucked
+	// behind them -- found via live user testing once Breasts/Penis/Testicles/Vagina made this stacking bug
+	// visible for the first time (nothing rendered onto BP_GROIN before that session).
 	var/list/has_limbs = list(
 		BP_CHEST =  list("path" = /obj/item/organ/external/chest),
-		BP_GROIN =  list("path" = /obj/item/organ/external/groin),
 		BP_HEAD =   list("path" = /obj/item/organ/external/head),
 		BP_L_ARM =  list("path" = /obj/item/organ/external/arm),
 		BP_R_ARM =  list("path" = /obj/item/organ/external/arm/right),
 		BP_L_LEG =  list("path" = /obj/item/organ/external/leg),
 		BP_R_LEG =  list("path" = /obj/item/organ/external/leg/right),
+		BP_GROIN =  list("path" = /obj/item/organ/external/groin),
 		BP_L_HAND = list("path" = /obj/item/organ/external/hand),
 		BP_R_HAND = list("path" = /obj/item/organ/external/hand/right),
 		BP_L_FOOT = list("path" = /obj/item/organ/external/foot),
@@ -741,6 +756,63 @@ The slots that you can use are found in items_clothing.dm and are the inventory 
 				continue
 			ADD_SORTED(L, hairstyle, GLOBAL_PROC_REF(cmp_text_asc))
 			L[hairstyle] = S
+	return L
+
+// Returns the raw (unfiltered) GLOB catalog list for a mutant-organ category. Add one line here per new category.
+/singleton/species/proc/get_mutant_style_source_list(organ_tag)
+	switch(organ_tag)
+		if(BP_TAIL) return GLOB.mutant_tail_styles_list
+		if(BP_HORNS) return GLOB.mutant_horn_styles_list
+		if(BP_FRILLS) return GLOB.mutant_frill_styles_list
+		if(BP_SPINES) return GLOB.mutant_spine_styles_list
+		if(BP_EARS) return GLOB.mutant_ear_styles_list
+		if(BP_XENODORSAL) return GLOB.mutant_xenodorsal_styles_list
+		if(BP_XENOHEAD) return GLOB.mutant_xenohead_styles_list
+		if(BP_WINGS) return GLOB.mutant_wing_styles_list
+		if(BP_SNOUT) return GLOB.mutant_snout_styles_list
+		if(BP_MOTH_ANTENNAE) return GLOB.mutant_moth_antennae_styles_list
+		if(BP_FLUFF) return GLOB.mutant_fluff_styles_list
+		if(BP_BREASTS) return GLOB.mutant_breast_styles_list
+		if(BP_PENIS) return GLOB.mutant_penis_styles_list
+		if(BP_TESTICLES) return GLOB.mutant_testicles_styles_list
+		if(BP_PUSSY) return GLOB.mutant_vagina_styles_list
+	return null
+
+// Species-filtered, cached (per species type, per organ_tag) list of style name -> /datum/sprite_accessory/mutant.
+// allow_noncanon (a player's "Allow Non-Canon Bodyparts" preference) bypasses the species_allowed/subspecies_allowed
+// filter entirely, returning every non-hidden style regardless of species -- deliberately NOT cached, since it's
+// player-specific rather than species-wide and cheap to rebuild (no per-style computation beyond two var reads).
+/singleton/species/proc/get_mutant_styles(organ_tag, allow_noncanon = FALSE)
+	var/list/source_list = get_mutant_style_source_list(organ_tag)
+	if(!source_list)
+		return list()
+	if(allow_noncanon)
+		var/list/L = list()
+		for(var/style in source_list)
+			var/datum/sprite_accessory/mutant/M = source_list[style]
+			if(M.hidden_from_picker)
+				continue
+			L[style] = M
+		return L
+	var/list/by_tag = LAZYACCESS(mutant_styles, type)
+	if(!by_tag)
+		by_tag = list()
+		LAZYSET(mutant_styles, type, by_tag)
+	var/list/L = by_tag[organ_tag]
+	if(L)
+		return L
+	L = list()
+	by_tag[organ_tag] = L
+	for(var/style in source_list)
+		var/datum/sprite_accessory/mutant/M = source_list[style]
+		if(M.hidden_from_picker)
+			continue
+		if(M.species_allowed && !(get_bodytype() in M.species_allowed))
+			continue
+		if(M.subspecies_allowed && !(name in M.subspecies_allowed))
+			continue
+		ADD_SORTED(L, style, GLOBAL_PROC_REF(cmp_text_asc))
+		L[style] = M
 	return L
 
 /singleton/species/proc/get_facial_hair_styles(gender)

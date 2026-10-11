@@ -82,9 +82,10 @@
 /obj/item/gun/projectile/changeling/Process()
 	var/mob/living/carbon/human/H = creator
 
-	if ( H.handcuffed || (H.stat != CONSCIOUS) || (length(loaded) == 0))
+	if (!H || H.handcuffed || (H.stat != CONSCIOUS) || (length(loaded) == 0))
 		//playsound(src, 'sound/effects/blobattack.ogg', 30, 1)
-		to_chat(creator,SPAN_WARNING("We retract our ranged stinger back into our body."))
+		if (creator)
+			to_chat(creator,SPAN_WARNING("We retract our ranged stinger back into our body."))
 		qdel(src)
 
 /mob/proc/changeling_boost_range()

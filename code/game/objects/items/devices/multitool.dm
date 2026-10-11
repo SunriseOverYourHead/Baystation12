@@ -22,6 +22,13 @@
 	var/buffer_name
 	var/atom/buffer_object
 
+	/// A plain id_tag string copied off a device with a multitool "store" interaction (e.g. the nuclear reactor),
+	/// and pasted onto another device with a "push" interaction (e.g. a reactor console) to relink it. Deliberately
+	/// separate from buffer_object/buffer_name above - those track a live atom reference via the interactive-
+	/// multitool-extension framework, which isn't a fit for a plain id_tag string that should survive the original
+	/// device being destroyed.
+	var/stored_id_tag
+
 /obj/item/device/multitool/Destroy()
 	unregister_buffer(buffer_object)
 	return ..()

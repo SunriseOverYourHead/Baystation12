@@ -54,7 +54,7 @@ GLOBAL_LIST_EMPTY(overmap_helm_computers)
 		set_operator(null)
 
 	if (autopilot && dx && dy)
-		var/turf/T = locate(dx,dy,GLOB.using_map.overmap_z)
+		var/turf/T = locate(dx,dy,linked.z)
 		if(linked.loc == T)
 			if(!linked.is_moving())
 				autopilot = 0

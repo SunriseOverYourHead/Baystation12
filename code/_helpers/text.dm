@@ -214,6 +214,19 @@
 		t = replacetext(t, char, repl_chars[char])
 	return t
 
+// Escapes the 5 standard HTML-special characters so `t` is safe to embed inside an HTML attribute value (or as
+// text content) in a raw, hand-built HTML string -- e.g. examine.dm's shift-click headshot preview, which embeds
+// a player-supplied URL into <img src="..."> with no other sanitization layer between it and the chat client's
+// innerHTML (tgui-panel's chat renderer does none on receipt). & must be replaced FIRST, or the & introduced by
+// escaping the other four characters would itself get escaped a second time.
+/proc/html_encode_attribute(t)
+	t = replacetext(t, "&", "&amp;")
+	t = replacetext(t, "\"", "&quot;")
+	t = replacetext(t, "'", "&#39;")
+	t = replacetext(t, "<", "&lt;")
+	t = replacetext(t, ">", "&gt;")
+	return t
+
 
 /// Builds a string of padding repeated until its character count meets or exceeds size
 /proc/generate_padding(size, padding)
@@ -351,10 +364,13 @@
 /proc/copytext_preserve_html(text, first, last)
 	return html_encode(copytext(html_decode(text), first, last))
 
-/proc/create_text_tag(tagname, tagdesc = tagname, client/C = null)
+/// Builds a chat tag image, falling back to `tagdesc` text when the viewer has tag icons switched off.
+/// `tag_icons` defaults to the channel tags (OOC/DEAD/PM/...); language tags pass their own sheet -- see
+/// /datum/language/proc/get_chat_tag().
+/proc/create_text_tag(tagname, tagdesc = tagname, client/C = null, tag_icons = './icons/chattags.dmi')
 	if(!(C && C.get_preference_value(/datum/client_preference/chat_tags) == GLOB.PREF_SHOW))
 		return tagdesc
-	return icon2html(icon('./icons/chattags.dmi', tagname), world, realsize=TRUE, class="text_tag")
+	return icon2html(icon(tag_icons, tagname), world, realsize=TRUE, class="text_tag")
 
 /proc/contains_az09(input)
 	for(var/i=1, i<=length(input), i++)

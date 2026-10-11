@@ -40,14 +40,15 @@
 
 	unarmed_types = list(/datum/unarmed_attack/slime_glomp)
 	has_organ =     list(BP_BRAIN = /obj/item/organ/internal/brain/slime) // Slime core.
+	// BP_GROIN moved after the legs -- see species.dm's has_limbs comment.
 	has_limbs = list(
 		BP_CHEST =  list("path" = /obj/item/organ/external/chest/unbreakable/slime),
-		BP_GROIN =  list("path" = /obj/item/organ/external/groin/unbreakable/slime),
 		BP_HEAD =   list("path" = /obj/item/organ/external/head/unbreakable/slime),
 		BP_L_ARM =  list("path" = /obj/item/organ/external/arm/unbreakable/slime),
 		BP_R_ARM =  list("path" = /obj/item/organ/external/arm/right/unbreakable/slime),
 		BP_L_LEG =  list("path" = /obj/item/organ/external/leg/unbreakable/slime),
 		BP_R_LEG =  list("path" = /obj/item/organ/external/leg/right/unbreakable/slime),
+		BP_GROIN =  list("path" = /obj/item/organ/external/groin/unbreakable/slime),
 		BP_L_HAND = list("path" = /obj/item/organ/external/hand/unbreakable/slime),
 		BP_R_HAND = list("path" = /obj/item/organ/external/hand/right/unbreakable/slime),
 		BP_L_FOOT = list("path" = /obj/item/organ/external/foot/unbreakable/slime),

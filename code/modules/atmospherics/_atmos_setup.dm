@@ -14,7 +14,8 @@ var/global/list/pipe_colors = list(
 	"yellow" = PIPE_COLOR_YELLOW,
 	"black" = PIPE_COLOR_BLACK,
 	"orange" = PIPE_COLOR_ORANGE,
-	"white" = PIPE_COLOR_WHITE)
+	"white" = PIPE_COLOR_WHITE,
+	"omni" = PIPE_COLOR_OMNI) //connects across a color mismatch instead of being blocked by it - see check_connect_types()
 
 /proc/pipe_color_lookup(color)
 	for(var/C in pipe_colors)

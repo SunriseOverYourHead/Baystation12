@@ -13,4 +13,5 @@
 		"\[harmonic\]", "\[disharmonic\]", "\[choral\]"
 	)
 	shorthand = "VP"
+	tag_icon = "vp"
 	space_chance = 0

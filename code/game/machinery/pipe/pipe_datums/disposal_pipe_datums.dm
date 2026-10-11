@@ -7,6 +7,12 @@
 	constructed_path = /obj/structure/disposalpipe/segment
 	var/turn = DISPOSAL_FLIP_NONE
 
+/datum/pipe/disposal_dispenser/simple
+	category = "Disposal Pipes"
+
+/datum/pipe/disposal_dispenser/device
+	category = "Disposal Devices"
+
 /datum/pipe/disposal_dispenser/simple/straight
 	name = "disposal pipe segment"
 	desc = "A huge pipe segment used for constructing disposal systems."

@@ -2,56 +2,27 @@
 #define PIPE_BENT     9
 #define PIPE_CAP      1
 
+// Regular/Supply/Scrubber/Fuel pipes now only offer ONE fitting each ("straight" - though it no longer builds a
+// literal straight pipe; see /obj/machinery/atmospherics/pipe/smart in pipes.dm): a single auto-shaping pipe
+// whose sprite is computed from its actual connections at render time, matching NovaSector's design. The old
+// discrete bent/manifold/manifold4w/cap recipe entries are gone; those DM classes (pipe/manifold, pipe/
+// manifold4w, pipe/cap) are untouched in pipes.dm and keep working for whatever's already on existing maps -
+// only this catalog stopped offering them as something new to build. Heat Exchange pipes are a Baystation-only
+// concept with no NovaSector equivalent, so that category is untouched and keeps its discrete shapes.
 /datum/pipe/pipe_dispenser/simple
 	category = "Regular Pipes"
 	colorable = TRUE
 	connect_types = CONNECT_TYPE_REGULAR
 	pipe_color = PIPE_COLOR_GREY
-	constructed_path = /obj/machinery/atmospherics/pipe/simple/hidden
-	pipe_class = PIPE_CLASS_BINARY
+	constructed_path = /obj/machinery/atmospherics/pipe/smart
+	pipe_class = PIPE_CLASS_QUATERNARY
 
 
 /datum/pipe/pipe_dispenser/simple/straight
 	name = "a pipe fitting"
-	desc = "a straight pipe segment."
+	desc = "a regular pipe segment - its shape follows whatever it ends up connected to."
 	build_path = /obj/item/pipe
 	rotate_class = PIPE_ROTATE_TWODIR
-	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
-
-/datum/pipe/pipe_dispenser/simple/bent
-	name = "bent pipe fitting"
-	desc = "a bent pipe segment"
-	build_path = /obj/item/pipe
-	dir = PIPE_BENT
-	rotate_class = PIPE_ROTATE_TWODIR
-	placement_mode = PIPE_PLACEMENT_DIAGONAL
-
-/datum/pipe/pipe_dispenser/simple/manifold
-	name = "pipe manifold fitting"
-	desc = "a pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold/hidden
-	pipe_class = PIPE_CLASS_TRINARY
-	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
-
-/datum/pipe/pipe_dispenser/simple/manifold4w
-	name = "four-way pipe manifold fitting"
-	desc = "a four-way pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold4w"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold4w/hidden
-	pipe_class = PIPE_CLASS_QUATERNARY
-	rotate_class = PIPE_ROTATE_ONEDIR
-
-/datum/pipe/pipe_dispenser/simple/cap
-	name = "pipe cap fitting"
-	desc = "a pipe cap for a regular pipe."
-	build_path = /obj/item/pipe
-	dir = PIPE_CAP
-	build_icon_state = "cap"
-	constructed_path = /obj/machinery/atmospherics/pipe/cap/hidden
-	pipe_class = PIPE_CLASS_UNARY
 	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
 /datum/pipe/pipe_dispenser/simple/up
@@ -61,6 +32,7 @@
 	build_icon = 'icons/obj/structures/structures.dmi'
 	build_icon_state = "up"
 	dir = PIPE_CAP
+	pipe_class = PIPE_CLASS_UNARY
 	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/up
 	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
@@ -71,6 +43,7 @@
 	build_icon = 'icons/obj/structures/structures.dmi'
 	build_icon_state = "down"
 	dir = PIPE_CAP
+	pipe_class = PIPE_CLASS_UNARY
 	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/down
 	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
@@ -85,241 +58,33 @@
 	pipe_class = PIPE_CLASS_BINARY
 	rotate_class = PIPE_ROTATE_TWODIR
 
-/datum/pipe/pipe_dispenser/supply
-	category = "Supply Pipes"
-	colorable = FALSE
-	connect_types = CONNECT_TYPE_SUPPLY
-	pipe_color = PIPE_COLOR_BLUE
-	constructed_path = /obj/machinery/atmospherics/pipe/simple/hidden/supply
-	pipe_class = PIPE_CLASS_BINARY
-
-/datum/pipe/pipe_dispenser/supply/straight
-	name = "supply pipe fitting"
-	desc = "a straight supply pipe segment."
-	build_path = /obj/item/pipe
-	rotate_class = PIPE_ROTATE_TWODIR
-	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
-
-/datum/pipe/pipe_dispenser/supply/bent
-	name = "bent supply pipe fitting"
-	desc = "a bent supply pipe segment"
-	build_path = /obj/item/pipe
-	dir = PIPE_BENT
-	rotate_class = PIPE_ROTATE_TWODIR
-	placement_mode = PIPE_PLACEMENT_DIAGONAL
-
-/datum/pipe/pipe_dispenser/supply/manifold
-	name = "supply pipe manifold fitting"
-	desc = "a supply pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold/hidden/supply
-	pipe_class = PIPE_CLASS_TRINARY
-	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
-
-/datum/pipe/pipe_dispenser/supply/manifold4w
-	name = "four-way supply pipe manifold fitting"
-	desc = "a four-way supply pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold4w"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold4w/hidden/supply
-	pipe_class = PIPE_CLASS_QUATERNARY
-	rotate_class = PIPE_ROTATE_ONEDIR
-
-/datum/pipe/pipe_dispenser/supply/cap
-	name = "supply pipe cap fitting"
-	desc = "a pipe cap for a regular pipe."
-	build_path = /obj/item/pipe
-	dir = PIPE_CAP
-	build_icon_state = "cap"
-	constructed_path = /obj/machinery/atmospherics/pipe/cap/hidden/supply
-	pipe_class = PIPE_CLASS_UNARY
-
-/datum/pipe/pipe_dispenser/supply/up
-	name = "upward supply pipe fitting"
-	desc = "an upward supply pipe segment."
-	build_path = /obj/item/pipe
-	build_icon = 'icons/obj/structures/structures.dmi'
-	build_icon_state = "up"
-	dir = PIPE_CAP
-	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/up/supply
-
-/datum/pipe/pipe_dispenser/supply/down
-	name = "downward supply pipe fitting"
-	desc = "a downward supply pipe segment."
-	build_path = /obj/item/pipe
-	build_icon = 'icons/obj/structures/structures.dmi'
-	build_icon_state = "down"
-	dir = PIPE_CAP
-	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/down/supply
-
-/datum/pipe/pipe_dispenser/supply/autoshutoff
-	name = "supply shutoff valve"
-	desc = "a valve that can automatically shut itself off"
+// Colors and layers now independently separate pipes (see check_connect_types() in atmospherics.dm), so a color
+// adapter/layer adapter is needed to deliberately bridge two otherwise-incompatible networks - ported from
+// NovaSector's color_adapter.dm/layermanifold.dm. Painting a pipe "omni" also bridges a color mismatch on its
+// own (no adapter needed); there's no layer equivalent of omni, only the dedicated adapter.
+/datum/pipe/pipe_dispenser/simple/color_adapter
+	name = "color adapter"
+	desc = "a pipe fitting that connects to pipes of any color."
 	build_path = /obj/item/pipe
 	build_icon_state = "svalve"
 	colorable = FALSE
-	pipe_color = PIPE_COLOR_WHITE
-	constructed_path = /obj/machinery/atmospherics/valve/shutoff/supply
+	pipe_color = PIPE_COLOR_OMNI
+	pipe_color_bridge = TRUE
+	constructed_path = /obj/machinery/atmospherics/pipe/color_adapter
 	pipe_class = PIPE_CLASS_BINARY
-	rotate_class = PIPE_ROTATE_TWODIR
-
-/datum/pipe/pipe_dispenser/scrubber
-	category = "Scrubber Pipes"
-	colorable = FALSE
-	connect_types = CONNECT_TYPE_SCRUBBER
-	pipe_color = PIPE_COLOR_RED
-	constructed_path = /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers
-	pipe_class = PIPE_CLASS_BINARY
-
-/datum/pipe/pipe_dispenser/scrubber/straight
-	name = "scrubber pipe fitting"
-	desc = "a straight scrubber pipe segment"
-	build_path = /obj/item/pipe
 	rotate_class = PIPE_ROTATE_TWODIR
 	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
 
-/datum/pipe/pipe_dispenser/scrubber/bent
-	name = "bent scrubber pipe fitting"
-	desc = "a bent scrubber pipe segment"
-	build_path = /obj/item/pipe
-	rotate_class = PIPE_ROTATE_TWODIR
-	dir = PIPE_BENT
-	placement_mode = PIPE_PLACEMENT_DIAGONAL
-
-/datum/pipe/pipe_dispenser/scrubber/manifold
-	name = "scrubber pipe manifold fitting"
-	desc = "a scrubber pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold/hidden/scrubbers
-	pipe_class = PIPE_CLASS_TRINARY
-	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
-
-/datum/pipe/pipe_dispenser/scrubber/manifold4w
-	name = "four-way scrubber pipe manifold fitting"
-	desc = "a four-way scrubber pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold4w"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold4w/hidden/scrubbers
-	pipe_class = PIPE_CLASS_QUATERNARY
-	rotate_class = PIPE_ROTATE_ONEDIR
-
-/datum/pipe/pipe_dispenser/scrubber/cap
-	name = "scrubber pipe cap fitting"
-	desc = "a pipe cap for a scrubber pipe."
-	build_path = /obj/item/pipe
-	dir = PIPE_CAP
-	build_icon_state = "cap"
-	constructed_path = /obj/machinery/atmospherics/pipe/cap/hidden/scrubbers
-
-/datum/pipe/pipe_dispenser/scrubber/up
-	name = "upward scrubber pipe fitting"
-	desc = "an upward scrubber pipe segment."
-	build_path = /obj/item/pipe
-	build_icon = 'icons/obj/structures/structures.dmi'
-	build_icon_state = "up"
-	dir = PIPE_CAP
-	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/up/scrubbers
-
-/datum/pipe/pipe_dispenser/scrubber/down
-	name = "downward scrubber pipe fitting"
-	desc = "a downward scrubber pipe segment."
-	build_path = /obj/item/pipe
-	build_icon = 'icons/obj/structures/structures.dmi'
-	build_icon_state = "down"
-	dir = PIPE_CAP
-	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/down/scrubbers
-
-/datum/pipe/pipe_dispenser/scrubber/autoshutoff
-	name = "scrubber shutoff valve"
-	desc = "a valve that can automatically shut itself off"
+/datum/pipe/pipe_dispenser/simple/layer_adapter
+	name = "layer adapter"
+	desc = "a pipe fitting that connects to pipes on any layer."
 	build_path = /obj/item/pipe
 	build_icon_state = "svalve"
-	colorable = FALSE
-	pipe_color = PIPE_COLOR_WHITE
-	constructed_path = /obj/machinery/atmospherics/valve/shutoff/scrubbers
+	pipe_layer_bridge = TRUE
+	constructed_path = /obj/machinery/atmospherics/pipe/layer_adapter
 	pipe_class = PIPE_CLASS_BINARY
-	rotate_class = PIPE_ROTATE_TWODIR
-
-/datum/pipe/pipe_dispenser/fuel
-	category = "Fuel Pipes"
-	colorable = FALSE
-	pipe_color = PIPE_COLOR_ORANGE
-	connect_types = CONNECT_TYPE_FUEL
-	constructed_path = /obj/machinery/atmospherics/pipe/simple/hidden/fuel
-	pipe_class = PIPE_CLASS_BINARY
-
-/datum/pipe/pipe_dispenser/fuel/straight
-	name = "fuel pipe fitting"
-	desc = "a striaght fuel pipe segment"
-	build_path = /obj/item/pipe
 	rotate_class = PIPE_ROTATE_TWODIR
 	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
-
-/datum/pipe/pipe_dispenser/fuel/bent
-	name = "bent fuel pipe fitting"
-	desc = "a bent fuel pipe segment"
-	build_path = /obj/item/pipe
-	rotate_class = PIPE_ROTATE_TWODIR
-	dir = PIPE_BENT
-	placement_mode = PIPE_PLACEMENT_DIAGONAL
-
-/datum/pipe/pipe_dispenser/fuel/manifold
-	name = "fuel pipe manifold fitting"
-	desc = "a fuel pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold/hidden/fuel
-	pipe_class = PIPE_CLASS_TRINARY
-	placement_mode = PIPE_PLACEMENT_ORTHOGONAL
-
-/datum/pipe/pipe_dispenser/fuel/manifold4w
-	name = "four-way supply pipe manifold fitting"
-	desc = "a four-way fuel pipe manifold segment"
-	build_path = /obj/item/pipe
-	build_icon_state = "manifold4w"
-	constructed_path = /obj/machinery/atmospherics/pipe/manifold4w/hidden/fuel
-	pipe_class = PIPE_CLASS_QUATERNARY
-	rotate_class = PIPE_ROTATE_ONEDIR
-
-/datum/pipe/pipe_dispenser/fuel/cap
-	name = "fuel pipe cap fitting"
-	desc = "a pipe cap for a fuel pipe."
-	build_path = /obj/item/pipe
-	dir = PIPE_CAP
-	build_icon_state = "cap"
-	constructed_path = /obj/machinery/atmospherics/pipe/cap/hidden/fuel
-	pipe_class = PIPE_CLASS_UNARY
-
-/datum/pipe/pipe_dispenser/fuel/up
-	name = "upward fuel pipe fitting"
-	desc = "an upward fuel pipe segment."
-	build_path = /obj/item/pipe
-	build_icon = 'icons/obj/structures/structures.dmi'
-	build_icon_state = "up"
-	dir = PIPE_CAP
-	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/up/fuel
-
-/datum/pipe/pipe_dispenser/fuel/down
-	name = "downward fuel pipe fitting"
-	desc = "a downward fuel pipe segment."
-	build_path = /obj/item/pipe
-	build_icon = 'icons/obj/structures/structures.dmi'
-	build_icon_state = "down"
-	dir = PIPE_CAP
-	constructed_path = /obj/machinery/atmospherics/pipe/zpipe/down/fuel
-
-/datum/pipe/pipe_dispenser/fuel/autoshutoff
-	name = "fuel shutoff valve"
-	desc = "a valve that can automatically shut itself off"
-	build_path = /obj/item/pipe
-	build_icon_state = "svalve"
-	colorable = FALSE
-	pipe_color = PIPE_COLOR_WHITE
-	constructed_path = /obj/machinery/atmospherics/valve/shutoff/fuel
-	pipe_class = PIPE_CLASS_BINARY
-	rotate_class = PIPE_ROTATE_TWODIR
 
 /datum/pipe/pipe_dispenser/he
 	category = "Heat Exchange Pipes"

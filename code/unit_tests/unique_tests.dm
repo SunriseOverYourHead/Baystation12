@@ -106,6 +106,12 @@
 		if(!language_key)
 			continue
 
+		// Regional variants of one tongue deliberately share their group's prefix -- `,e` means "speak my English"
+		// whichever variant that is -- and only the group's primary is registered in language_keys. Skipping the
+		// others makes that shared key legal while still failing on a collision between unrelated languages.
+		if(initial(l.language_group) && !initial(l.is_group_primary))
+			continue
+
 		group_by(languages_by_key, language_key, lt)
 
 	var/number_of_issues = number_of_issues(languages_by_key, "Language Keys")
@@ -113,6 +119,43 @@
 		fail("[number_of_issues] issue\s with language datums found.")
 	else
 		pass("All languages datums have unique keys.")
+	return 1
+
+/datum/unit_test/language_groups_shall_have_one_primary
+	name = "UNIQUENESS: Language Groups Shall Have Exactly One Primary"
+
+// Only a group's primary variant claims the group's speech prefix in language_keys. Zero primaries means the prefix
+// is never registered and the whole group becomes unspeakable by key; two means one silently overwrites the other.
+// Neither shows up as a compile error, so assert it here.
+/datum/unit_test/language_groups_shall_have_one_primary/start_test()
+	var/list/primaries_by_group = list()
+	var/list/keys_by_group = list()
+
+	for(var/lt in subtypesof(/datum/language))
+		var/datum/language/l = lt
+		var/language_group = initial(l.language_group)
+		if(!language_group)
+			continue
+		primaries_by_group[language_group] += initial(l.is_group_primary) ? 1 : 0
+		if(!keys_by_group[language_group])
+			keys_by_group[language_group] = list()
+		keys_by_group[language_group] |= initial(l.key)
+
+	var/failures = 0
+	for(var/language_group in primaries_by_group)
+		var/primaries = primaries_by_group[language_group]
+		if(primaries != 1)
+			failures++
+			log_unit_test("[language_group]: expected exactly 1 primary variant, found [primaries].")
+		var/list/keys = keys_by_group[language_group]
+		if(length(keys) != 1)
+			failures++
+			log_unit_test("[language_group]: variants must all share one key, found [json_encode(keys)].")
+
+	if(failures)
+		fail("[failures] issue\s with language group definitions found.")
+	else
+		pass("All language groups have exactly one primary variant and a single shared key.")
 	return 1
 
 /datum/unit_test/outfit_backpacks_shall_have_unique_names

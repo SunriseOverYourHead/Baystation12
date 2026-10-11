@@ -318,6 +318,14 @@
 			else
 				client.perspective = EYE_PERSPECTIVE
 				client.eye = loc
+		// update_skybox() (code/_onclick/hud/skybox.dm) only runs from /mob/Move() and /mob/forceMove() - i.e.
+		// when the MOB itself relocates. Redirecting client.eye to a remote atom (exactly what overmap sensor
+		// consoles do, see look()/unlook() in code/modules/overmap/ships/computers/ship.dm) never moves the
+		// mob's own body, so the skybox was never being rebuilt for wherever the eye actually ended up - it
+		// stayed frozen on whatever was cached for the mob's real location, rendering as a wrong/black
+		// background behind otherwise-correctly-rendered overmap objects. Forcing a rebuild here, the one place
+		// every eye change already funnels through, covers it generally rather than per call site.
+		client.update_skybox(TRUE)
 	return
 
 

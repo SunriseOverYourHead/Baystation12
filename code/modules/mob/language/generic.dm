@@ -27,3 +27,4 @@
 	key = "s"
 	flags = SIGNLANG | NO_STUTTER | NONVERBAL
 	shorthand = "HS"
+	tag_icon = "hs"

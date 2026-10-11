@@ -21,6 +21,11 @@
 #define LOCAL   4 // Machines running on local power. Not tracked by area.
 #define TOTAL   5 // For total power used only.
 
+// Fuel/control rod integrity never goes below this - "there is always a little residual fuel," and a fully-worn
+// control rod still physically exists, just at 0 effectiveness (handled separately, not by this floor).
+// Lives here (not reactor_core.dm) so it's defined before fuel_rod.dm, which alphabetically includes first.
+#define REACTOR_INTEGRITY_FLOOR 1
+
 // Bitflags for machine stat variable.
 #define MACHINE_STAT_NOPOWER     FLAG_01
 #define MACHINE_STAT_MAINT       FLAG_02  // Under maintenance.

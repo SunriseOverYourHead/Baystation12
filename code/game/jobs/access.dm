@@ -194,6 +194,8 @@ var/global/list/priv_region_access
 			return "Supply"
 		if(ACCESS_REGION_SERVICE) //nt
 			return "Service"
+		if(ACCESS_REGION_INFANTRY)
+			return "Infantry"
 
 /proc/get_access_desc(id)
 	var/list/AS = priv_all_access_datums_id || get_all_access_datums_by_id()

@@ -42,6 +42,7 @@
 #define SS_INIT_ALARM           -4
 #define SS_INIT_SHUTTLE         -5
 #define SS_INIT_GOALS           -5
+#define SS_INIT_STARMAP         -6
 #define SS_INIT_LIGHTING        -6
 #define SS_INIT_ZCOPY           -8
 #define SS_INIT_HOLOMAP         -9

@@ -47,7 +47,12 @@ SUBSYSTEM_DEF(roundend)
 
 /datum/controller/subsystem/roundend/Initialize(start_uptime)
 	max_length = config.maximum_round_length
-	vote_check = config.vote_autotransfer_initial
+	// Deliberately not arming vote_check from config.vote_autotransfer_initial - the end-of-shift vote (the
+	// "Return to Port" transfer vote, code/datums/vote/transfer.dm) should never fire on its own here. It stays
+	// fully callable manually though: any player can still start it from the normal vote panel (gated by
+	// config.allow_vote_restart, same as before), and admins can always call it regardless of that setting -
+	// see /datum/vote/transfer/can_run(). Leaving vote_check unset just means fire() below never arms the
+	// automatic timer that used to call it every config.vote_autotransfer_interval minutes.
 	if (config.empty_round_timeout)
 		empty_timeout = POSITIVE_INFINITY
 

@@ -111,7 +111,8 @@ var/global/list/admin_verbs_ban = list(
 var/global/list/admin_verbs_sounds = list(
 	/client/proc/play_local_sound,
 	/client/proc/play_sound,
-	/client/proc/play_server_sound
+	/client/proc/play_server_sound,
+	/client/proc/play_web_sound
 	)
 
 var/global/list/admin_verbs_fun = list(
@@ -210,7 +211,8 @@ var/global/list/admin_verbs_debug = list(
 	/datum/admins/proc/EnableDevtools,
 	/datum/admins/proc/force_initialize_weather,
 	/datum/admins/proc/force_weather_state,
-	/datum/admins/proc/force_kill_weather
+	/datum/admins/proc/force_kill_weather,
+	/client/proc/starmap_debug_panel
 	)
 
 var/global/list/admin_verbs_paranoid_debug = list(

@@ -8,6 +8,11 @@
 		)
 	siemens_coefficient = 0.8
 	gender_icons = 1
+	// The base /obj/item/clothing class excludes Nabber (GAS/MSW/MSQ all share that bodytype) by default -- that
+	// made sense before the leg-remap system existed to shape jumpsuit art to their silhouette, it doesn't anymore.
+	// Nothing else was actually restricted here (Unathi already has its own onmob_under_solgov_unathi.dmi above),
+	// so clearing this just opens the whole solgov line up to GAS/MSW/MSQ -- 2026-09-03, explicit user request.
+	species_restricted = null
 
 //PT
 /obj/item/clothing/under/solgov/pt
@@ -197,6 +202,72 @@
 	accessories = list(/obj/item/clothing/accessory/solgov/department/supply/fleet)
 	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
 
+/obj/item/clothing/under/solgov/utility/fleet/polopants
+	name = "fleet polo and pants"
+	desc = "An alternative utility uniform of the SCG Fleet, specially designed for engineering staff. The pants sport some yellow reflective stripes, and have knee pads."
+	icon_state = "navypolopants"
+	worn_state = "navypolopants"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/polopants/command
+	desc = "An alternative utility uniform of the SCG Fleet. The pants have knee pads."
+	icon_state = "navypolopantsnostripe"
+	worn_state = "navypolopantscom"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/polopants/security
+	desc = "An alternative utility uniform of the SCG Fleet. The pants have knee pads."
+	icon_state = "navypolopantsnostripe"
+	worn_state = "navypolopantssec"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/polopants/medical
+	desc = "An alternative utility uniform of the SCG Fleet, specially designed for medics and doctors. The pants have knee pads."
+	icon_state = "navypolopantsnostripe"
+	worn_state = "navypolopantsmed"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/polopants/supply
+	desc = "An alternative utility uniform of the SCG Fleet. The pants have knee pads."
+	icon_state = "navypolopantsnostripe"
+	worn_state = "navypolopantssup"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/polopants/service
+	desc = "An alternative utility uniform of the SCG Fleet. The pants have knee pads."
+	icon_state = "navypolopantsnostripe"
+	worn_state = "navypolopantssrv"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/polopants/exploration
+	desc = "An alternative utility uniform of the SCG Fleet. The pants have knee pads."
+	icon_state = "navypolopantsnostripe"
+	worn_state = "navypolopantsxpl"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/officer
+	name = "fleet officer's coveralls"
+	desc = "Alternative utility uniform of the SCG Fleet, for officers."
+	icon_state = "navyutilityoff"
+	worn_state = "navyutilityoff"
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/officer/command
+	accessories = list(/obj/item/clothing/accessory/solgov/department/command/fleet)
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/officer/engineering
+	accessories = list(/obj/item/clothing/accessory/solgov/department/engineering/fleet)
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/officer/security
+	accessories = list(/obj/item/clothing/accessory/solgov/department/security/fleet)
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+/obj/item/clothing/under/solgov/utility/fleet/officer/medical
+	accessories = list(/obj/item/clothing/accessory/solgov/department/medical/fleet)
+	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON
+
 /obj/item/clothing/under/scga/utility/marine
 	name = "utility uniform, SCGMC"
 	desc = "A green, durable utility jumpsuit. Belonging to the SCGMC uniform"
@@ -234,6 +305,7 @@
 	desc = "The service uniform skirt of the SCG Fleet, made from immaculate white fabric."
 	icon_state = "whiteservicefem"
 	worn_state = "whiteservicefem"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 
 /obj/item/clothing/under/scga/service/marine
 	name = "service uniform, SCGMC"
@@ -242,6 +314,8 @@
 /obj/item/clothing/under/scga/service/skirt/marine
 	name = "service skirt uniform, SCGMC"
 	desc = "A slimming brown service shirt and green skirt. Belonging to the solar marine corps service uniform."
+	worn_state = "under_service_skirt_worn"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 
 /obj/item/clothing/under/scga/service_command/marine
 	name = "service uniform, SCGMC"
@@ -251,6 +325,8 @@
 	name = "service skirt uniform, SCGA"
 	desc = "A slimming brown service shirt and green skirt with beige streaks, for senior officers. Belonging to the solar marine corps command service uniform."
 	icon_state = "under_command_skirt"
+	worn_state = "under_command_skirt_worn"
+	leg_remap_category = CLOTHING_LEG_CATEGORY_SKIRT
 	item_state_slots = list(
 		slot_l_hand_str = "under_command_skirt_held_l",
 		slot_r_hand_str = "under_command_skirt_held_r",
@@ -300,6 +376,7 @@
 	desc = "A feminine version of the SCG Expeditionary Corps dress uniform in silver trim."
 	icon_state = "greydressfem"
 	worn_state = "greydressfem"
+	leg_remap_category = null // skirt-shaped
 
 /obj/item/clothing/under/solgov/dress/expeditionary/skirt/engineering
 	item_flags = ITEM_FLAG_WASHER_ALLOWED | ITEM_FLAG_INVALID_FOR_CHAMELEON

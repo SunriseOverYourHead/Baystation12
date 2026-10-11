@@ -430,6 +430,11 @@
 	if(prefs)
 		prefs.open_setup_window(usr)
 
+/client/verb/character_directory()
+	set name = "Character Directory"
+	set category = "OOC"
+	GLOB.character_directory.ui_interact(usr)
+
 /client/verb/character_priorities()
 	set name = "Character Priorities"
 	set category = "OOC"

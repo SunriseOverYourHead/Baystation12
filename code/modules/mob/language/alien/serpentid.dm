@@ -6,6 +6,7 @@
 	flags = WHITELISTED | SIGNLANG | NO_STUTTER | NONVERBAL
 	colour = ".nabber_lang"
 	shorthand = "SD"
+	tag_icon = "sd"
 
 /datum/language/nabber/get_random_name(gender)
 	if(gender == FEMALE)

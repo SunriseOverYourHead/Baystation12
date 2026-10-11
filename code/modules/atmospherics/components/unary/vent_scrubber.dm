@@ -12,6 +12,7 @@
 	identifier = "AScr"
 
 	level = ATOM_LEVEL_UNDER_TILE
+	atmos_single_device_per_tile = TRUE
 
 	var/hibernate = 0 //Do we even process?
 	var/scrubbing = SCRUBBER_EXCHANGE
@@ -52,6 +53,25 @@
 	frame_type = /obj/item/pipe
 	construct_state = /singleton/machine_construction/default/item_chassis
 	base_type = /obj/machinery/atmospherics/unary/vent_scrubber
+
+	// Centered on a proper tiled floor regardless of layer (matching NovaSector) - the layer nudge only applies
+	// once the tile's covering is removed, exposing bare plating. See the matching comment on vent_pump and on
+	// piping_layer_pixel_shift_needs_exposed_tile's declaration in atmospherics.dm.
+	piping_layer_pixel_shift_needs_exposed_tile = TRUE
+
+// Every scrubber is forced onto its own dedicated red/layer-2 loop, regardless of what's mapped or what the RPD
+// was set to at construction - this is the "no massive remap" mechanism. pre_atmos_migrate() (called from
+// Initialize(), see atmospherics.dm) handles the mapload/dynamic-load case; it's called again here from
+// atmos_init() because construction.dm's use_tool() sets pipe_color/piping_layer from the RPD (lines 153/157
+// there) AFTER Initialize() has already run, so a player-built scrubber needs the override applied a second time.
+/obj/machinery/atmospherics/unary/vent_scrubber/pre_atmos_migrate()
+	pipe_color = PIPE_COLOR_RED
+	piping_layer = 2
+	apply_piping_layer_offset()
+
+/obj/machinery/atmospherics/unary/vent_scrubber/atmos_init()
+	pre_atmos_migrate()
+	..()
 
 /obj/machinery/atmospherics/unary/vent_scrubber/on
 	use_power = POWER_USE_IDLE

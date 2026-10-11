@@ -89,6 +89,10 @@
 	name = "circuit board (sensors console)"
 	build_path = /obj/machinery/computer/ship/sensors
 
+/obj/item/stock_parts/circuitboard/galaxymap
+	name = "circuit board (galaxy map console)"
+	build_path = /obj/machinery/computer/ship/galaxymap
+
 /obj/item/stock_parts/circuitboard/area_atmos
 	name = "circuit board (area air control console)"
 	build_path = /obj/machinery/computer/area_atmos

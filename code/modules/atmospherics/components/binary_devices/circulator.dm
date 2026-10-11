@@ -9,7 +9,14 @@
 	anchored = FALSE
 	layer = STRUCTURE_LAYER
 
-	var/kinetic_efficiency = 0.04 //combined kinetic and kinetic-to-electric efficiency
+	var/kinetic_efficiency = 0.04 //combined kinetic and kinetic-to-electric efficiency - reverted back from 0.4.
+								  //The realistic ~0.75-0.85 figure was correct for turbine+generator efficiency in
+								  //isolation, but this term is driven purely by PRESSURE DELTA with no temperature
+								  //dependency at all - raising it also meant plain pressurized room-temperature air
+								  //with zero heat input could generate real power (600KW/circulator at 0.4), which
+								  //undermines the reactor entirely. Reverting mitigates it (~10x less free power)
+								  //but doesn't eliminate it - the "power from pressure alone, no heat needed" quirk
+								  //is inherent to this formula's shape, not something introduced by tuning this var.
 	var/volume_ratio = 0.2
 
 	var/recent_moles_transferred = 0

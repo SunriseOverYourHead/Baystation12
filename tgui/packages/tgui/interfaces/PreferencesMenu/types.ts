@@ -110,8 +110,26 @@ export type Quirk = {
 export type Language = {
   description: string;
   name: string;
-  icon: string;
+  /** RSC name of the language's flag badge, or null where none has been drawn. */
+  icon: string | null;
   speaking: boolean;
+  /** Non-null for regional variants of one tongue; variants sharing a group collapse into a single UI entry. */
+  group: string | null;
+  /** The variant's short label within its group ("Britain"), falling back to `name` when ungrouped. */
+  variant_name: string;
+  shorthand: string;
+  /** LANGUAGE_LEVEL_* — 0 when merely offered, 1 (A1) through 6 (C2) when known. */
+  level: number;
+  level_name: string;
+  /** Granted by the character's culture: always native, never counted against the slot limit, not editable. */
+  native: boolean;
+  warning: string;
+};
+
+export type LanguageLevel = {
+  value: number;
+  name: string;
+  description: string;
 };
 
 export type Marking = {
@@ -223,10 +241,12 @@ export type PreferencesMenuData = {
       job_clothes: BooleanLike;
       loadout_index: string; // NOVA EDIT ADDITION: Multiple loadout presets
       spawnpoint: string; // BS12
+      preview_mode: 'Naked' | 'Naked (Aroused)' | 'Underwear' | 'Loadout' | 'Job'; // BS12
+      master_erp_preferences: BooleanLike; // BS12
+      allow_noncanon_bodyparts: BooleanLike; // BS12
     };
 
     // BS12 additions
-    flavor_texts: Record<string, string>;
     robot_flavor_texts: Record<string, string>;
     robot_module_names: string[];
     records: {
@@ -237,6 +257,55 @@ export type PreferencesMenuData = {
       memory: string;
       email_addr: string;
       email_pass: string;
+    };
+    identity_media: {
+      headshot_url: string;
+      headshot_nsfw_url: string;
+      art_reference_url: string;
+      art_ref_nsfw: BooleanLike;
+      headshot_ai_generated: BooleanLike;
+      headshot_nsfw_ai_generated: BooleanLike;
+      art_reference_ai_generated: BooleanLike;
+      view_ai_generated_headshots: BooleanLike;
+    };
+    erp_directory: {
+      show_in_directory: BooleanLike;
+      ooc_notes: string;
+      attraction: string;
+      display_gender: string;
+      emote_length: string;
+      approach_pref: string;
+      furry_pref: string;
+      scalie_pref: string;
+      other_pref: string;
+      demihuman_pref: string;
+      human_pref: string;
+      character_ad: string;
+      erp_status: string;
+      erp_status_nc: string;
+      erp_status_v: string;
+      erp_status_hypno: string;
+      erp_free_use: BooleanLike;
+      can_knot_partners: BooleanLike;
+      mechanical_erp: BooleanLike;
+      custom_species: string;
+      custom_species_lore: string;
+      character_flavor_text: string;
+      flavor_text_nsfw: string;
+      show_nsfw_flavor_text: string;
+      erp_unlocked: BooleanLike;
+      choices: {
+        attraction: string[];
+        display_gender: string[];
+        emote_length: string[];
+        approach_pref: string[];
+        directory_character: string[];
+        erp_status: string[];
+        erp_status_nc: string[];
+        erp_status_v: string[];
+        erp_status_hypno: string[];
+        show_nsfw_flavor_text: string[];
+      };
     };
 
     randomization: Record<string, RandomSetting>;
@@ -305,6 +374,8 @@ export type PreferencesMenuData = {
 
   selected_languages: Language[];
   unselected_languages: Language[];
+  native_languages: Language[];
+  language_levels: LanguageLevel[];
   total_language_points: number;
   quirk_points_enabled: number;
   quirks_balance: number;

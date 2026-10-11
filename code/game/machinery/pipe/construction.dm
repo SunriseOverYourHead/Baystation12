@@ -19,6 +19,10 @@ Buildable meters
 	var/constructed_path = /obj/machinery/atmospherics/pipe/simple/hidden
 	var/pipe_class = PIPE_CLASS_BINARY
 	var/rotate_class = PIPE_ROTATE_STANDARD
+	var/piping_layer = PIPING_LAYER_DEFAULT
+	var/p_init_dir = NORTH|SOUTH|EAST|WEST
+	var/pipe_color_bridge = FALSE
+	var/pipe_layer_bridge = FALSE
 
 /obj/item/pipe/Initialize(mapload, obj/machinery/atmospherics/P)
 	. = ..()
@@ -32,6 +36,7 @@ Buildable meters
 	desc = P.desc
 
 	connect_types = P.connect_types
+	piping_layer = P.piping_layer
 	color = P.pipe_color
 	icon = P.build_icon
 	icon_state = P.build_icon_state
@@ -141,6 +146,17 @@ Buildable meters
 		if((M.initialize_directions & pipe_dir) && M.check_connect_types_construction(M,src))	// matches at least one direction on either type of pipe & same connection type
 			to_chat(user, SPAN_WARNING("There is already a pipe of the same type at this location."))
 			return TRUE
+
+	// vent_scrubber/vent_pump are always forced onto their own fixed color+layer (see pre_atmos_migrate()), so the
+	// layer/color-aware check above would only block a second one of the SAME kind - but a vent_pump and a
+	// vent_scrubber have different color+layer and wouldn't conflict there, even though only one of either should
+	// ever occupy a tile (matching NovaSector). initial(fake_machine.atmos_single_device_per_tile) is TRUE for
+	// either, so this catches BOTH same-kind and cross-kind duplicates regardless of layer.
+	if(initial(fake_machine.atmos_single_device_per_tile))
+		for(var/obj/machinery/atmospherics/M in loc)
+			if(M.atmos_single_device_per_tile)
+				to_chat(user, SPAN_WARNING("There is already a device of this kind at this location."))
+				return TRUE
 	// no conflicts found
 
 	var/pipefailtext = SPAN_WARNING("There's nothing to connect this pipe section to!") //(with how the pipe code works, at least one end needs to be connected to something, otherwise the game deletes the segment)"
@@ -152,6 +168,11 @@ Buildable meters
 	if (P.colorable)
 		P.color = color
 	P.set_dir(dir)
+	P.piping_layer = piping_layer
+	P.p_init_dir = p_init_dir
+	P.pipe_color_bridge = pipe_color_bridge
+	P.pipe_layer_bridge = pipe_layer_bridge
+	P.apply_piping_layer_offset()
 	P.set_initial_level()
 
 	if(P.pipe_class == PIPE_CLASS_UNARY)

@@ -6,8 +6,23 @@
 
 /datum/preferences/var/preview_gear = TRUE
 
+/// TRUE strips the preview mannequin's underwear too (the "Naked" preview mode) -- otherwise, with
+/// preview_job/preview_gear both FALSE, the mannequin still shows whatever underwear copy_to() gave it (the
+/// "Underwear" preview mode). See "update_preview" in preferences_tgui.dm's ui_act().
+/datum/preferences/var/preview_nude = FALSE
+
+/// TRUE (only meaningful alongside preview_nude) forces the mannequin's penis/vagina organ(s) into their aroused
+/// sprite (the "Naked (Aroused)" preview mode) -- lets a player see what their character's genital arousal state
+/// actually looks like directly in character setup, without needing to be in a live round with the sexcon engine
+/// running. See dress_preview_mob() below for where this is actually applied to the mannequin's organs.
+/datum/preferences/var/preview_aroused = FALSE
+
 /datum/preferences/var/icon/preview_icon
 /datum/preferences/var/tgui_preview_version = 0
+
+/// Which direction the TGUI character preview is currently facing -- cycled by the rotate-left/rotate-right
+/// buttons (see "rotate" in preferences_tgui.dm's ui_act()). Only one direction is ever rendered at a time.
+/datum/preferences/var/preview_dir = SOUTH
 
 
 /datum/preferences/VV_static()
@@ -19,6 +34,10 @@
 /datum/preferences/proc/dress_preview_mob(mob/living/carbon/human/mannequin)
 	var/update_icon = FALSE
 	copy_to(mannequin, TRUE)
+	if(preview_nude)
+		QDEL_NULL_LIST(mannequin.worn_underwear)
+		mannequin.worn_underwear = list()
+	apply_preview_arousal(mannequin)
 	var/datum/job/previewJob
 	if (preview_job || preview_gear)
 		// Determine what job is marked as 'High' priority, and dress them up as such.
@@ -68,6 +87,30 @@
 	if(update_icon)
 		mannequin.update_icons()
 
+/**
+ * Sets the mannequin's penis/vagina organ(s) is_aroused flag to match preview_aroused (see sexcon.dm's
+ * update_genital_arousal_visuals() for the live-game equivalent of this same flag/render pair) and refreshes the
+ * groin limb if anything changed. The mannequin has no /datum/sex_controller (it's a preview dummy, not a
+ * controllable living mob) so this sets the organ flag directly rather than going through the sexcon engine.
+ * Always runs (even when preview_aroused is FALSE) so switching away from "Naked (Aroused)" correctly reverts the
+ * mannequin's organs, rather than leaving them stuck aroused from a previous preview render.
+ */
+/datum/preferences/proc/apply_preview_arousal(mob/living/carbon/human/mannequin)
+	var/should_be_aroused = preview_nude && preview_aroused
+	var/changed = FALSE
+	var/obj/item/organ/internal/mutant/penis/P = mannequin.internal_organs_by_name[BP_PENIS]
+	if(istype(P) && P.is_aroused != should_be_aroused)
+		P.is_aroused = should_be_aroused
+		changed = TRUE
+	var/obj/item/organ/internal/mutant/vagina/V = mannequin.internal_organs_by_name[BP_PUSSY]
+	if(istype(V) && V.is_aroused != should_be_aroused)
+		V.is_aroused = should_be_aroused
+		changed = TRUE
+	if(changed)
+		// update_body(), NOT the organ's own update_icon() -- see sexcon.dm's update_genital_arousal_visuals()
+		// header comment for why the organ-level proc alone never actually refreshes what's displayed.
+		mannequin.update_body()
+
 
 /datum/preferences/proc/update_preview_icon(resize_only)
 	var/static/icon/last_built_icon
@@ -77,14 +120,22 @@
 		dress_preview_mob(mannequin)
 		mannequin.update_icons()
 		mannequin.ImmediateOverlayUpdate()
+		// Single-pose preview (cycled via the rotate-left/rotate-right buttons, preview_dir) rather than the old
+		// fixed 3-pose (W/N/S) composite -- a plain square background just big enough to center the flat
+		// mannequin render with a little margin.
+		mannequin.dir = preview_dir
+		var/icon/flat = getFlatIcon(mannequin, preview_dir, always_use_defdir = TRUE)
+		// Canvas used to be a flat 48x48 with content blended at a fixed (9,9), sized on the assumption every
+		// species renders inside a plain 32x32 tile -- true for Human/Anthro, but species with a taller/wider
+		// icon_template (GAS 32x40, Gyne 40x48) genuinely need more room even with zero mutant organs toggled on,
+		// so their own base render was already clipping against the fixed canvas. Size dynamically off the actual
+		// flattened render instead, keeping the same ~16px margin the original constants implied (48-32=16).
+		var/margin = 16
+		var/canvas_w = max(48, flat.Width() + margin)
+		var/canvas_h = max(48, flat.Height() + margin)
 		last_built_icon = icon('icons/effects/128x48.dmi', bgstate)
-		last_built_icon.Scale(48+32, 16+32)
-		mannequin.dir = WEST
-		last_built_icon.Blend(getFlatIcon(mannequin, WEST, always_use_defdir = TRUE), ICON_OVERLAY, 1, 9)
-		mannequin.dir = NORTH
-		last_built_icon.Blend(getFlatIcon(mannequin, NORTH, always_use_defdir = TRUE), ICON_OVERLAY, 25, 17)
-		mannequin.dir = SOUTH
-		last_built_icon.Blend(getFlatIcon(mannequin, SOUTH, always_use_defdir = TRUE), ICON_OVERLAY, 49, 1)
+		last_built_icon.Scale(canvas_w, canvas_h)
+		last_built_icon.Blend(flat, ICON_OVERLAY, round((canvas_w - flat.Width()) / 2), round((canvas_h - flat.Height()) / 2))
 	preview_icon = new (last_built_icon)
 	var/scale = client.get_preference_value(/datum/client_preference/preview_scale)
 	switch (scale)

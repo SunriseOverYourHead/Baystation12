@@ -27,7 +27,9 @@ const FeatureBlooperDropdownInput = (
       <Stack.Item>
         <Button
           onClick={() => {
-            act('play_blooper');
+            // Pass the currently selected entry so the button auditions what's highlighted right now, rather
+            // than whatever was last saved -- the whole point is hearing options before committing to one.
+            act('play_blooper', { chirp: props.value });
           }}
           icon="play"
           width="100%"

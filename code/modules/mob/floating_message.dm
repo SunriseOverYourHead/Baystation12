@@ -60,17 +60,20 @@ var/global/list/floating_chat_colors = list()
 		global.floating_chat_colors[name] = get_random_colour(160, 230)
 	style += "color: [global.floating_chat_colors[name]];"
 
-	// create 2 messages, one that appears if you know the language, and one that appears when you don't know the language
+	// One shared image for everyone who follows the speaker completely, plus a per-viewer one for anyone who does
+	// not -- proficiency is per-listener now, so two partial understanders of the same language see different words
+	// survive and cannot share an image the way a single "gibberish" version used to be shared.
 	var/image/understood = generate_floating_text(src, capitalize(message), style, fontsize, duration, show_to)
 	for(var/client/C in show_to)
 		if(!C.mob.is_deaf() && C.get_preference_value(/datum/client_preference/floating_messages) == GLOB.PREF_SHOW)
-			if(C.mob.say_understands(src, language))
+			var/comprehension = C.mob.get_speech_comprehension(src, language)
+			if(comprehension >= LANGUAGE_COMPREHENSION_FULL || !language)
 				C.images += understood
 			else
-				var/image/gibberish = language ? generate_floating_text(src, (icon_prepend ? "[icon_prepend] " : "") + language.scramble(original_message, C.mob.languages), style, fontsize, duration, show_to, 8) : understood
-				C.images += gibberish
+				var/scrambled = language.scramble(original_message, C.mob.languages, comprehension)
+				C.images += generate_floating_text(src, (icon_prepend ? "[icon_prepend] " : "") + scrambled, style, fontsize, duration, show_to)
 
-/proc/generate_floating_text(atom/movable/holder, message, style, size, duration, show_to, height_adjust)
+/proc/generate_floating_text(atom/movable/holder, message, style, size, duration, show_to)
 	var/image/I = image(null, get_atom_on_turf(holder))
 	I.plane = HUD_PLANE
 	I.layer = HUD_ABOVE_ITEM_LAYER

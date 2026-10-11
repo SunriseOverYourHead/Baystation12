@@ -4,6 +4,7 @@
 	warning = "Automatically given if spawning with no languages."
 	key = "j"
 	shorthand = "Spc"
+	tag_icon = "spc"
 	partial_understanding = list(
 		LANGUAGE_HUMAN_EURO = 25,
 		LANGUAGE_HUMAN_CHINESE = 25,

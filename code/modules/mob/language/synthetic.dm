@@ -76,6 +76,7 @@
 	syllables = list("beep","beep","beep","beep","beep","boop","boop","boop","bop","bop","dee","dee","doo","doo","hiss","hss","buzz","buzz","bzz","ksssh","keey","wurr","wahh","tzzz")
 	space_chance = 10
 	shorthand = "EAL"
+	tag_icon = "eal"
 
 /datum/language/machine/can_speak_special(mob/living/speaker)
 	return speaker.isSynthetic()

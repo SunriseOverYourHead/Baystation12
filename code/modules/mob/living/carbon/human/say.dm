@@ -216,6 +216,12 @@
 					used_radios += r_ear
 
 /mob/living/carbon/human/handle_speech_sound()
+	// A chosen vocal chirp REPLACES the species' own speech sound rather than stacking with it -- otherwise a
+	// Skrell who picked "meow" would warble and meow on the same message. Leaving the chirp preference on
+	// "Species Default" means no chirp is emitted at all (vocal_chirps.dm bails on a null catalog entry) and this
+	// falls through to the species behaviour below, unchanged.
+	if(get_vocal_chirp_by_id(vocal_chirp_id))
+		return ..()
 	if(species.speech_sounds && prob(species.speech_chance))
 		var/list/returns[2]
 		returns[1] = sound(pick(species.speech_sounds))
@@ -231,15 +237,6 @@
 		return FALSE
 	. = ..()
 
-/mob/living/carbon/human/parse_language(message)
-	var/prefix = copytext_char(message,1,2)
-	if(length(message) >= 1 && prefix == get_prefix_key(/singleton/prefix/audible_emote))
-		return all_languages["Noise"]
-
-	if(length(message) >= 2 && is_language_prefix(prefix))
-		var/language_prefix = lowertext(copytext_char(message, 2 ,3))
-		var/datum/language/L = language_keys[language_prefix]
-		if (can_speak(L))
-			return L
-
-	return null
+// /mob/living/carbon/human/parse_language() used to live here as a byte-for-byte copy of the base proc, which meant
+// any fix to prefix handling had to be made twice. It has been removed; /mob/proc/parse_language() covers humans
+// unchanged, and still dispatches to the human can_speak() override.

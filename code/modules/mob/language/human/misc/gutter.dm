@@ -19,4 +19,5 @@
 		"yayo", "aiya", "chiksa", "tikat", "bazar","oi", "yo", "meit", "grok", "ken", "berk", "cohon", "pendeo"
 	)
 	shorthand = "GT"
+	tag_icon = "gt"
 	has_written_form = TRUE

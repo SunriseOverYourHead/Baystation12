@@ -1,7 +1,6 @@
 /datum/preferences
 	var/age = 30						//age of character
 	var/spawnpoint = "Default" 			//where this character will spawn (0-2).
-	var/metadata = ""
 	var/real_name						//our character's name
 
 /datum/category_item/player_setup_item/physical/basic
@@ -10,12 +9,10 @@
 
 /datum/category_item/player_setup_item/physical/basic/load_character(datum/pref_record_reader/R)
 	pref.spawnpoint = R.read("spawnpoint")
-	pref.metadata = R.read("OOC_Notes")
 	pref.real_name = R.read("real_name")
 
 /datum/category_item/player_setup_item/physical/basic/save_character(datum/pref_record_writer/W)
 	W.write("spawnpoint", pref.spawnpoint)
-	W.write("OOC_Notes", pref.metadata)
 	W.write("real_name", pref.real_name)
 
 /datum/category_item/player_setup_item/physical/basic/sanitize_character()

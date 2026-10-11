@@ -42,8 +42,12 @@
 	cold_level_2 = 50
 	cold_level_3 = -1
 
-	min_age = 1
-	max_age = 100
+	// Same scaling, aging, and maturity age as Unathi (lizard.dm) -- explicit user direction.
+	min_age = 22
+	max_age = 200
+
+	force_male_sheath_mode = "Slit"
+	default_genital_color = "#660033"
 
 	gluttonous = GLUT_TINY|GLUT_ITEM_NORMAL
 	stomach_capacity = 12
@@ -75,10 +79,19 @@
 		BP_BRAIN =      /obj/item/organ/internal/brain,
 		BP_EYES =       /obj/item/organ/internal/eyes/vox,
 		BP_STACK =      /obj/item/organ/internal/voxstack,
-		BP_HINDTONGUE = /obj/item/organ/internal/hindtongue
+		BP_HINDTONGUE = /obj/item/organ/internal/hindtongue,
+		BP_HORNS =      /obj/item/organ/internal/mutant/horns,
+		BP_TAIL =       /obj/item/organ/internal/mutant/tail/vox,
+		BP_SNOUT =      /obj/item/organ/internal/mutant/snout,
+		BP_BREASTS =    /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS =      /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES =  /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY =      /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 
-	genders = list(NEUTER)
+	// MALE/FEMALE/PLURAL ("Trans") -- Other (NEUTER) is Diona-exclusive, see station.dm's Diona genders comment.
+	genders = list(MALE, FEMALE, PLURAL)
 	pronouns = list(PRONOUNS_THEY_THEM, PRONOUNS_IT_ITS)
 	descriptors = list(
 		/datum/mob_descriptor/height = -1,
@@ -137,6 +150,9 @@
 		H.equip_to_slot_or_del(new /obj/item/tank/nitrogen(H), slot_back)
 		H.equip_to_slot_or_del(new /obj/item/storage/box/vox(H), slot_r_hand)
 		H.set_internals(H.back)
+
+/singleton/species/vox/is_mutant_organ_mandatory(organ_tag)
+	return organ_tag == BP_TAIL
 
 /singleton/species/vox/disfigure_msg(mob/living/carbon/human/H)
 	var/datum/pronouns/P = H.choose_from_pronouns()

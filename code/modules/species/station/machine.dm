@@ -17,8 +17,12 @@
 	rarity_value = 2
 	strength = STR_HIGH
 
-	min_age = 1
+	// A freshly manufactured chassis can be 0 years old, but is immediately a legal adult (human equivalent 18).
+	min_age = 0
 	max_age = 90
+	human_equivalent_age_formula = "offset18"
+
+	default_genital_color = "#A84040"
 
 	warning_low_pressure = 50
 	hazard_low_pressure = -1
@@ -43,14 +47,20 @@
 
 	has_organ = list(
 		BP_POSIBRAIN = /obj/item/organ/internal/posibrain,
-		BP_EYES = /obj/item/organ/internal/eyes/robot
+		BP_EYES = /obj/item/organ/internal/eyes/robot,
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 
 	heat_discomfort_level = 373.15
 	heat_discomfort_strings = list(
 		"Your CPU temperature probes warn you that you are approaching critical heat levels!"
 		)
-	genders = list(NEUTER)
+	// MALE/FEMALE/PLURAL ("Trans") -- Other (NEUTER) is Diona-exclusive, see station.dm's Diona genders comment.
+	genders = list(MALE, FEMALE, PLURAL)
 
 	available_cultural_info = list(
 		TAG_CULTURE = list(

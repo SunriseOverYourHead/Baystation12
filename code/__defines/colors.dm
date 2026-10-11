@@ -105,6 +105,9 @@
 #define	PIPE_COLOR_BLACK       "#444444"
 #define	PIPE_COLOR_ORANGE      "#b95a00"
 #define PIPE_COLOR_WHITE       "#ffffff"
+// Not a paint choice like the others - a pipe/device painted omni connects across any color mismatch (see
+// check_connect_types() in atmospherics.dm). Matches NovaSector's ATMOS_COLOR_OMNI value.
+#define PIPE_COLOR_OMNI        "#eeeeee"
 
 #define	COMMS_COLOR_DEFAULT    "#ff00ff"
 #define	COMMS_COLOR_ENTERTAIN  "#666666"

@@ -40,17 +40,24 @@
  * required src_object datum
  * required interface string  Name of the React component to render.
  * optional title string
+ * optional window datum/tgui_window  A pre-built window to display this UI in, instead of requesting one
+ *   from the pool. Used for UIs that live in a permanent, pane-embedded skin element (e.g. the pregame
+ *   Lobby, see lobby_tgui.dm) rather than a floating popup.
  */
-/datum/tgui/New(mob/user, datum/src_object, interface, title, ui_x, ui_y)
+/datum/tgui/New(mob/user, datum/src_object, interface, title, ui_x, ui_y, datum/tgui_window/window)
 	src.user = user
 	src.src_object = src_object
-	src.window_key = "\ref[src_object]-main"
 	src.interface = interface
 	if(title)
 		src.title = title
 	src.state = src_object.ui_state(user)
 	if(ui_x && ui_y)
 		src.window_size = list(ui_x, ui_y)
+	if(window)
+		src.window = window
+		src.window_key = window.id
+	else
+		src.window_key = "\ref[src_object]-main"
 
 /datum/tgui/Destroy()
 	user = null
@@ -60,16 +67,20 @@
 /**
  * Open this UI (request a window, send initial data).
  * Returns TRUE if a new window was opened.
+ *
+ * optional preinitialized bool  If TRUE, assumes a pre-built window (see New()) has already had
+ *   initialize() called on it, and skips doing so again here.
  */
-/datum/tgui/proc/open()
+/datum/tgui/proc/open(preinitialized = FALSE)
 	if(!user.client)
 		return FALSE
-	if(window)
+	if(window && window.status > TGUI_WINDOW_LOADING)
 		return FALSE
 	process_status()
 	if(status < UI_UPDATE)
 		return FALSE
-	window = SStgui.request_pooled_window(user)
+	if(!window)
+		window = SStgui.request_pooled_window(user)
 	if(!window)
 		return FALSE
 	opened_at = world.time
@@ -77,7 +88,7 @@
 	// Send the JS/CSS bundle before we open the window so the browser
 	// has the files in its resource cache when it processes the HTML.
 	send_assets()
-	if(!window.is_ready())
+	if(!window.is_ready() && !preinitialized)
 		window.initialize(strict_mode = TRUE)
 	else
 		window.send_message("ping")
@@ -88,11 +99,13 @@
 	return TRUE
 
 /**
- * Send the tgui JS/CSS bundle to the client.
+ * Send the tgui JS/CSS bundle, plus any assets the src_object declares via ui_assets(), to the client.
  */
 /datum/tgui/proc/send_assets()
 	var/datum/asset/simple/tgui_assets = get_asset_datum(/datum/asset/simple/tgui)
 	tgui_assets.send(user.client)
+	for(var/datum/asset/asset in src_object.ui_assets(user))
+		asset.send(user.client)
 
 /**
  * Close this UI.

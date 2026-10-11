@@ -7,4 +7,5 @@
 	key = ""
 	syllables = list("ook", "eek", "hiss", "gronk")
 	shorthand = "Ook"
+	tag_icon = "ook"
 	hidden_from_codex = 1

@@ -74,12 +74,42 @@
 				tmp_icon_state = on_rolled_sleeves
 
 		var/use_sprite_sheet = accessory_icons[slot]
+		var/using_species_spritesheet = FALSE
 		if(sprite_sheets[bodytype])
 			use_sprite_sheet = sprite_sheets[bodytype]
+			using_species_spritesheet = TRUE
+			// Don't trust a species sheet that doesn't actually have this state -- same reasoning as
+			// get_mob_overlay()'s own re-check in items.dm (see its comment): a sheet existing for this
+			// bodytype doesn't guarantee it covers every icon_state this accessory might use.
+			if(!(tmp_icon_state in icon_states(use_sprite_sheet)))
+				use_sprite_sheet = accessory_icons[slot]
+				using_species_spritesheet = FALSE
+
+		// Bulk-generated species sprites -- see the identical fallback (and its full comment) in items.dm's
+		// get_mob_overlay(). Not currently populated for any accessory category, but the hook costs nothing to
+		// have ready for when one is.
+		if(!using_species_spritesheet && leg_remap_category)
+			var/list/generated_for_category = GLOB.generated_sprite_sheets[leg_remap_category]
+			var/generated_icon = generated_for_category ? generated_for_category[bodytype] : null
+			if(generated_icon && (tmp_icon_state in icon_states(generated_icon)))
+				use_sprite_sheet = generated_icon
+				using_species_spritesheet = TRUE
 
 		if(icon_override && ("[tmp_icon_state]_mob" in icon_states(icon_override)))
 			return overlay_image(icon_override, "[tmp_icon_state]_mob", color, RESET_COLOR)
 		else
+			// Accessories render via this override, not the generic get_worn_icon() in items.dm -- so the
+			// leg_remap_category pixel-remap hook (see _leg_shape_remap.dm) needs its own copy here, same
+			// logic as get_worn_icon()'s, or it silently never fires for any accessory (ties, solgov
+			// insignia/rank, etc). Skipped when a species-specific sprite_sheet is already in use, same reason
+			// as get_worn_icon()'s own using_species_spritesheet/spritesheet check -- that art (eg Unathi's own
+			// onmob_accessories_solgov_unathi.dmi) is already correctly shaped, a table built against the
+			// generic human sprite would crop the wrong positions out of it.
+			var/shape_key = (leg_remap_category && !using_species_spritesheet) ? user_human.get_body_shape_key() : null
+			if(shape_key)
+				var/icon/remapped = get_leg_remapped_icon(use_sprite_sheet, tmp_icon_state, shape_key)
+				if(remapped)
+					return overlay_image(remapped, "", color, RESET_COLOR)
 			return overlay_image(use_sprite_sheet, tmp_icon_state, color, RESET_COLOR)
 
 

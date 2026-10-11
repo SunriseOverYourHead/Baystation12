@@ -50,3 +50,4 @@
 	name = "old dress"
 	desc = "An elegant - if tattered - black and red dress. There's nothing visible through the holes in the fabric; nothing but darkness."
 	icon_state = "fienddress"
+	leg_remap_category = null // dress-shaped

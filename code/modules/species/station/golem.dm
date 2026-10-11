@@ -32,11 +32,17 @@
 	heat_level_3 = SYNTH_HEAT_LEVEL_3
 
 	has_organ = list(
-		BP_BRAIN = /obj/item/organ/internal/brain/golem
+		BP_BRAIN = /obj/item/organ/internal/brain/golem,
+		BP_BREASTS = /obj/item/organ/internal/mutant/breasts,
+		BP_PENIS = /obj/item/organ/internal/mutant/penis,
+		BP_TESTICLES = /obj/item/organ/internal/mutant/testicles,
+		BP_PUSSY = /obj/item/organ/internal/mutant/vagina,
+		BP_ANUS =              /obj/item/organ/internal/mutant/anus
 		)
 
 	death_message = "becomes completely motionless..."
-	genders = list(NEUTER)
+	// MALE/FEMALE/PLURAL ("Trans") -- Other (NEUTER) is Diona-exclusive, see station.dm's Diona genders comment.
+	genders = list(MALE, FEMALE, PLURAL)
 	pronouns = list(PRONOUNS_IT_ITS)
 
 	force_cultural_info = list(

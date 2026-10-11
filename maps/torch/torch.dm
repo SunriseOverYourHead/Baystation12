@@ -92,7 +92,6 @@
 	#include "items/clothing/solgov-under.dm"
 
 	#include "items/wallets.dm"
-	#include "items/weapons.dm"
 
 	#include "job/torch_access.dm"
 	#include "job/torch_jobs.dm"

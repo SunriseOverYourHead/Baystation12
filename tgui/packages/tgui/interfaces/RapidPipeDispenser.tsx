@@ -1,13 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
   ColorBox,
-  ImageButton,
   LabeledList,
   Section,
   Stack,
-  StyleableSection,
   Tabs,
 } from 'tgui-core/components';
 import type { BooleanLike } from 'tgui-core/react';
@@ -16,18 +14,18 @@ import { capitalizeAll } from 'tgui-core/string';
 import { useBackend } from '../backend';
 import { Window } from '../layouts';
 
-const ROOT_CATEGORIES = ['Atmospherics', 'Disposals', 'Transit Tubes'] as const;
+const ROOT_CATEGORIES = ['Atmospherics', 'Disposals'] as const;
 
 export const ICON_BY_CATEGORY_NAME = {
   Atmospherics: 'wrench',
   Binary: 'arrows-left-right',
   Devices: 'microchip',
+  'Disposal Devices': 'microchip',
   'Disposal Pipes': 'grip-lines',
   Disposals: 'trash-alt',
   'Heat Exchange': 'thermometer-half',
   Pipes: 'grip-lines',
   'Station Equipment': 'microchip',
-  'Transit Tubes': 'bus',
 } as const;
 
 const TOOLS = [
@@ -64,22 +62,16 @@ type Category = {
 type Recipe = {
   pipe_index: number;
   pipe_name: string;
-  previews: Preview[];
-};
-
-type Preview = {
-  dir_name: string;
-  dir: string;
-  flipped: BooleanLike;
-  icon_state: string;
-  selected: BooleanLike;
+  // Full CSS class string (size class + sprite class), from the dynamically-generated
+  // /datum/asset/spritesheet/pipes (code/game/objects/items/weapons/RPD.dm) - null if no icon resolved.
+  icon: string | null;
 };
 
 type Data = {
   // Dynamic
   categories: Category[];
   category: number;
-  init_directions: DirectionsAllowed;
+  init_directions?: DirectionsAllowed;
   mode: number;
   multi_layer: BooleanLike;
   pipe_layers: number;
@@ -225,59 +217,53 @@ function LayerSelect(props) {
 type RecipeRowProps = {
   recipe: Recipe;
   shownCategory: Category;
+  selected: boolean;
 };
 
+// A per-recipe icon instead of the full click-to-set-rotation directional preview grid NovaSector's own
+// ImageButton grid offers - see /datum/asset/spritesheet/pipes (code/game/objects/items/weapons/RPD.dm) for
+// where these come from. Rotation is still handled the way it always was here, via click-position math in
+// do_atmos_build() rather than by picking a specific preview tile.
 function RecipeRow(props: RecipeRowProps) {
   const { act } = useBackend<Data>();
-  const { recipe, shownCategory } = props;
+  const { recipe, shownCategory, selected } = props;
 
   return (
-    <StyleableSection
-      textStyle={{
-        color: 'var(--color-label)',
-        fontSize: '1em',
-        fontWeight: 'normal',
-        textAlign: 'right',
-      }}
-      title={recipe.pipe_name}
-      titleStyle={{
-        borderBottom: '1px solid var(--color-border)',
-        padding: 0,
-      }}
+    <Button
+      fluid
+      height="28px"
+      color="transparent"
+      selected={selected}
+      onClick={() =>
+        act('pipe_type', {
+          pipe_type: recipe.pipe_index,
+          category: shownCategory.cat_name,
+        })
+      }
     >
-      <Stack fill wrap>
-        {recipe.previews.map((preview) => (
-          <Stack.Item key={preview.dir}>
-            <ImageButton
-              asset={['pipes32x32', `${preview.dir}-${preview.icon_state}`]}
-              color="blue"
-              imageSize={58}
-              assetSize={30}
-              onClick={() => {
-                act('pipe_type', {
-                  pipe_type: recipe.pipe_index,
-                  category: shownCategory.cat_name,
-                });
-                act('setdir', {
-                  dir: preview.dir,
-                  flipped: preview.flipped,
-                });
-              }}
-              selected={preview.selected}
-              tooltip={preview.dir_name}
-              tooltipPosition="bottom"
-            />
-          </Stack.Item>
-        ))}
-      </Stack>
-    </StyleableSection>
+      {!!recipe.icon && (
+        <Box inline verticalAlign="middle" mr="6px" className={recipe.icon} />
+      )}
+      <span>{recipe.pipe_name}</span>
+    </Button>
   );
+}
+
+// Loads the RPD's dynamically-generated recipe-icon spritesheet CSS once - see the matching helper and comment
+// in RapidConstructionDevice.tsx for why this (rather than the base tgui bundle's window-creation-time
+// injection) is how a per-interface spritesheet gets its stylesheet loaded here.
+function useSpritesheetCss(filename: string) {
+  useEffect(() => {
+    // biome-ignore lint/suspicious/noExplicitAny: Byond is a BYOND-injected global, not a bundled module.
+    (globalThis as any).Byond?.loadCss(filename, true);
+  }, [filename]);
 }
 
 function PipeTypeSection(props) {
   const { data } = useBackend<Data>();
-  const { categories = [], selected_category } = data;
+  const { categories = [], selected_category, selected_recipe } = data;
   const [categoryName, setCategoryName] = useState(selected_category);
+  useSpritesheetCss('spritesheet_pipes-tgui.css');
 
   const shownCategory =
     categories.find((category) => category.cat_name === categoryName) ||
@@ -303,6 +289,10 @@ function PipeTypeSection(props) {
             key={recipe.pipe_name}
             recipe={recipe}
             shownCategory={shownCategory}
+            selected={
+              recipe.pipe_name === selected_recipe &&
+              shownCategory.cat_name === selected_category
+            }
           />
         ))}
       </Section>
@@ -312,7 +302,9 @@ function PipeTypeSection(props) {
 
 export function SmartPipeBlockSection(props) {
   const { act, data } = useBackend<Data>();
-  const { init_directions } = data;
+  const {
+    init_directions = { north: false, south: false, east: false, west: false },
+  } = data;
 
   return (
     <Section fill>

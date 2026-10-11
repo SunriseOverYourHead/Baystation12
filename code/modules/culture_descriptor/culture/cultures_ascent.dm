@@ -89,3 +89,9 @@ GLOBAL_LIST_AS(gyne_architecture, list(
 		return "[random_id(/singleton/species/mantid, 10000, 99999)] [get_gyne_name()]"
 	else
 		return "[random_id(/singleton/species/mantid, 1, 99)] [get_gyne_name()]"
+
+// Matches get_random_name() above, which already bakes a leading number into every generated Alate/Gyne name
+// (e.g. "55 Wet Walkers") -- without this, sanitize_name()'s default digit-stripping would mangle both that and
+// any player-typed name using the same convention.
+/singleton/cultural_info/culture/ascent/sanitize_name(new_name)
+	return sanitizeName(new_name, allow_numbers = 1)

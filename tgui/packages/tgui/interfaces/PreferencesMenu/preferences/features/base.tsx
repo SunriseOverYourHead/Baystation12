@@ -334,6 +334,35 @@ export const FeatureTriColorInput = (props: FeatureValueProps<string[]>) => {
   );
 };
 
+// Breasts/Testicles color only -- an explicit way to clear all 3 color slots back to blank, which already (and
+// silently) falls back to rendering tinted toward the character's skin tone (get_mutant_fallback_color(),
+// preferences_tgui.dm) or the species' own default_genital_color when one is set. Previously only reachable by
+// simply never having picked a color in the first place; this exposes it as a real button instead.
+export const FeatureTriColorInputWithSkinReset = (
+  props: FeatureValueProps<string[]>,
+) => {
+  const { act } = useBackend<PreferencesMenuData>();
+  const { featureId } = props;
+  return (
+    <Stack align="center" fill>
+      <Stack.Item grow>
+        <FeatureTriColorInput {...props} />
+      </Stack.Item>
+      <Stack.Item>
+        <Button
+          icon="undo"
+          tooltip="Reset all 3 color slots back to your skin tone"
+          onClick={() =>
+            act('reset_genital_color_to_skin', { preference: featureId })
+          }
+        >
+          Match Skin Tone
+        </Button>
+      </Stack.Item>
+    </Stack>
+  );
+};
+
 export const FeatureTriBoolInput = (props: FeatureValueProps<boolean[]>) => {
   const { handleSetValue, value } = props;
 
